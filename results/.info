@@ -1,0 +1,6 @@
+diffusion
+	Simulation results from `{fipy}/examples/benchmarking/solvers/diffusion.py`.
+nucleation
+	Simulation results using Phase Field Benchmark 8(b)
+old
+	old stuff
