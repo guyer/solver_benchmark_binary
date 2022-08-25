@@ -1,0 +1,4 @@
+- Reimpliment using signac?
+- Reimpliment using SnakeMake?
+- Reimpliment using Sumatra?
+- Reimpliment using CORR?
