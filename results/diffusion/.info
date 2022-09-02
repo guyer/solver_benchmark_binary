@@ -1,5 +1,5 @@
 README.md
-	this file
+	Description of `results/diffusion/`.
 arithmetic_diffusion
 	`fast` queue on `ruth` 
 	diffusion coefficient equal to solution variable, evaluated as
@@ -24,7 +24,7 @@ harmonic_right
 	`fast` queue on `ruth`
 	diffusion coefficient equal to solution variable, evaluated as
 	harmonic mean.
-	right-hand boundary condition set to ???.
+	right-hand boundary condition set to 0.1.
 linux
 	- `fast` queue on `ruth`
 	- diffusion coefficient equal to solution variable, evaluated as

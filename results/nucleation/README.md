@@ -9,6 +9,7 @@ DATA & FILE OVERVIEW
 ```
 results/nucleation/
 ├── README.md
+│    { Description of `results/nucleation/`.
 ├── nucleation18/
 │    ⎧ - `fast` queue on `ruth`
 │    ⎨ - 600 time units.

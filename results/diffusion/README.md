@@ -68,7 +68,7 @@ results/diffusion/
 │    ⎧ `fast` queue on `ruth`
 │    ⎨ diffusion coefficient equal to solution variable, evaluated as
 │    ⎪ harmonic mean.
-│    ⎩ right-hand boundary condition set to ???.
+│    ⎩ right-hand boundary condition set to 0.1.
 ├── linux
 │    ⎧ - `fast` queue on `ruth`
 │    ⎨ - diffusion coefficient equal to solution variable, evaluated as
