@@ -9,16 +9,17 @@ DATA & FILE OVERVIEW
 ```
 ./
 ├── README.md
-│    ⎧ this file
-│    ⎩ some text
+│    { Description of `solvers_and_timings/`.
 ├── TODO.md
 │    { Tasks to work on
-├── solver.1.log
-├── solver.log
 ├── codes/
 │    { Runable programs
-│   └── notebooks/
-│        { [Jupyter](https://jupyter.org/) notebook files.
+│   ├── config/
+│   │    { Python logging configuration files.
+│   ├── notebooks/
+│   │    { [Jupyter](https://jupyter.org/) notebook files.
+│   └── scripts/
+│        { Python and bash programs.
 └── results/
     ├── diffusion/
     │    { Simulation results from `{fipy}/examples/benchmarking/solvers/diffusion.py`.
@@ -27,6 +28,8 @@ DATA & FILE OVERVIEW
     └── old/
          { old stuff
 ```
+
+(generated with `tree -FL 2 --info --filesfirst .`)
 
 ------------------------------------
 DATA-SPECIFIC INFORMATION FOR: *.log
