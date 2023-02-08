@@ -1,0 +1,24 @@
+name: fipy_solver_benchmarking_310
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - future
+  - gmsh
+  - ipdb
+  - ipywidgets
+  - jupyterlab
+  - matplotlib
+  - pandas
+  - scipy
+  - mpi4py
+  - mayavi
+  - nbdime
+  - petsc4py
+  - tqdm
+  - memory_profiler
+  - jupyterlab-git
+  - scikit-image
+  - tree
+  - pip

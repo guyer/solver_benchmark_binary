@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fipy_solver_benchmarking"
+version = "0.0.1"
+authors = [
+  { name="Jonathan Guyer", email="guyer@nist.gov" },
+]
+description = "A small example package"
+readme = "README.md"
+requires-python = ">=2.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 2",
+    "License :: Public Domain :: NIST",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+# "Homepage" = "https://github.com/pypa/sampleproject"
+# "Bug Tracker" = "https://github.com/pypa/sampleproject/issues"

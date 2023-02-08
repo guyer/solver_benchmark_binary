@@ -1,6 +1,37 @@
 Timing and solver convergence info developed while working on #701 (Add 
 support for PETSc solvers)
 
+## INSTALLATION
+
+- Create conda environment:
+    - To benchmark PySparse (and other Python 2.7 solvers)
+
+      `mamba env create --name <ENVNAME> --file environment_27.yml`
+      
+    - To benchmark Python 3 solvers
+
+      `mamba env create --name <ENVNAME> --file environment_3x.yml`
+      
+- Activate the environment:
+
+  `mamba activate <ENVNAME>`
+
+- Install a working copy of FiPy:
+
+  `python -m pip install --editable <PATH_TO_FIPY>`
+  
+- Install the supporting package for this project:
+
+    - for Python 2.7:
+
+      `python setup.py develop`
+
+    - for Python 3.x:
+
+      `python -m pip install --editable .`
+      
+
+## USAGE
 
 ## DATA & FILE OVERVIEW
 
