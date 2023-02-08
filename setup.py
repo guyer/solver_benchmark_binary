@@ -13,7 +13,7 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 2",
-        "License :: Public Domain :: NIST",
+        "License :: Public Domain",
         "Operating System :: OS Independent",
     ],
 )
