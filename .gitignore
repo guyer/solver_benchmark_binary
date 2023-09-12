@@ -1,3 +1,5 @@
 .ipynb_checkpoints
 results/*/*/
 fipy_solver_benchmarking.egg-info
+__pycache__
+*.pyc
