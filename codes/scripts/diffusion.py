@@ -7,7 +7,7 @@
 
 # **Do not edit `diffusion.py`**. Generate the batch-runnable file from the notebook with
 # ```bash
-# jupyter nbconvert diffusion.ipynb --to python
+# jupyter nbconvert diffusion.ipynb --to python --output-dir=../scripts/
 # ```
 
 # ## Import Python modules
@@ -41,7 +41,7 @@ except:
 # ## Initialize
 # ### Load parameters
 
-# In[24]:
+# In[3]:
 
 
 parser = argparse.ArgumentParser()
@@ -80,19 +80,25 @@ parser.add_argument("--store_matrix",
 
 # ### Set any parameters for interactive notebook
 
-# In[44]:
+# In[62]:
 
 
 if isnotebook:
     # argv = ["--numberOfElements=10000", "--totaltime=1.2", "--checkpoint_interval=0.12",
     #         "--nucleation_scale=100", "--output=nucleation6"]
-    argv = ["--numberOfElements=1000000", "--output=diffusion01",
-           "--store_matrix"]
+    # argv = ["--numberOfElements=1000000", "--output=diffusion01",
+    #        "--store_matrix"]
+    
+    argv = ["--numberOfElements=16",
+    "--output=diffusion04",
+    "--restart=matrices/initial_conditions/diffusion/t=0.0.npz",
+    "--store_matrix",
+    "--totaltime=6"]
 else:
     argv = None
 
 
-# In[45]:
+# In[63]:
 
 
 args, unknowns = parser.parse_known_args(args=argv)
@@ -106,7 +112,7 @@ args, unknowns = parser.parse_known_args(args=argv)
 # 
 # Create a mesh based on parameters. The default is a 1 x 1 domain subdivided into 1000 cells in each direction.
 
-# In[46]:
+# In[64]:
 
 
 nx = ny = int(nmx.sqrt(args.numberOfElements))
@@ -115,7 +121,7 @@ phi = fp.CellVariable(mesh=mesh, name="$\phi$", value=1., hasOld=True)
 elapsed = 0.
 
 
-# In[47]:
+# In[65]:
 
 
 if args.restart is not None:
@@ -130,14 +136,14 @@ if args.restart is not None:
     elapsed = float(re.match(pattern, args.restart).group(1))
 
 
-# In[48]:
+# In[66]:
 
 
 x, y = mesh.cellCenters[0], mesh.cellCenters[1]
 X, Y = mesh.faceCenters[0], mesh.faceCenters[1]
 
 
-# In[49]:
+# In[67]:
 
 
 if isnotebook:
@@ -147,7 +153,7 @@ if isnotebook:
 
 # ## Create solver
 
-# In[50]:
+# In[53]:
 
 
 precon = None
@@ -187,7 +193,7 @@ solver = solver_class(tolerance=args.tolerance, criterion="initial",
 # \frac{\partial\phi}{\partial t} = \nabla\cdot\left(\phi\nabla\phi\right)
 # \end{align}
 
-# In[51]:
+# In[54]:
 
 
 eq = fp.TransientTerm() == fp.DiffusionTerm(coeff=phi)
@@ -204,7 +210,7 @@ eq = fp.TransientTerm() == fp.DiffusionTerm(coeff=phi)
 # \hat{n}\cdot\left(\phi\nabla\phi\right)|_{y=1} &= 0
 # \end{align}
 
-# In[52]:
+# In[55]:
 
 
 phi.constrain(args.left, where=mesh.facesLeft)
@@ -215,7 +221,7 @@ phi.constrain(args.right, where=mesh.facesRight)
 
 # ### Setup ouput storage
 
-# In[53]:
+# In[56]:
 
 
 if (args.output is not None) and (parallelComm.procID == 0):
@@ -240,7 +246,7 @@ if parallelComm.procID == 0:
 
 # ### Define output routines
 
-# In[54]:
+# In[57]:
 
 
 def savePhi(elapsed):
@@ -268,7 +274,7 @@ def checkpoint_data(elapsed, store_matrix=False):
 
 # ### Figure out when to save
 
-# In[55]:
+# In[58]:
 
 
 checkpoints = (fp.numerix.arange(int(elapsed / args.checkpoint_interval),
@@ -278,7 +284,7 @@ checkpoints = (fp.numerix.arange(int(elapsed / args.checkpoint_interval),
 checkpoints.sort()
 
 
-# In[56]:
+# In[59]:
 
 
 checkpoint_data(elapsed)
@@ -286,7 +292,7 @@ checkpoint_data(elapsed)
 
 # ## Solve and output
 
-# In[57]:
+# In[60]:
 
 
 times = checkpoints.copy()
@@ -294,7 +300,7 @@ times.sort()
 times = times[(times > elapsed) & (times <= args.totaltime)]
 
 
-# In[58]:
+# In[61]:
 
 
 from steppyngstounes import CheckpointStepper, FixedStepper

@@ -11,7 +11,7 @@
 
 # **Do not edit `nucleation.py`**. Generate the batch-runnable file from the notebook with
 # ```bash
-# jupyter nbconvert nucleation.ipynb --to python
+# jupyter nbconvert nucleation.ipynb --to python --output-dir=../scripts/
 # ```
 
 # ## Import Python modules
@@ -50,7 +50,7 @@ except:
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--output", help="directory to store results in",
-                    default=os.getcwd())
+                    default=None)
 parser.add_argument("--store_by_solver",
                     help="store results in nested subdirectories based on solver,"
                     "preconditioner, and system size",
@@ -435,6 +435,12 @@ if isnotebook:
 
 # ### Define output routines
 
+# In[ ]:
+
+
+
+
+
 # In[85]:
 
 
@@ -468,7 +474,7 @@ def savePhi(elapsed):
 def saveMatrix(elapsed):
     mtxname = os.path.join(path, "t={}.mtx".format(elapsed))
     eq.matrix.exportMmf(mtxname)
-    
+
     rhs_value = eq.RHSvector
     if parallelComm.procID == 0:
         rhsname = os.path.join(path, "t={}.rhs.npz".format(elapsed))
