@@ -3,6 +3,7 @@ from matplotlib import colors
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy import ndimage
 
 from ..io.data import load_field
 

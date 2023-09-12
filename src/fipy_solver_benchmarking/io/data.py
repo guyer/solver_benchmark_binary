@@ -1,4 +1,5 @@
-import os
+import numpy as np
+import pathlib
 
 
 def read_tsv(tsv):
@@ -38,10 +39,12 @@ def load_field(record, fname, key):
     if preconditioner == "unpreconditioned":
         preconditioner = "NoneType"
 
-    path = os.path.join(os.path.dirname(record["logfile"]),
-                        record["package.solver"], record["solver_class"],
-                        preconditioner, str(record["numberOfElements"]),
-                        fname)
+    path = (pathlib.Path(record["logfile"]).parent
+            / record["package.solver"]
+            / record["solver_class"]
+            / preconditioner
+            / str(record["numberOfElements"])
+            / fname)
 
     try:
         with np.load(path) as data:
