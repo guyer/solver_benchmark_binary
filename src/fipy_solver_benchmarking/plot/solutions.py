@@ -406,8 +406,10 @@ def plot_error_matrix(dfA, dfB, by, fname, key="value",
     groupsA = dfA.groupby(by)
     groupsB = dfB.groupby(by)
     
+    plt.figure()
     fig, axs = plt.subplots(ncols=len(groupsA), nrows=len(groupsB),
-                            figsize=(10, 10 * len(groupsB) / len(groupsA)))
+                            figsize=(10, 8 * len(groupsB) / len(groupsA)),
+                            gridspec_kw={"top": 0.6, "bottom": 0.1, "left": 0.3, "right": 0.7})
     plt.setp(axs.flat, xticks=[], yticks=[], frame_on=False)
     
     if logscale:
@@ -417,14 +419,14 @@ def plot_error_matrix(dfA, dfB, by, fname, key="value",
     
     converged_cmap = mpl.colormaps['viridis'].copy()
     converged_cmap.set_bad(color='black')
-    cax = plt.axes([0.95, 0.3, 0.025, 0.4])
+    cax = plt.axes([0.75, 0.3, 0.025, 0.4])
     converged_cb = plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=converged_cmap),
                                 cax=cax)
     converged_cb.set_label("converged", labelpad=-70)
 
     diverged_cmap = mpl.colormaps['inferno'].copy()
     diverged_cmap.set_bad(color='black')
-    cax = plt.axes([1.025, 0.3, 0.025, 0.4])
+    cax = plt.axes([0.825, 0.3, 0.025, 0.4])
     diverged_cb = plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=diverged_cmap),
                                cax=cax, ticklocation='left', format="")
     diverged_cb.set_label("diverged", labelpad=-45, color="red")

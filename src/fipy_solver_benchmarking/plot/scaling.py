@@ -16,7 +16,9 @@ def plot_all(df, color_by_suite=True,
         'pyamgx': 'cyan'
     }
     
-    fig, ax = plt.subplots(figsize=(8,6))
+    plt.figure()
+    fig, ax = plt.subplots(figsize=(8,6),
+                           gridspec_kw={"right": 0.8})
     groups = df.groupby(by + ["numberOfElements"])
     groups = groups.agg(converged=("converged", "all"),
                         elapsed_count=("elapsed_seconds", "count"),
@@ -167,17 +169,19 @@ def plot_solve_fraction(df, color_by_suite=True,
     return ax
 
 def plot_by_solver(df):
-    for solver_class, group1 in df.groupby(["solver_class"]):
+    for (solver_class,), group1 in df.groupby(["solver_class"]):
         plot_all(group1, by=["package.solver", "preconditioner"], title=solver_class)
         
 def plot_sweep_times(df):
     for numberOfElements, group1 in df.groupby("numberOfElements"):
-        fig, ax = plt.subplots(figsize=(8,6))
+        plt.figure()
+        fig, ax = plt.subplots(figsize=(8,6),
+                               gridspec_kw={"right": 0.5})
         for label, group2 in group1.groupby(["package.solver", "solver_class", "preconditioner"]):
             group2 = group2.reset_index()
             group2.plot(y="elapsed_seconds", ax=ax, label=label, logy=True)
         _ = plt.xlim(xmax=9)
-        plt.legend(loc="upper right", bbox_to_anchor=(1.7, 1.0))
+        plt.legend(loc="upper left", bbox_to_anchor=(1.0, 1.0))
         plt.title("size = {0}x{0}".format(int(np.sqrt(numberOfElements))))
         plt.ylabel("sweep time / s")
         plt.xlabel("sweep")  
