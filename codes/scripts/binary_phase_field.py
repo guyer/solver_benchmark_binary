@@ -320,174 +320,14 @@ def f(phi, C):
             + (1 - C) * nmx.log(1 - C) + C * nmx.log(C))
 
 
-# In[78]:
-
-
-zeta = 0
-xi = 1
-Delta_W = 0
-
-
-# In[79]:
+# In[127]:
 
 
 phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
 free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
 free_energy.name = r"$\phi$ vs. $C$"
-fp.Viewer(vars=free_energy)
-
-
-# In[80]:
-
-
-zeta = 0
-xi = 2
-Delta_W = 0
-
-
-# In[81]:
-
-
-phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
-free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
-free_energy.name = r"$\phi$ vs. $C$"
-fp.Viewer(vars=free_energy)
-
-
-# In[82]:
-
-
-zeta = 0
-xi = 1
-Delta_W = 2
-
-
-# In[83]:
-
-
-phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
-free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
-free_energy.name = r"$\phi$ vs. $C$"
-fp.Viewer(vars=free_energy)
-
-
-# In[84]:
-
-
-zeta = 1
-xi = 1
-Delta_W = 0
-
-
-# In[85]:
-
-
-phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
-free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
-free_energy.name = r"$\phi$ vs. $C$"
-fp.Viewer(vars=free_energy)
-
-
-# In[86]:
-
-
-zeta = 2
-xi = 1
-Delta_W = 0
-
-
-# In[87]:
-
-
-phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
-free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
-free_energy.name = r"$\phi$ vs. $C$"
-fp.Viewer(vars=free_energy)
-
-
-# In[88]:
-
-
-zeta = 3
-xi = 1
-Delta_W = 0
-
-
-# In[89]:
-
-
-phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
-free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
-free_energy.name = r"$\phi$ vs. $C$"
-fp.Viewer(vars=free_energy)
-
-
-# In[93]:
-
-
-zeta = 5
-xi = 1
-Delta_W = 0
-
-
-# In[94]:
-
-
-phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
-free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
-free_energy.name = r"$\phi$ vs. $C$"
-fp.Viewer(vars=free_energy)
-
-
-# In[99]:
-
-
-zeta = 6
-xi = 1
-Delta_W = 0
-
-
-# In[100]:
-
-
-phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
-free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
-free_energy.name = r"$\phi$ vs. $C$"
-fp.Viewer(vars=free_energy)
-
-
-# In[95]:
-
-
-zeta = 10
-xi = 1
-Delta_W = 0
-
-
-# In[96]:
-
-
-phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
-free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
-free_energy.name = r"$\phi$ vs. $C$"
-fp.Viewer(vars=free_energy)
-
-
-# In[97]:
-
-
-zeta = 100
-xi = 1
-Delta_W = 0
-
-
-# In[98]:
-
-
-phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
-free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
-free_energy.name = r"$\phi$ vs. $C$"
-fp.Viewer(vars=free_energy)
+if isnotebook:
+    fp.Viewer(vars=free_energy)
 
 
 # ## Setup output
@@ -519,7 +359,7 @@ if parallelComm.procID == 0:
 
 # ### Define output routines
 
-# In[118]:
+# In[126]:
 
 
 def saveC(elapsed):
@@ -537,10 +377,25 @@ def saveMatrix(elapsed):
         rhsname = os.path.join(path, "t={}.rhs.npz".format(elapsed))
         nmx.savez(rhsname, rhs=rhs_value)
 
+def save_energy():
+    nx = phi_C_mesh.nx
+    ny = phi_C_mesh.ny
+    energy_value = free_energy.globalValue
+    energy_value = energy_value.reshape((nx, ny))
+    if parallelComm.procID == 0:
+        fname = os.path.join(path, "energy.npz")
+        nmx.savez(fname, energy=energy_value)
+    
 def checkpoint_data(elapsed, store_matrix=False):
     saveC(elapsed)
     if store_matrix:
         saveMatrix(elapsed)
+
+
+# In[124]:
+
+
+save_energy()
 
 
 # ### Figure out when to save
