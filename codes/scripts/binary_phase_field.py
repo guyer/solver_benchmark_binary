@@ -78,24 +78,34 @@ parser.add_argument("--tolerance", help="linear solver tolerance",
 parser.add_argument("--store_matrix",
                     help="store the matrix and RHS vector along with other output",
                     action='store_true')
+parser.add_argument("--gradient2thermal",
+                    help="strength of gradient energy relative to thermal energy",
+                    type=float, default=1)
+parser.add_argument("--segregation2transformation",
+                    help="strength of segregation relative to transformation driving force",
+                    type=float, default=1)
+parser.add_argument("--adsorption",
+                    help="strength of relative adsorption",
+                    type=float, default=0)
 
 
 # ### Set any parameters for interactive notebook
 
-# In[81]:
+# In[101]:
 
 
 if isnotebook:
     # argv = ["--numberOfElements=10000", "--totaltime=1.2", "--checkpoint_interval=0.12",
     #         "--nucleation_scale=100", "--output=nucleation6"]
-    argv = ["--numberOfElements=10000", "--nucleation_scale=1000", "--output=solidification1",
+    argv = ["--numberOfElements=100000", "--nucleation_scale=1000", "--output=solidification3",
+            "--segregation2transformation=6.",
            "--restart=../../results/nucleation/nucleation18/t=300.0.npz",
            "--store_matrix"]
 else:
     argv = None
 
 
-# In[82]:
+# In[102]:
 
 
 args, unknowns = parser.parse_known_args(args=argv)
@@ -110,7 +120,7 @@ args, unknowns = parser.parse_known_args(args=argv)
 # Create a mesh based on parameters. Set
 # >  the computational domain is ... 1000×1000 
 
-# In[94]:
+# In[103]:
 
 
 nx = ny = int(nmx.sqrt(args.numberOfElements))
@@ -119,7 +129,7 @@ phi = fp.CellVariable(mesh=mesh, name="$\phi$", value=0., hasOld=True)
 elapsed = 0.
 
 
-# In[95]:
+# In[104]:
 
 
 if args.restart is not None:
@@ -134,20 +144,20 @@ if args.restart is not None:
     elapsed = float(re.match(pattern, args.restart).group(1))
 
 
-# In[96]:
+# In[105]:
 
 
 x, y = mesh.cellCenters[0], mesh.cellCenters[1]
 X, Y = mesh.faceCenters[0], mesh.faceCenters[1]
 
 
-# In[97]:
+# In[106]:
 
 
-C = fp.CellVariable(mesh=mesh, name="$C$", value=0.3 + 0.4 * phi, hasOld=True)
+C = fp.CellVariable(mesh=mesh, name="$C$", value=0.7 - 0.4 * phi, hasOld=True)
 
 
-# In[98]:
+# In[107]:
 
 
 if isnotebook:
@@ -157,7 +167,7 @@ if isnotebook:
 
 # ## Create solver
 
-# In[99]:
+# In[108]:
 
 
 precon = None
@@ -190,240 +200,301 @@ solver = solver_class(tolerance=args.tolerance, criterion="initial",
                       iterations=args.iterations, precon=precon)
 
 
-# ## Define governing equation
+# ## Binary Alloy with Frozen Phase Field: governing equation
 
-# ## Binary Alloy Phase Field
-# 
-# binary diffusion with frozen phase; diffusion with convection due to phase boundary
+# Given the strength of the phase transformation driving force,
+# $$\Delta f = \frac{1}{6\sqrt{2}}$$
 
+# In[109]:
+
+
+Delta_f = 1 / (6 * nmx.sqrt(2.))
+
+
+# the strength of gradient energy relative to thermal energy, $\xi$,
+
+# In[110]:
+
+
+xi = args.gradient2thermal
+
+
+# the strength of the segregation relative to the nucleation driving force, $\zeta$,
+
+# In[111]:
+
+
+zeta = args.segregation2transformation
+
+
+# the strength of the relative adsorption, $\tilde{W}$,
+
+# In[112]:
+
+
+Delta_W = args.adsorption
+
+
+# the phase interpolation function
 # \begin{align}
-# \frac{1}{M_\phi}\frac{\partial \phi}{\partial t} &= \nabla\cdot\left(\kappa_\phi\nabla \phi\right)
-# - \left[
-#     \left(1-C\right)\frac{L_A\left(T - T_m^A\right)}{T_m^A}
-#     + C\frac{L_B\left(T - T_m^B\right)}{T_m^B}
-# \right] p'(\phi)
-# - \left[
-#     \left(1-C\right)\frac{W_A}{2}
-#     + C\frac{W_B}{2}
-# \right] g'(\phi)
-# \\
-# \frac{\partial C}{\partial t} &= \nabla\cdot\left(D_C\nabla C\right)
-# \\ &\quad {} + \nabla\cdot\left(
-#     D_C\frac{C\left(1-C\right)V_m}{RT}
-#     \left\{
-#         \left[
-#             \frac{L_B\left(T - T_m^B\right)}{T_m^B}
-#             - \frac{L_A\left(T - T_m^A\right)}{T_m^A}
-#         \right] p'(\phi)
-#         - \frac{W_B - W_A}{2} g'(\phi)
-#     \right\}
-#     \nabla \phi\right)
+# p(\phi) & \equiv \phi^3 (6\phi^2 - 15 \phi + 10
 # \end{align}
 
-# non-dimensionalize
-
-# \begin{align}
-# \frac{1}{M_\phi}\frac{\partial \phi}{\partial t \tau} &= \frac{1}{\lambda}\nabla\cdot\left(\kappa_\phi\frac{1}{\lambda}\nabla \phi\right)
-# - \left[
-#     \left(1-C\right)L_A\left(\frac{T}{T_m^A} - 1\right)
-#     + C L_B\left(\frac{T}{T_m^B} - 1\right)
-# \right] p'(\phi)
-# - \left[
-#     \left(1-C\right)\frac{W_A}{2}
-#     + C\frac{W_B}{2}
-# \right] g'(\phi)
-# \\
-# \frac{\partial C}{\partial t \tau} &= \frac{1}{\lambda}\nabla\cdot\left(D_C\frac{1}{\lambda}\nabla C\right)
-# \\ &\quad {} + \frac{1}{\lambda} \nabla\cdot\left(
-#     D_C\frac{C\left(1-C\right)V_m}{RT}
-#     \left\{
-#         \left[
-#             L_B\left(\frac{T}{T_m^B} - 1\right)
-#             - L_A\left(\frac{T}{T_m^A} - 1\right)
-#         \right] p'(\phi)
-#         - \frac{W_B - W_A}{2} g'(\phi)
-#     \right\}
-#     \frac{1}{\lambda} \nabla \phi\right)
-# \end{align}
-
-# \begin{align}
-# \frac{\partial \phi}{\partial t} &= \nabla\cdot\left(\frac{M_\phi\tau\kappa_\phi}{\lambda^2}\nabla \phi\right)
-# - \left[
-#     \left(1-C\right)M_\phi\tau L_A\left(\frac{T}{T_m^A} - 1\right)
-#     + C M_\phi\tau L_B\left(\frac{T}{T_m^B} - 1\right)
-# \right] p'(\phi)
-# - \left[
-#     \left(1-C\right)\frac{M_\phi\tau W_A}{2}
-#     + C\frac{M_\phi\tau W_B}{2}
-# \right] g'(\phi)
-# \\
-# \frac{\partial C}{\partial t} &= \nabla\cdot\left(\frac{D_C\tau}{\lambda^2}\nabla C\right)
-# \\ &\quad {} + \nabla\cdot\left(
-#     \frac{D_C\tau}{\lambda^2}C\left(1-C\right)
-#     \left\{
-#         \left[
-#             \frac{L_B V_m}{RT}\left(\frac{T}{T_m^B} - 1\right)
-#             - \frac{L_A V_m}{RT}\left(\frac{T}{T_m^A} - 1\right)
-#         \right] p'(\phi)
-#         - \frac{\frac{W_B V_m}{RT} - \frac{W_A V_m}{RT}}{2} g'(\phi)
-#     \right\}
-#     \nabla \phi\right)
-# \end{align}
-
-# \begin{align}
-# M_\phi &= \frac{T_m^A \beta_A}{6 L_A \delta_A}
-# \\
-# &\sim \mathrm{\frac{K \frac{cm}{K s}}{\frac{J}{cm^3} cm}}
-# \\
-# &\sim \mathrm{\frac{cm^3}{J\,s}}
-# \end{align}
-
-# \begin{align}
-# \tau M_\phi &\sim \mathrm{s \frac{cm^3}{J\,s}}
-# \\
-# &\sim \mathrm{\frac{cm^3}{J}}
-# \end{align}
-
-# \begin{align}
-# \tau M_\phi \frac{\kappa_\phi}{\lambda^2} &\sim \mathrm{\frac{cm^3}{J}\frac{J}{cm}\frac{1}{cm^2}}
-# \\
-# &\sim 1
-# \end{align}
-
-# \begin{align}
-# \tau M_\phi L_? \sim \tau M_\phi W_? &\sim \mathrm{\frac{cm^3}{J}\frac{J}{cm^3}}
-# \\
-# &\sim 1
-# \end{align}
-
-# \begin{align}
-# \frac{D_C \tau}{\lambda^2} &\sim \mathrm{\frac{cm^2}{s}\frac{s}{cm^2}}
-# \\
-# &\sim 1
-# \end{align}
-
-# \begin{align}
-# \frac{L_? V_m}{R T} \sim \frac{W_? V_m}{R T} &\sim \mathrm{\frac{J}{cm^3}\frac{cm^3}{mol}\frac{mol\,K}{J\,K}}
-# \\
-# &\sim 1
-# \end{align}
-
-# \begin{align}
-# \frac{\partial \phi}{\partial t} &= \nabla\cdot\left(\tilde{\kappa}_\phi\nabla \phi\right)
-# - \left[
-#     \left(1-C\right)\tilde{L}_A\left(\frac{T}{T_m^A} - 1\right)
-#     + C \tilde{L}_B\left(\frac{T}{T_m^B} - 1\right)
-# \right] p'(\phi)
-# - \left[
-#     \left(1-C\right)\frac{\tilde{W}_A}{2}
-#     + C\frac{\tilde{W}_B}{2}
-# \right] g'(\phi)
-# \\
-# \frac{\partial C}{\partial t} &= \nabla\cdot\left(\tilde{D}_C\nabla C\right)
-# \\ &\quad {} + \nabla\cdot\left(
-#     \tilde{D}_C C\left(1-C\right)
-#     \left\{
-#         \left[
-#             \hat{L}_B\left(\frac{T}{T_m^B} - 1\right)
-#             - \hat{L}_A\left(\frac{T}{T_m^A} - 1\right)
-#         \right] p'(\phi)
-#         - \frac{\hat{W}_B - \hat{W}_A}{2} g'(\phi)
-#     \right\}
-#     \nabla \phi\right)
-# \end{align}
-
-# Let $V_m / (R T) = 100 \tau M_\phi$, such that $\hat{L}_? = 100 \tilde{L}_?$ and $\hat{W}_? = 100 \tilde{W}_?$:
-# \begin{align}
-# \frac{\partial \phi}{\partial t} &= \nabla\cdot\left(\tilde{\kappa}_\phi\nabla \phi\right)
-# - \left[
-#     \left(1-C\right)\tilde{L}_A\left(\frac{T}{T_m^A} - 1\right)
-#     + C \tilde{L}_B\left(\frac{T}{T_m^B} - 1\right)
-# \right] p'(\phi)
-# - \left[
-#     \left(1-C\right)\frac{\tilde{W}_A}{2}
-#     + C\frac{\tilde{W}_B}{2}
-# \right] g'(\phi)
-# \\
-# \frac{\partial C}{\partial t} &= \nabla\cdot\left(\tilde{D}_C\nabla C\right)
-# \\ &\quad {} + \nabla\cdot\left(
-#     100
-#     \tilde{D}_C C\left(1-C\right)
-#     \left\{
-#         \left[
-#             \tilde{L}_B\left(\frac{T}{T_m^B} - 1\right)
-#             - \tilde{L}_A\left(\frac{T}{T_m^A} - 1\right)
-#         \right] p'(\phi)
-#         - \frac{\tilde{W}_B - \tilde{W}_A}{2} g'(\phi)
-#     \right\}
-#     \nabla \phi\right)
-# \end{align}
-
-# Comparing the phase equation with the [nucleation benchmark](nucleation.ipynb) equation
-# $$
-# \begin{aligned}
-# \frac{\partial\phi}{\partial t} &= \nabla^2 \phi - g'(\phi) + \Delta f p'(\phi)
-# \\
-# \Delta f &= \frac{1}{6\sqrt{2}}
-# \end{aligned}
-# $$
-
-# \begin{align}
-# \tilde{\kappa}_\phi &=1
-# \\
-# \tilde{W}_A = \tilde{W}_B &= 1
-# \\
-# \tilde{L}_A \left(\frac{T}{T_m^A} - 1\right) = \tilde{L}_B \left(\frac{T}{T_m^B} - 1\right)
-# &= -\frac{1}{6\sqrt{2}}
-# \end{align}
-# which would result in no convection in the diffusion equation. So, let
-# \begin{align}
-# \tilde{L}_A \left(\frac{T}{T_m^A} - 1\right) &= -\frac{1.1}{6\sqrt{2}}
-# \\
-# \tilde{L}_B \left(\frac{T}{T_m^B} - 1\right) &= -\frac{0.9}{6\sqrt{2}}
-# \\
-# \tilde{D}_C &= 1
-# \end{align}
-
-# \begin{align}
-# \frac{\partial \phi}{\partial t} &= \nabla^2 \phi
-# + \left[
-#     1.1\left(1-C\right)
-#     + 0.9 C
-# \right] \frac{1}{6\sqrt{2}} p'(\phi)
-# - g'(\phi)
-# \\
-# \frac{\partial C}{\partial t} &= \nabla^2 C
-# + \nabla\cdot\left(
-#     C\left(1-C\right) \frac{20}{6\sqrt{2}} p'(\phi)
-#     \nabla \phi\right)
-# \\
-# &= \nabla^2 C
-# + \nabla\cdot\left(
-#     C\left(1-C\right) \frac{20}{6\sqrt{2}} \nabla p(\phi)\right)
-# \end{align}
-
-# Freeze the phase field and solve the diffusion equation
-
-# In[100]:
+# In[113]:
 
 
 def p(phi):
     return phi**3 * (6 * phi**2 - 15 * phi + 10)
 
-# DeltaDelta_f = 20. / (6 * nmx.sqrt(2.))
-DeltaDelta_f = 20. / (6 * nmx.sqrt(2.))
-phaseTransformationVelocity = (1 - C).harmonicFaceValue * DeltaDelta_f * p(phi).faceGrad
+
+# and the double well function
+# \begin{align}
+# g(\phi) & \equiv \phi^2 (1 - \phi)^2
+# \end{align}
+
+# In[114]:
+
+
+def g(phi):
+    return phi**2 * (1 - phi)**2
+
+
+# diffusion with convection due to frozen phase boundary can be described by
+# \begin{align}
+# \frac{\partial C}{\partial t} &= \nabla^2 C
+# + \nabla\cdot\left[
+#     C\left(1-C\right)
+#     \xi
+#     \left(
+#         \zeta \Delta f p'(\phi)
+#         - \frac{\Delta\tilde{W}}{2} g'(\phi)
+#     \right)
+#     \nabla \phi\right]
+# \\
+# &= \nabla^2 C
+# + \nabla\cdot\left[
+#     C\left(1-C\right)
+#     \xi
+#     \left(
+#         \zeta \Delta f \nabla p(\phi)
+#         - \frac{\Delta\tilde{W}}{2} \nabla g(\phi)
+#     \right)
+# \right]
+# \end{align}
+
+# In[115]:
+
+
+phaseTransformationVelocity = (1 - C).harmonicFaceValue * xi * (zeta * Delta_f * p(phi).faceGrad 
+                                                                - 0.5 * Delta_W * g(phi).faceGrad)
 
 eq = (fp.TransientTerm(var=C)
       == fp.DiffusionTerm(var=C)
       + fp.ConvectionTerm(coeff=phaseTransformationVelocity, var=C))
 
 
+# ## Free Energy
+
+# \begin{align}
+# \frac{f(\phi, C, T) V_m}{RT}
+# &= \xi \left\{ 
+# -\Delta f \left[1 + \frac{1}{2} (1 - 2C) \zeta
+# \right]p(\phi)\right.
+# \\
+# &\qquad \left. {} + \left[
+# 1 - \frac{1}{2} (1 - 2C) \Delta\tilde{W}
+# \right] g(\phi)
+# \right\}
+# \\
+# &\qquad {} + \left[
+#     \left(1 - C\right)\ln\left(1 - C\right) + C\ln C
+# \right]
+# \end{align}
+
+# In[116]:
+
+
+def f(phi, C):
+    return (xi * (-Delta_f * (1 + 0.5 * (1 - 2 * C) * zeta) * p(phi)
+                  + (1 + 0.5 * (1 - 2 * C) * Delta_W) * g(phi))
+            + (1 - C) * nmx.log(1 - C) + C * nmx.log(C))
+
+
+# In[78]:
+
+
+zeta = 0
+xi = 1
+Delta_W = 0
+
+
+# In[79]:
+
+
+phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
+free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
+free_energy.name = r"$\phi$ vs. $C$"
+fp.Viewer(vars=free_energy)
+
+
+# In[80]:
+
+
+zeta = 0
+xi = 2
+Delta_W = 0
+
+
+# In[81]:
+
+
+phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
+free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
+free_energy.name = r"$\phi$ vs. $C$"
+fp.Viewer(vars=free_energy)
+
+
+# In[82]:
+
+
+zeta = 0
+xi = 1
+Delta_W = 2
+
+
+# In[83]:
+
+
+phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
+free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
+free_energy.name = r"$\phi$ vs. $C$"
+fp.Viewer(vars=free_energy)
+
+
+# In[84]:
+
+
+zeta = 1
+xi = 1
+Delta_W = 0
+
+
+# In[85]:
+
+
+phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
+free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
+free_energy.name = r"$\phi$ vs. $C$"
+fp.Viewer(vars=free_energy)
+
+
+# In[86]:
+
+
+zeta = 2
+xi = 1
+Delta_W = 0
+
+
+# In[87]:
+
+
+phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
+free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
+free_energy.name = r"$\phi$ vs. $C$"
+fp.Viewer(vars=free_energy)
+
+
+# In[88]:
+
+
+zeta = 3
+xi = 1
+Delta_W = 0
+
+
+# In[89]:
+
+
+phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
+free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
+free_energy.name = r"$\phi$ vs. $C$"
+fp.Viewer(vars=free_energy)
+
+
+# In[93]:
+
+
+zeta = 5
+xi = 1
+Delta_W = 0
+
+
+# In[94]:
+
+
+phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
+free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
+free_energy.name = r"$\phi$ vs. $C$"
+fp.Viewer(vars=free_energy)
+
+
+# In[99]:
+
+
+zeta = 6
+xi = 1
+Delta_W = 0
+
+
+# In[100]:
+
+
+phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
+free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
+free_energy.name = r"$\phi$ vs. $C$"
+fp.Viewer(vars=free_energy)
+
+
+# In[95]:
+
+
+zeta = 10
+xi = 1
+Delta_W = 0
+
+
+# In[96]:
+
+
+phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
+free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
+free_energy.name = r"$\phi$ vs. $C$"
+fp.Viewer(vars=free_energy)
+
+
+# In[97]:
+
+
+zeta = 100
+xi = 1
+Delta_W = 0
+
+
+# In[98]:
+
+
+phi_C_mesh = fp.Grid2D(nx=100, Lx=1., ny=100, Ly=1.)
+free_energy = f(phi=phi_C_mesh.y, C=phi_C_mesh.x)
+free_energy.name = r"$\phi$ vs. $C$"
+fp.Viewer(vars=free_energy)
+
+
 # ## Setup output
 
 # ### Setup ouput storage
 
-# In[105]:
+# In[117]:
 
 
 if (args.output is not None) and (parallelComm.procID == 0):
@@ -448,7 +519,7 @@ if parallelComm.procID == 0:
 
 # ### Define output routines
 
-# In[104]:
+# In[118]:
 
 
 def saveC(elapsed):
@@ -474,7 +545,7 @@ def checkpoint_data(elapsed, store_matrix=False):
 
 # ### Figure out when to save
 
-# In[101]:
+# In[119]:
 
 
 checkpoints = (fp.numerix.arange(int(elapsed / args.checkpoint_interval),
@@ -486,14 +557,14 @@ checkpoints.sort()
 
 # ## Solve and output
 
-# In[102]:
+# In[120]:
 
 
 times = checkpoints
 times = times[(times > elapsed) & (times <= args.totaltime)]
 
 
-# In[103]:
+# In[121]:
 
 
 from steppyngstounes import CheckpointStepper, FixedStepper
@@ -538,4 +609,10 @@ for checkpoint in CheckpointStepper(start=elapsed,
         # labelViewer.plot()
 
     _ = checkpoint.succeeded()
+
+
+# In[ ]:
+
+
+
 
