@@ -16,8 +16,9 @@ optional arguments:
   -h, --help  show this help message and exit
   --qsub      Invoke SCRIPT using 'qsub -cwd' for Sun grid engine
               (default: invoke using bash)
-  --sbatch    Invoke SCRIPT using 'sbatch ???' for slurm
-              (default: invoke using bash)
+  --sbatch PARTITION SLURMTIME
+              Invoke SCRIPT using 'sbatch --partition=${PARTITION} --time=${SLURMTIME}'
+              for slurm (default: invoke using bash)
   --env ENV   Conda environment to activate before invoking SCRIPT
               (default: fipy)
   --np NP     Number of processes to invoke SCRIPT with (default: 1)
@@ -31,7 +32,8 @@ optional arguments:
   --preconditioners PRECONDITIONERS  Names of preconditioners (separated by spaces) (default: none)"
 
 QSUB=0
-SBATCH=""
+SBATCH=0
+PARTITION=""
 SLURMTIME="1:00:00"
 ENV=fipy
 NP=1
@@ -51,7 +53,8 @@ do
             QSUB=1
             ;;
         --sbatch)
-            SBATCH="$2"
+            SBATCH=1
+            PARTITION="$2"
             SLURMTIME="$3"
             shift # option has two parameters
             shift
@@ -140,8 +143,8 @@ do
 
             if [[ $QSUB == 1 ]]; then
                 qsub -cwd -pe nodal ${NP} -q "wide64" -o "${dir}" -e "${dir}" "${BASH_SOURCE%/*}/setup.sh" --env "${ENV}" -- ${INVOCATION}
-            elif [[ -n $SBATCH ]]; then
-                sbatch --partition=${SBATCH} --job-name=${JOBNAME} --ntasks=${NP} \
+            elif [[ $SBATCH == 1 ]]; then
+                sbatch --partition=${PARTITION} --job-name=${JOBNAME} --ntasks=${NP} \
                   --ntasks-per-core=2 --time=${SLURMTIME} \
                   "${BASH_SOURCE%/*}/setup.sh" --log ${LOGCONFIG} ${LOGFILE} --env "${ENV}" -- ${INVOCATION}
             else
