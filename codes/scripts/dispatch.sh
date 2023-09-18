@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # E.g.,
-# bash codes/scripts/dispatch.sh --env fipy27 --solversuite pysparse --log codes/scripts/macos_config.json diffusion.py --preconditioner=ilu
+# bash codes/scripts/dispatch.sh --env fipy27 --solversuite pysparse --log codes/scripts/macos_config.json diffusion.py --preconditioners=ilu
 
 USAGE="usage: $0 [-h] [--env ENV] [--cmd CMD] [--np NP] [--mprof] [--] SCRIPT [ARGS]
 
@@ -24,10 +24,11 @@ optional arguments:
   --mprof     Whether to run mprof profiler (default: False)
   --log CONFIG LOG  Path to log configuration file template and
                     path for log file.
-  --solversuite SUITE   Solver package to use
-  --powermin POWERMIN   Power of ten for minimum size, minsize = 10**POWERMIN
-  --powermin POWERMAX   Power of ten for maximum size, maxsize = 10**POWERMAX
-  --powerstep POWERSTEP Increment in power of ten for size"
+  --solversuite SUITE   Solver package to use (default: petsc)
+  --powermin POWERMIN   Power of ten for minimum size, minsize = 10**POWERMIN (default: 1)
+  --powermin POWERMAX   Power of ten for maximum size, maxsize = 10**POWERMAX (default: 6)
+  --powerstep POWERSTEP Increment in power of ten for size (default: 1)
+  --preconditioners PRECONDITIONERS  Names of preconditioners (separated by spaces) (default: none)"
 
 QSUB=0
 SBATCH=""
