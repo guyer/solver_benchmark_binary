@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # E.g.,
-# bash codes/scripts/dispatch.sh --env fipy27 --solversuite pysparse --log codes/scripts/macos_config.json diffusion.py --preconditioners=ilu
+# bash codes/scripts/dispatch.sh --env fipy27 --solversuite pysparse --log codes/loggers/config_template.json solver.log --output=results/problem/platform codes/notebooks/diffusion.ipynb --preconditioners=ilu --store_by_solver
 
-USAGE="usage: $0 [-h] [--env ENV] [--cmd CMD] [--np NP] [--mprof] [--] SCRIPT [ARGS]
+USAGE="usage: $0 [-h] [OPTIONS] [--] NOTEBOOK [ARGS]
 
 Iterates over solvers and mesh sizes by calling setup.sh, which activates
 the appropriate conda environment and calls python on SCRIPT
@@ -23,8 +23,9 @@ optional arguments:
               (default: fipy)
   --np NP     Number of processes to invoke SCRIPT with (default: 1)
   --mprof     Whether to run mprof profiler (default: False)
-  --log CONFIG LOG  Path to log configuration file template and
-                    path for log file.
+  --output OUTPUT   Directory to store results in
+  --log CONFIG LOGNAME  Path to log configuration file template and
+                        name for log file.
   --solversuite SUITE   Solver package to use (default: petsc)
   --powermin POWERMIN   Power of ten for minimum size, minsize = 10**POWERMIN (default: 1)
   --powermin POWERMAX   Power of ten for maximum size, maxsize = 10**POWERMAX (default: 6)
@@ -38,7 +39,8 @@ SLURMTIME="1:00:00"
 ENV=fipy
 NP=1
 LOGCONFIG=""
-LOGFILE=""
+LOGNAME=""
+OUTPUT="."
 PYTHON=python
 SOLVERSUITE=petsc
 PRECONDITIONERS=none
@@ -69,12 +71,16 @@ do
             ;;
         --log)
             LOGCONFIG="$2"
-            LOGFILE="$3"
+            LOGNAME="$3"
             shift # option has two parameters
             shift
             ;;
         --mprof)
             PYTHON="mprof run"
+            ;;
+        --output)
+            OUTPUT="$2"
+            shift # option has parameter
             ;;
         --solversuite)
             SOLVERSUITE="$2"
@@ -142,14 +148,23 @@ do
             JOBNAME="${SCRIPT}-${SOLVERSUITE}-${size}-${preconditioner}-${solver}"
 
             if [[ $QSUB == 1 ]]; then
-                qsub -cwd -pe nodal ${NP} -q "wide64" -o "${dir}" -e "${dir}" "${BASH_SOURCE%/*}/setup.sh" --env "${ENV}" -- ${INVOCATION}
+                qsub -cwd -pe nodal ${NP} -q "wide64" -o "${dir}" -e "${dir}" \
+                  "${BASH_SOURCE%/*}/setup.sh" \
+                  --env "${ENV}" --output "${OUTPUT}" \
+                  -- ${INVOCATION}
             elif [[ $SBATCH == 1 ]]; then
                 sbatch --partition=${PARTITION} --job-name=${JOBNAME} --ntasks=${NP} \
                   --ntasks-per-core=2 --time=${SLURMTIME} \
-                  "${BASH_SOURCE%/*}/setup.sh" --log ${LOGCONFIG} ${LOGFILE} --env "${ENV}" -- ${INVOCATION}
+                  "${BASH_SOURCE%/*}/setup.sh" \
+                  --log ${LOGCONFIG} ${LOGNAME} --env "${ENV}" --output "${OUTPUT}" \
+                  -- ${INVOCATION}
             else
-                echo bash "${BASH_SOURCE%/*}/setup.sh" --env "${ENV}" -- ${INVOCATION}
-                bash "${BASH_SOURCE%/*}/setup.sh" --log ${LOGCONFIG} ${LOGFILE} --env "${ENV}" -- ${INVOCATION}
+                echo bash "${BASH_SOURCE%/*}/setup.sh" \
+                  --log ${LOGCONFIG} ${LOGNAME} --env "${ENV}" --output "${OUTPUT}" \
+                  -- ${INVOCATION}
+                bash "${BASH_SOURCE%/*}/setup.sh" \
+                  --log ${LOGCONFIG} ${LOGNAME} --env "${ENV}" --output "${OUTPUT}" \
+                  -- ${INVOCATION}
             fi
         done
     done

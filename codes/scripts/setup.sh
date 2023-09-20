@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USAGE="usage: $0 [-h] [--env ENV] [--] SCRIPT [ARGS]
+USAGE="usage: $0 [-h] [OPTIONS] [--] SCRIPT [ARGS]
 
 activates the appropriate conda environment and calls python on SCRIPT
 with ARGS
@@ -9,11 +9,13 @@ optional arguments:
   -h, --help  show this help message and exit
   --env ENV   Conda environment to activate before invoking SCRIPT
               (default: fipy)
-  --log CONFIG LOG  Path to log configuration file template and
-                    path for log file.
+  --log CONFIG LOGFILE  Path to log configuration file template and
+                        name for log file.
+  --output OUTPUT       Directory to store results in (default: '.')
 "
 
 ENV=fipy
+OUTPUT="."
 
 while [[ $# > 0 ]] && [[ $1 == -* ]]
 do
@@ -27,6 +29,10 @@ do
             LOGFILE="$3"
             shift # option has two parameters
             shift
+            ;;
+        --output)
+            OUTPUT="$2"
+            shift # option has parameter
             ;;
         -h|--help)
             echo "$USAGE"
@@ -52,21 +58,20 @@ if [[ "$#" < 1 ]]; then
 fi
 
 if [[ -n $LOGCONFIG ]]; then
-    tmp_dir=$(mktemp -d -t fipylogconfig-XXXXXXXXXX)
-    cp $LOGCONFIG $tmp_dir
-    LOGCONFIG="${tmp_dir}/${LOGCONFIG##*/}"
+    mkdir -p $OUTPUT
+    cp $LOGCONFIG $OUTPUT
+    LOGCONFIG="${OUTPUT}/${LOGCONFIG##*/}"
 
-    logpath=${LOGFILE%/*}
-    mkdir -p $logpath
     if [[ -n $SLURM_JOB_ID ]]; then
         logbase=${LOGFILE##*/}
         logpref=${logbase%.*}
         logfext=${logbase##*.}
 
-        LOGFILE="${logpath}/${logpref}.${SLURM_JOB_ID}.${logfext}"
+        LOGFILE="${logpref}.${SLURM_JOB_ID}.${logfext}"
     fi
 
-    sed -i -e "s:%LOGFILE%:${LOGFILE}:g" $LOGCONFIG
+    echo sed -i "" -e "s:%LOGFILE%:${OUTPUT}/${LOGFILE}:g" $LOGCONFIG
+    sed -i "" -e "s:%LOGFILE%:${OUTPUT}/${LOGFILE}:g" $LOGCONFIG
 
     LOGCONFIGENV="FIPY_LOG_CONFIG=${LOGCONFIG}"
 fi
@@ -74,9 +79,5 @@ fi
 # https://stackoverflow.com/a/56155771/2019542
 eval "$(conda shell.bash hook)"
 conda activate $ENV
-echo ${LOGCONFIGENV} "$@"
-env ${LOGCONFIGENV} "$@"
-
-if [[ -n $tmp_dir ]]; then
-    rm -rf ${tmp_dir}
-fi
+echo ${LOGCONFIGENV} "$@" "--output=${OUTPUT}"
+env ${LOGCONFIGENV} "$@" "--output=${OUTPUT}"
