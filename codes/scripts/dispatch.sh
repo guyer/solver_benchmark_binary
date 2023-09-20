@@ -5,12 +5,12 @@
 
 USAGE="usage: $0 [-h] [OPTIONS] [--] NOTEBOOK [ARGS]
 
-Iterates over solvers and mesh sizes by calling setup.sh, which activates
+Converts NOTEBOOK to SCRIPT,
+iterates over solvers and mesh sizes by calling setup.sh, which activates
 the appropriate conda environment and calls python on SCRIPT
 
 positional arguments:
-  SCRIPT      Python script to launch (expected to be in same
-              directory as $0)
+  NOTEBOOK    Jupyter notebook to convert to python and launch
 
 optional arguments:
   -h, --help  show this help message and exit
@@ -28,7 +28,7 @@ optional arguments:
                         name for log file.
   --solversuite SUITE   Solver package to use (default: petsc)
   --powermin POWERMIN   Power of ten for minimum size, minsize = 10**POWERMIN (default: 1)
-  --powermin POWERMAX   Power of ten for maximum size, maxsize = 10**POWERMAX (default: 6)
+  --powermax POWERMAX   Power of ten for maximum size, maxsize = 10**POWERMAX (default: 6)
   --powerstep POWERSTEP Increment in power of ten for size (default: 1)
   --preconditioners PRECONDITIONERS  Names of preconditioners (separated by spaces) (default: none)"
 
@@ -125,7 +125,7 @@ if [[ "$#" < 1 ]]; then
     exit 1
 fi
 
-SCRIPT=$1
+NOTEBOOK=$1
 shift
 
 if [[ $NP > 1 ]]; then
@@ -133,6 +133,20 @@ if [[ $NP > 1 ]]; then
 else
     MPI=""
 fi
+
+# https://stackoverflow.com/a/56155771/2019542
+eval "$(conda shell.bash hook)"
+conda activate $ENV
+
+nbpath=${NOTEBOOK%/*}
+nbbase=${NOTEBOOK##*/}
+nbpref=${nbbase%.*}
+nbfext=${nbbase##*.}
+
+echo "jupyter nbconvert ${NOTEBOOK} --to python --output-dir=${OUTPUT}"
+jupyter nbconvert ${NOTEBOOK} --to python --output-dir=${OUTPUT}
+
+SCRIPT=${OUTPUT}/${nbpref}.py
 
 for (( POWER=${POWERMIN}; POWER<=${POWERMAX}; POWER+=${POWERSTEP} ))
 do
@@ -142,7 +156,7 @@ do
         for preconditioner in $PRECONDITIONERS
         do
             INVOCATION="OMP_NUM_THREADS=1 FIPY_SOLVERS=${SOLVERSUITE} ${LOG_CONFIG} \
-              ${MPI} ${PYTHON} ${BASH_SOURCE%/*}/${SCRIPT} \
+              ${MPI} ${PYTHON} ${SCRIPT} \
               --numberOfElements=${size} --solver=${solver} --preconditioner=${preconditioner} $@"
 
             JOBNAME="${SCRIPT}-${SOLVERSUITE}-${size}-${preconditioner}-${solver}"
