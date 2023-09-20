@@ -134,10 +134,6 @@ else
     MPI=""
 fi
 
-# https://stackoverflow.com/a/56155771/2019542
-eval "$(conda shell.bash hook)"
-conda activate $ENV
-
 nbpath=${NOTEBOOK%/*}
 nbbase=${NOTEBOOK##*/}
 nbpref=${nbbase%.*}
