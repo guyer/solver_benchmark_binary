@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # E.g.,
-# bash codes/scripts/dispatch.sh --env fipy27 --solversuite pysparse --log codes/loggers/config_template.json solver.log --output=results/problem/platform codes/notebooks/diffusion.ipynb --preconditioners=ilu --store_by_solver
+# bash codes/scripts/dispatch.sh --env fipy27 --solversuite pysparse --log codes/loggers/config_template.json solver.log --output results/problem/platform --preconditioners "jacobi ilu ssor icc none" codes/notebooks/diffusion.ipynb --store_by_solver
 
 USAGE="usage: $0 [-h] [OPTIONS] [--] NOTEBOOK [ARGS]
 
