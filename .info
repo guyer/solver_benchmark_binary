@@ -1,11 +1,23 @@
+LICENSE.md
+	Terms of use.
 NOTES.md
-	Information about first round results
+	Information about first round results.
 	Lost all context at this point?
 README.md
 	Description of `solvers_and_timings/`.
+pyproject.toml
+	Package metadata for Py3k.
+setup.py
+	Package installer for Py27.
 TODO.md
-	Tasks to work on
+	Tasks to work on.
 codes
-	Runnable programs
-matrices
-    Data used by notebooks
+	Runnable programs.
+data
+	Data used by notebooks.
+environments
+	Conda environment files.
+results
+	Simulation results.
+src
+	Analysis package.

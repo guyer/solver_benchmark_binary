@@ -1,6 +1,11 @@
+binary
+	Results from `codes/notebooks/binary_phase_field.ipynb`.
+	Binary diffusion in a frozen phase field.
 diffusion
-	Simulation results from `{fipy}/examples/benchmarking/solvers/diffusion.py`.
+	Results from `codes/notebooks/diffusion.ipynb`.
+	Diffusion in a 2D field.
 nucleation
-	Simulation results using Phase Field Benchmark 8(b)
+	Results from `codes/notebooks/nucleation.ipynb`
+	(using Phase Field Benchmark 8(b)).
 old
 	old stuff

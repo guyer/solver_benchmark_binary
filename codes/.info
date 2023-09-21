@@ -1,4 +1,4 @@
-config
+loggers
 	Python logging configuration files.
 notebooks
 	[Jupyter](https://jupyter.org/) notebook files.
