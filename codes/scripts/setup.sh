@@ -60,11 +60,11 @@ fi
 if [[ -n $LOGCONFIG ]]; then
     mkdir -p $OUTPUT
 
-    configbase = ${LOGCONFIG##*/}
-    configpref = ${configbase%.*}
-    configfext = ${configbase##*.}
+    configbase=${LOGCONFIG##*/}
+    configpref=${configbase%.*}
+    configfext=${configbase##*.}
     
-    JOBLOGCONFIG = "${OUTPUT}/${configpref}.${configfext}"
+    JOBLOGCONFIG="${OUTPUT}/${configpref}.${configfext}"
 
     if [[ -n $SLURM_JOB_ID ]]; then
         logbase=${LOGFILE##*/}
@@ -72,7 +72,7 @@ if [[ -n $LOGCONFIG ]]; then
         logfext=${logbase##*.}
 
         LOGFILE="${logpref}.${SLURM_JOB_ID}.${logfext}"
-        JOBLOGCONFIG = "${OUTPUT}/${configpref}.${SLURM_JOB_ID}.${configfext}"
+        JOBLOGCONFIG="${OUTPUT}/${configpref}.${SLURM_JOB_ID}.${configfext}"
     fi
 
     echo sed -e "s:%LOGFILE%:${OUTPUT}/${LOGFILE}:g" "${LOGCONFIG}" > "${JOBLOGCONFIG}"
