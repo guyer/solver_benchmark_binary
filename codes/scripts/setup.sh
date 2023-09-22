@@ -59,8 +59,12 @@ fi
 
 if [[ -n $LOGCONFIG ]]; then
     mkdir -p $OUTPUT
-    cp $LOGCONFIG $OUTPUT
-    LOGCONFIG="${OUTPUT}/${LOGCONFIG##*/}"
+
+    configbase = ${LOGCONFIG##*/}
+    configpref = ${configbase%.*}
+    configfext = ${configbase##*.}
+    
+    JOBLOGCONFIG = "${OUTPUT}/${configpref}.${configfext}"
 
     if [[ -n $SLURM_JOB_ID ]]; then
         logbase=${LOGFILE##*/}
@@ -68,12 +72,13 @@ if [[ -n $LOGCONFIG ]]; then
         logfext=${logbase##*.}
 
         LOGFILE="${logpref}.${SLURM_JOB_ID}.${logfext}"
+        JOBLOGCONFIG = "${OUTPUT}/${configpref}.${SLURM_JOB_ID}.${configfext}"
     fi
 
-    echo sed -i "" -e "s:%LOGFILE%:${OUTPUT}/${LOGFILE}:g" $LOGCONFIG
-    sed -i "" -e "s:%LOGFILE%:${OUTPUT}/${LOGFILE}:g" $LOGCONFIG
+    echo sed -e "s:%LOGFILE%:${OUTPUT}/${LOGFILE}:g" "${LOGCONFIG}" > "${JOBLOGCONFIG}"
+    sed -e "s:%LOGFILE%:${OUTPUT}/${LOGFILE}:g" "${LOGCONFIG}" > "${JOBLOGCONFIG}"
 
-    LOGCONFIGENV="FIPY_LOG_CONFIG=${LOGCONFIG}"
+    LOGCONFIGENV="FIPY_LOG_CONFIG=${JOBLOGCONFIG}"
 fi
 
 # https://stackoverflow.com/a/56155771/2019542
