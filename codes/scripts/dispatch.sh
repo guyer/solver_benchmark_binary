@@ -164,7 +164,7 @@ do
                   -- ${INVOCATION}
             elif [[ $SBATCH == 1 ]]; then
                 sbatch --partition=${PARTITION} --job-name=${JOBNAME} --ntasks=${NP} \
-                  --ntasks-per-core=2 --time=${SLURMTIME} \
+                  --ntasks-per-core=2 --time=${SLURMTIME} --output="${OUTPUT}/slurm-%j.out"\
                   "${BASH_SOURCE%/*}/setup.sh" \
                   --log ${LOGCONFIG} ${LOGNAME} --env "${ENV}" --output "${OUTPUT}" \
                   -- ${INVOCATION}
