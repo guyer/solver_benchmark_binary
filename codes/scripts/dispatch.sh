@@ -1,65 +1,85 @@
 #!/bin/bash
 
 # E.g.,
-# bash codes/scripts/dispatch.sh --env fipy27 --solversuite pysparse --log codes/loggers/config_template.json solver.log --output results/problem/platform --preconditioners "jacobi ilu ssor icc none" codes/notebooks/diffusion.ipynb --store_by_solver
+# bash codes/scripts/dispatch.sh --scheduler bash --env fipy27 --solversuite pysparse --log codes/loggers/config_template.json --output results/problem/platform --preconditioners "jacobi none" --codes/notebooks/diffusion.ipynb --store_by_solver
 
 USAGE="usage: $0 [-h] [OPTIONS] [--] NOTEBOOK [ARGS]
 
 Converts NOTEBOOK to SCRIPT,
-iterates over solvers and mesh sizes by calling setup.sh, which activates
-the appropriate conda environment and calls python on SCRIPT
+iterates over solvers, preconditionrs, and mesh sizes by calling setup.sh,
+which activates the appropriate conda environment and calls python on SCRIPT.
 
 positional arguments:
-  NOTEBOOK    Jupyter notebook to convert to python and launch
+  NOTEBOOK    Jupyter notebook to convert to python and launch.
+              Can be absolute path or relative to directory where
+              dispatch.sh is executed.
 
 optional arguments:
   -h, --help  show this help message and exit
-  --qsub      Invoke SCRIPT using 'qsub -cwd' for Sun grid engine
+  --scheduler SCHEDULER  Tool used to launch job.
+              Can be 'sbatch' for Slurm, 'qsub' for Sun Grid Engine, or 'bash'
               (default: invoke using bash)
-  --sbatch PARTITION SLURMTIME
-              Invoke SCRIPT using 'sbatch --partition=${PARTITION} --time=${SLURMTIME}'
-              for slurm (default: invoke using bash)
+  --skedargs SKEDARGS  Space-separated string of argments to pass to the SCHEDULER.
+  --queue QUEUE  Name of queue or partition on the SCHEDULER.
   --env ENV   Conda environment to activate before invoking SCRIPT
               (default: fipy)
   --np NP     Number of processes to invoke SCRIPT with (default: 1)
   --mprof     Whether to run mprof profiler (default: False)
   --output OUTPUT   Directory to store results in
-  --log CONFIG LOGNAME  Path to log configuration file template and
-                        name for log file.
+  --log CONFIG  Path to log configuration file template.
   --solversuite SUITE   Solver package to use (default: petsc)
+  --solvers SOLVERS  Names of solvers (separated by spaces)
+              (default: 'pcg cgs gmres lu')
+  --preconditioners PRECONDITIONERS  Names of preconditioners (separated by spaces)
+              (default: 'jacobi ilu ssor icc none')
   --powermin POWERMIN   Power of ten for minimum size, minsize = 10**POWERMIN (default: 1)
   --powermax POWERMAX   Power of ten for maximum size, maxsize = 10**POWERMAX (default: 6)
-  --powerstep POWERSTEP Increment in power of ten for size (default: 1)
-  --preconditioners PRECONDITIONERS  Names of preconditioners (separated by spaces) (default: none)"
+  --powerstep POWERSTEP Increment in power of ten for size (default: 1)"
 
-QSUB=0
-SBATCH=0
-PARTITION=""
+SCHEDULER="bash"
+SKEDARGS=""
+QUEUE=""
 SLURMTIME="1:00:00"
 ENV=fipy
+MPI=""
 NP=1
 LOGCONFIG=""
 LOGNAME=""
 OUTPUT="."
 PYTHON=python
 SOLVERSUITE=petsc
-PRECONDITIONERS=none
+SOLVERS="pcg cgs gmres lu"
+PRECONDITIONERS="jacobi ilu ssor icc none"
 POWERMIN=1
 POWERMAX=6
 POWERSTEP=1
 
+function make_absolute () {
+    case $1 in
+        /*)
+            # absolute path
+            echo $1
+            ;;
+        *)
+            # relative path, make absolute
+            echo "$(pwd)/$1"
+    esac
+}
+
 while [[ $# > 0 ]] && [[ $1 == -* ]]
 do
     case "$1" in
-        --qsub)
-            QSUB=1
+        --scheduler)
+            SCHEDULER="$2"
+            shift # option has parameter
             ;;
-        --sbatch)
-            SBATCH=1
-            PARTITION="$2"
-            SLURMTIME="$3"
-            shift # option has two parameters
-            shift
+        --skedargs)
+            SKEDARGS="$2"
+            shift # option has parameter
+            ;;
+        --queue)
+            QUEUE="$2"
+            shift # option has parameter
             ;;
         --env)
             ENV="$2"
@@ -71,9 +91,7 @@ do
             ;;
         --log)
             LOGCONFIG="$2"
-            LOGNAME="$3"
-            shift # option has two parameters
-            shift
+            shift # option has parameter
             ;;
         --mprof)
             PYTHON="mprof run"
@@ -86,6 +104,14 @@ do
             SOLVERSUITE="$2"
             shift # option has parameter
             ;;
+        --solvers)
+            SOLVERS="$2"
+            shift # option has parameter
+            ;;
+        --preconditioners)
+            PRECONDITIONERS="$2"
+            shift # option has parameter
+            ;;
         --powermin)
             POWERMIN="$2"
             shift # option has parameter
@@ -96,10 +122,6 @@ do
             ;;
         --powerstep)
             POWERMAX="$2"
-            shift # option has parameter
-            ;;
-        --preconditioners)
-            PRECONDITIONERS="$2"
             shift # option has parameter
             ;;
         -h|--help)
@@ -125,63 +147,90 @@ if [[ "$#" < 1 ]]; then
     exit 1
 fi
 
-NOTEBOOK=$1
-shift
-
 if [[ $NP > 1 ]]; then
     MPI="mpirun -np ${NP}"
-else
-    MPI=""
 fi
+
+OUTPUT="$(make_absolute ${OUTPUT})"
+readonly OUTPUT
+
+mkdir -p "${OUTPUT}"
+
+NOTEBOOK=$1
+shift
 
 nbpath=${NOTEBOOK%/*}
 nbbase=${NOTEBOOK##*/}
 nbpref=${nbbase%.*}
 nbfext=${nbbase##*.}
 
-set -x
-
 # https://stackoverflow.com/a/56155771/2019542
 eval "$(conda shell.bash hook)"
 conda activate $ENV
 
+set -x
 jupyter nbconvert ${NOTEBOOK} --to python --output-dir=${OUTPUT}
+set +x
 
 conda deactivate
 
-SCRIPT=${OUTPUT}/${nbpref}.py
+script="${nbpref}.py"
 
-for (( POWER=${POWERMIN}; POWER<=${POWERMAX}; POWER+=${POWERSTEP} ))
+declare -a setup
+
+setup=($(make_absolute "${BASH_SOURCE%/*}/setup.sh"))
+if [[ -n ${LOGCONFIG} ]]; then
+    setup+=(--log "$(make_absolute ${LOGCONFIG})")
+fi
+setup+=(--env "${ENV}")
+
+for (( power=${POWERMIN}; power<=${POWERMAX}; power+=${POWERSTEP} ))
 do
-    size=$((10**${POWER}))
-    for solver in pcg cgs gmres lu
+    size=$((10**power))
+    for solver in ${SOLVERS}
     do
-        for preconditioner in $PRECONDITIONERS
+        for preconditioner in ${PRECONDITIONERS}
         do
-            INVOCATION="OMP_NUM_THREADS=1 FIPY_SOLVERS=${SOLVERSUITE} ${LOG_CONFIG} \
-              ${MPI} ${PYTHON} ${SCRIPT} \
-              --numberOfElements=${size} --solver=${solver} --preconditioner=${preconditioner} $@"
+            job=(OMP_NUM_THREADS=1 FIPY_SOLVERS=${SOLVERSUITE})
+            job+=(${MPI} ${PYTHON} ${script})
+            job+=(--numberOfElements=${size})
+            job+=(--solver="${solver}")
+            job+=(--preconditioner="${preconditioner}")
+            job+=($@)
 
-            JOBNAME="${SCRIPT}-${SOLVERSUITE}-${size}-${preconditioner}-${solver}"
+            case "${SCHEDULER}" in
+                qsub)
+                    options=(-cwd -pe nodal "${NP}" -q "${QUEUE}")
+                    options+=(-o "${OUTPUT}" -e "${OUTPUT}")
+                    options+=(change working directory to ${OUTPUT})
+                    options+=(${SKEDARGS})
 
-            if [[ $QSUB == 1 ]]; then
-                qsub -cwd -pe nodal ${NP} -q "wide64" -o "${dir}" -e "${dir}" \
-                  "${BASH_SOURCE%/*}/setup.sh" \
-                  --env "${ENV}" --output "${OUTPUT}" \
-                  -- ${INVOCATION}
-            elif [[ $SBATCH == 1 ]]; then
-                sbatch --partition=${PARTITION} --job-name=${JOBNAME} --ntasks=${NP} \
-                  --ntasks-per-core=2 --time=${SLURMTIME} --output="${OUTPUT}/slurm-%j.out"\
-                  "${BASH_SOURCE%/*}/setup.sh" \
-                  --log ${LOGCONFIG} ${LOGNAME} --env "${ENV}" --output "${OUTPUT}" \
-                  -- ${INVOCATION}
-            else
-                bash "${BASH_SOURCE%/*}/setup.sh" \
-                  --log ${LOGCONFIG} ${LOGNAME} --env "${ENV}" --output "${OUTPUT}" \
-                  -- ${INVOCATION}
-            fi
+                    set -x
+                    qsub ${options[@]} -- ${setup[@]} -- ${job[@]}
+                    set +x
+                    ;;
+                sbatch)
+                    options=(--partition="${QUEUE}")
+                    options+=(--jobname="${script##*/}-${SOLVERSUITE}-${size}-${preconditioner}-${solver}")
+                    options+=(--ntasks="${NP}" --ntasks-per-core=2)
+                    options+=(--chdir="${OUTPUT}")
+                    options+=(${SKEDARGS})
+
+                    set -x
+                    sbatch ${options[@]} -- ${setup[@]} -- ${job[@]}
+                    set +x
+                    ;;
+                bash)
+                    # default
+                    set -x
+                    (pushd "${OUTPUT}" && ${setup[@]} -- ${job[@]}; popd)
+                    set +x
+                    ;;
+                *)
+                    echo Unknown scheduler: "${SCHEDULER}">&2
+                    exit 20
+                    ;;
+            esac
         done
     done
 done
-
-set +x
