@@ -211,7 +211,7 @@ do
                     ;;
                 sbatch)
                     options=(--partition="${QUEUE}")
-                    options+=(--jobname="${script##*/}-${SOLVERSUITE}-${size}-${preconditioner}-${solver}")
+                    options+=(--job-name="${script##*/}-${SOLVERSUITE}-${size}-${preconditioner}-${solver}")
                     options+=(--ntasks="${NP}" --ntasks-per-core=2)
                     options+=(--chdir="${OUTPUT}")
                     options+=(${SKEDARGS})
