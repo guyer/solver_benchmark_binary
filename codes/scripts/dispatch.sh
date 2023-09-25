@@ -139,11 +139,12 @@ nbbase=${NOTEBOOK##*/}
 nbpref=${nbbase%.*}
 nbfext=${nbbase##*.}
 
+set -x
+
 # https://stackoverflow.com/a/56155771/2019542
 eval "$(conda shell.bash hook)"
 conda activate $ENV
 
-echo "jupyter nbconvert ${NOTEBOOK} --to python --output-dir=${OUTPUT}"
 jupyter nbconvert ${NOTEBOOK} --to python --output-dir=${OUTPUT}
 
 conda deactivate
@@ -175,9 +176,6 @@ do
                   --log ${LOGCONFIG} ${LOGNAME} --env "${ENV}" --output "${OUTPUT}" \
                   -- ${INVOCATION}
             else
-                echo bash "${BASH_SOURCE%/*}/setup.sh" \
-                  --log ${LOGCONFIG} ${LOGNAME} --env "${ENV}" --output "${OUTPUT}" \
-                  -- ${INVOCATION}
                 bash "${BASH_SOURCE%/*}/setup.sh" \
                   --log ${LOGCONFIG} ${LOGNAME} --env "${ENV}" --output "${OUTPUT}" \
                   -- ${INVOCATION}
@@ -185,3 +183,5 @@ do
         done
     done
 done
+
+set +x

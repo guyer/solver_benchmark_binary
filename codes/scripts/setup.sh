@@ -57,6 +57,8 @@ if [[ "$#" < 1 ]]; then
     exit 1
 fi
 
+set -x
+
 if [[ -n $LOGCONFIG ]]; then
     mkdir -p $OUTPUT
 
@@ -75,7 +77,6 @@ if [[ -n $LOGCONFIG ]]; then
         JOBLOGCONFIG="${OUTPUT}/${configpref}.${SLURM_JOB_ID}.${configfext}"
     fi
 
-    echo sed -e "s:%LOGFILE%:${OUTPUT}/${LOGFILE}:g" "${LOGCONFIG}" > "${JOBLOGCONFIG}"
     sed -e "s:%LOGFILE%:${OUTPUT}/${LOGFILE}:g" "${LOGCONFIG}" > "${JOBLOGCONFIG}"
 
     LOGCONFIGENV="FIPY_LOG_CONFIG=${JOBLOGCONFIG}"
@@ -84,5 +85,6 @@ fi
 # https://stackoverflow.com/a/56155771/2019542
 eval "$(conda shell.bash hook)"
 conda activate $ENV
-echo ${LOGCONFIGENV} "$@" "--output=${OUTPUT}"
 env ${LOGCONFIGENV} "$@" "--output=${OUTPUT}"
+
+set +x
