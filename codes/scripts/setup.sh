@@ -9,13 +9,11 @@ optional arguments:
   -h, --help  show this help message and exit
   --env ENV   Conda environment to activate before invoking SCRIPT
               (default: fipy)
-  --log CONFIG LOGFILE  Path to log configuration file template and
-                        name for log file.
-  --output OUTPUT       Directory to store results in (default: '.')
+  --log CONFIG  Path to log configuration file template.
 "
 
 ENV=fipy
-OUTPUT="."
+LOGFILE="solver.log"
 
 while [[ $# > 0 ]] && [[ $1 == -* ]]
 do
@@ -26,12 +24,6 @@ do
             ;;
         --log)
             LOGCONFIG="$2"
-            LOGFILE="$3"
-            shift # option has two parameters
-            shift
-            ;;
-        --output)
-            OUTPUT="$2"
             shift # option has parameter
             ;;
         -h|--help)
@@ -57,16 +49,12 @@ if [[ "$#" < 1 ]]; then
     exit 1
 fi
 
-set -x
-
 if [[ -n $LOGCONFIG ]]; then
-    mkdir -p $OUTPUT
-
     configbase=${LOGCONFIG##*/}
     configpref=${configbase%.*}
     configfext=${configbase##*.}
     
-    JOBLOGCONFIG="${OUTPUT}/${configpref}.${configfext}"
+    JOBLOGCONFIG="${configpref}.${configfext}"
 
     if [[ -n $SLURM_JOB_ID ]]; then
         logbase=${LOGFILE##*/}
@@ -74,10 +62,10 @@ if [[ -n $LOGCONFIG ]]; then
         logfext=${logbase##*.}
 
         LOGFILE="${logpref}.${SLURM_JOB_ID}.${logfext}"
-        JOBLOGCONFIG="${OUTPUT}/${configpref}.${SLURM_JOB_ID}.${configfext}"
+        JOBLOGCONFIG="${configpref}.${SLURM_JOB_ID}.${configfext}"
     fi
 
-    sed -e "s:%LOGFILE%:${OUTPUT}/${LOGFILE}:g" "${LOGCONFIG}" > "${JOBLOGCONFIG}"
+    sed -e "s:%LOGFILE%:${LOGFILE}:g" "${LOGCONFIG}" > "${JOBLOGCONFIG}"
 
     LOGCONFIGENV="FIPY_LOG_CONFIG=${JOBLOGCONFIG}"
 fi
@@ -85,6 +73,7 @@ fi
 # https://stackoverflow.com/a/56155771/2019542
 eval "$(conda shell.bash hook)"
 conda activate $ENV
-env ${LOGCONFIGENV} "$@" "--output=${OUTPUT}"
 
+set -x
+env ${LOGCONFIGENV} "$@" --output=.
 set +x
