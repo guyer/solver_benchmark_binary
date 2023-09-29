@@ -2,6 +2,8 @@
 
 # E.g.,
 # bash codes/scripts/dispatch.sh --scheduler bash --env fipy27 --solversuite pysparse --log codes/loggers/config_template.json --output results/problem/platform --preconditioners "jacobi none" --codes/notebooks/diffusion.ipynb --store_by_solver
+# or
+# bash codes/scripts/dispatch.sh --scheduler sbatch --queue fast --skedargs "--time=12:00:00"  --env fipy_solver_benchmarking_11 --solversuite trilinos --log codes/loggers/config_template.json --output results/binary/linux -- codes/notebooks/binary_phase_field.ipynb --store_by_solver
 
 USAGE="usage: $0 [-h] [OPTIONS] [--] NOTEBOOK [ARGS]
 
