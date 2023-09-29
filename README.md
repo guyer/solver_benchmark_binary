@@ -19,6 +19,10 @@ Timing and solver convergence info developed while working on
 - Install a working copy of FiPy:
 
   `python -m pip install --editable <PATH_TO_FIPY>`
+
+- Install steppyngstounes
+
+  `python -m pip install --editable <PATH_TO_STEPPYNGSTOUNES>`
   
 - Install the supporting package for this project:
 
