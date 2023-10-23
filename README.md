@@ -59,10 +59,20 @@ The `dispatch.sh` script converts the specified `.ipynb` notebook into a `.py` s
 
 Jobs on the CTCMS cluster are invoked with `--sbatch fast 12:00:00` or `--sbatch gpu 12:00:00`.
 
+### Retrieving results
+
+Bring results from CTCMS to laptop with
+
+```bash
+rsync -avzh  mr-french.nist.gov:/data/guyer/solvers_and_timings/results .
+```
+
 ### Analyses
 
 Notebooks for anaysis of results can be found in `codes/notebooks/analyze_*.ipynb`.
 These notebooks should be self-contained.
+
+### Aggregating
 
 ## DATA & FILE OVERVIEW
 
