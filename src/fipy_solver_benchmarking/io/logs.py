@@ -12,8 +12,10 @@ def read_events(fname):
     versions = {}
 
     with open(fname, 'r') as f:
-        begin_time = np.nan
+        begin_solve_time = np.nan
+        begin_prepare_time = np.nan
         solve_time = np.nan
+        prepare_time = np.nan
         simulation_id = np.nan
         for line in f:
             entries = line.split("|")
@@ -59,16 +61,24 @@ def read_events(fname):
                 event["time_stamp"] = time_stamp
                 event["solver_class"] = logger.split('.')[-1]
                 event["solve_time"] = str(solve_time)
+                event["prepare_time"] = str(prepare_time)
                 converged = event["status_name"] in success_statuses
                 events.append(event)
                 solve_time = np.nan
             elif (level, function) == ("DEBUG", "_solve_"):
                 if msg == "BEGIN solve":
-                    begin_time = pd.to_datetime(time_stamp)
+                    begin_solve_time = pd.to_datetime(time_stamp)
                     solve_time = np.nan
                 elif msg == "END solve":
-                    solve_time = pd.to_datetime(time_stamp) - begin_time
-                    begin_time = np.nan
+                    solve_time = pd.to_datetime(time_stamp) - begin_solve_time
+                    begin_solve_time = np.nan
+            elif (level, function) == ("DEBUG", "_prepareLinearSystem"):
+                if msg == "BEGIN _prepareLinearSystem":
+                    begin_prepare_time = pd.to_datetime(time_stamp)
+                    prepare_time = np.nan
+                elif msg == "END _prepareLinearSystem":
+                    prepare_time = pd.to_datetime(time_stamp) - begin_prepare_time
+                    begin_prepare_time = np.nan
 
     return events
 
@@ -76,20 +86,24 @@ def events2df(events):
     df = pd.json_normalize(events)
     df["time_stamp"] = pd.to_datetime(df["time_stamp"])
     df["solve_time"] = pd.to_timedelta(df["solve_time"])    
+    df["prepare_time"] = pd.to_timedelta(df["prepare_time"])
     df.loc[df["preconditioner"].isna()
            | (df["preconditioner"] == "NoneType"), "preconditioner"] = "unpreconditioned"
 
     return df
 
 def extract_total_times(df):
+    prepare_time = df.groupby("simulation_id")["prepare_time"].sum()
     solve_time = df.groupby("simulation_id")["solve_time"].sum()
     
     df2 = df[df["state"].isin(["START", "END"])].copy()
     df2["time_delta"] = df2["time_stamp"].diff()
     df2 = df2[df2["state"] == "END"].set_index("simulation_id")
+    df2["prepare_time"] = prepare_time
     df2["solve_time"] = solve_time
     
     df2["elapsed_seconds"] = df2["time_delta"] / pd.Timedelta("00:00:01")
+    df2["prepare_seconds"] = df2["prepare_time"] / pd.Timedelta("00:00:01")
     df2["solve_seconds"] = df2["solve_time"] / pd.Timedelta("00:00:01")
 
     return df2.sort_values("numberOfElements")
