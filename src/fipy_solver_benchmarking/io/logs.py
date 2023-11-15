@@ -65,6 +65,18 @@ def read_events(fname):
                 converged = event["status_name"] in success_statuses
                 events.append(event)
                 solve_time = np.nan
+            elif (level, function) == ("DEBUG", "log"):
+                if logger.endswith("Convergence") or logger.endswith("Divergence"):
+                    state["state"] = "SWEEP"
+                    event = json.loads(msg)
+                    event.update(state.copy())
+                    event["time_stamp"] = time_stamp
+                    event["solver_class"] = event["solver"].split("(")[0]
+                    event["solve_time"] = str(solve_time)
+                    event["prepare_time"] = str(prepare_time)
+                    converged = event["status_name"] in success_statuses
+                    events.append(event)
+                    solve_time = np.nan
             elif (level, function) == ("DEBUG", "_solve_"):
                 if msg == "BEGIN solve":
                     begin_solve_time = pd.to_datetime(time_stamp)
