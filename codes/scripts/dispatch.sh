@@ -176,7 +176,7 @@ jupyter nbconvert ${NOTEBOOK} --to python --output-dir=${OUTPUT}
 if [[ ${PRECONDITIONERS} == "all" ]]; then
     # run `preconditioners.py` alongside this script to get preconditioners
     # from active environment and solver suite
-    PRECONDITIONERS="$(FIPY_SOLVERS=${SOLVERSUITE} ${PYTHON} ${0%/*}/preconditioners.py)"
+    PRECONDITIONERS="$(FIPY_SOLVERS=${SOLVERSUITE} ${PYTHON} ${0%/*}/preconditioners.py) none"
 fi
 
 if [[ ${SOLVERS} == "all" ]]; then
