@@ -14,6 +14,7 @@ optional arguments:
 
 ENV=fipy
 LOGFILE="solver.log"
+OUTPUT="."
 
 while [[ $# > 0 ]] && [[ $1 == -* ]]
 do
@@ -24,6 +25,10 @@ do
             ;;
         --log)
             LOGCONFIG="$2"
+            shift # option has parameter
+            ;;
+        --output)
+            OUTPUT="$2"
             shift # option has parameter
             ;;
         -h|--help)
@@ -75,5 +80,5 @@ eval "$(conda shell.bash hook)"
 conda activate $ENV
 
 set -x
-env ${LOGCONFIGENV} "$@" --output=.
+env ${LOGCONFIGENV} "$@" --output=${OUTPUT}
 set +x
