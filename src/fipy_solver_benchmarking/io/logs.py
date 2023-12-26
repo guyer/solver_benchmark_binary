@@ -126,3 +126,15 @@ def extract_sweep_times(df):
     df2["elapsed_seconds"] = df2["time_delta"] / pd.Timedelta("00:00:01")
 
     return df2[~df2["state"].isin(["START", "END"])]
+
+def logs2events(path, pattern):
+    events = []
+    for fname in path.glob(pattern):
+        events.extend(read_events(fname))
+    return events
+
+def logs2df(path, pattern):
+    return events2df(logs2events(path, pattern))
+
+def logs2total(path, pattern):
+    return extract_total_times(logs2df(path, pattern))
