@@ -6,19 +6,22 @@ from matplotlib.legend import Legend
 
 def plot_all(df, color_by_suite=True,
              by=["package.solver", "solver_class", "preconditioner"],
-             data_set="elapsed_seconds", ylabel="elapsed time", title=None):
+             data_set="elapsed_seconds", ylabel="elapsed time", title=None,
+             ymin=None, ymax=None, ax=None):
     color_map = {
         'no-pysparse': 'red',
         'trilinos': 'red',
         'petsc': 'blue',
         'scipy': 'green',
         'pysparse': 'orange',
-        'pyamgx': 'cyan'
+        'pyamgx': 'cyan',
+        'petsc-RCV': 'pink'
     }
     
     # plt.figure()
-    fig, ax = plt.subplots(figsize=(8,6),
-                           gridspec_kw={"right": 0.8})
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8,6),
+                               gridspec_kw={"right": 0.8})
     groups = df.groupby(by + ["numberOfElements"])
     groups = groups.agg(converged=("converged", "all"),
                         data_count=(data_set, "count"),
@@ -68,11 +71,12 @@ def plot_all(df, color_by_suite=True,
 
     ax.set_ylabel(f"{ylabel} / s")
     ax.set_xlabel("number of elements")
+    ax.set_ylim(ymin=ymin, ymax=ymax)
 
     if title is not None:
         ax.set_title(title)
 
-    plt.show()
+    # plt.show()
     
     return ax
 
@@ -149,9 +153,15 @@ def plot_solve_fraction(df, color_by_suite=True,
 
     return ax
 
-def plot_by_solver(df, data_set="elapsed_seconds", ylabel="elapsed time"):
+def plot_by_solver(df, data_set="elapsed_seconds", ylabel="elapsed time", ymin=None, ymax=None):
     for (solver_class,), group1 in df.groupby(["solver_class"]):
-        plot_all(group1, by=["package.solver", "preconditioner"], data_set=data_set, ylabel=ylabel, title=solver_class)
+        plot_all(group1, by=["package.solver", "preconditioner"], data_set=data_set, ylabel=ylabel, title=solver_class,
+                 ymin=ymin, ymax=ymax)
+
+def plot_by_preconditioner(df, data_set="elapsed_seconds", ylabel="elapsed time", ymin=None, ymax=None):
+    for (solver_class,), group1 in df.groupby(["solver_class"]):
+        plot_all(group1, by=["preconditioner"], data_set=data_set, ylabel=ylabel, title=solver_class,
+                 ymin=ymin, ymax=ymax, color_by_suite=False)
         
 def plot_sweep_times(df):
     for numberOfElements, group1 in df.groupby("numberOfElements"):
