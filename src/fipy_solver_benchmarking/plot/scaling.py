@@ -7,7 +7,7 @@ from matplotlib.legend import Legend
 def plot_all(df, color_by_suite=True,
              by=["package.solver", "solver_class", "preconditioner"],
              data_set="elapsed_seconds", ylabel="elapsed time", title=None,
-             ymin=None, ymax=None, ax=None):
+             xmin=None, xmax=None, ymin=None, ymax=None, ax=None):
     color_map = {
         'no-pysparse': 'red',
         'trilinos': 'red',
@@ -71,6 +71,7 @@ def plot_all(df, color_by_suite=True,
 
     ax.set_ylabel(f"{ylabel} / s")
     ax.set_xlabel("number of elements")
+    ax.set_xlim(xmin=xmin, xmax=xmax)
     ax.set_ylim(ymin=ymin, ymax=ymax)
 
     if title is not None:
