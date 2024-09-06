@@ -1,5 +1,6 @@
 from snakemake.utils import Paramspace
 import pandas as pd
+from itertools import product
 
 VERSIONS, FIPYVERSIONS = glob_wildcards("results/{version,[A-Za-z0-9]+}/{fipyversion,[^/]+}/")
 SIZES = [9, 99, 999]
@@ -42,38 +43,44 @@ rule ipynb2py:
     shell:
         "jupyter nbconvert {input} --to python --output-dir={wildcards.path}"
 
-checkpoint make_params:
+checkpoint preconditioners:
     output:
-        "results/{path}/{solversuite}/params.csv"
+        "results/{path}/{solversuite}/preconditioners.txt"
     conda:
         "fipy_solver_benchmarking_311"
+#        "benchmark_{solversuite}"
     shell:
-        "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/params.py > {output}"
+        "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/preconditioners.py > {output}"
+
+checkpoint solvers:
+    output:
+        "results/{path}/{solversuite}/solvers.txt"
+    conda:
+        "fipy_solver_benchmarking_311"
+#        "benchmark_{solversuite}"
+    shell:
+        "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/solvers.py > {output}"
 
 def get_params(wildcards):
-    csv_file = checkpoints.make_params.get(path=wildcards.path,
-                                           solversuite=wildcards.solversuite).output[0]
-    paramspace = Paramspace(pd.read_csv(csv_file))
+    p = checkpoints.preconditioners
+    precon_file = p.get(path=wildcards.path,
+                        solversuite=wildcards.solversuite).output[0]
+    with open(p.get(path=wildcards.path,
+                    solversuite=wildcards.solversuite).output[0], 'r') as f:
+        preconditioners = f.read().split()
+
+    s = checkpoints.solvers
+    solve_file = s.get(path=wildcards.path,
+                       solversuite=wildcards.solversuite).output[0]
+    with open(solve_file, 'r') as f:
+        solvers = f.read().split()
+
+    df = pd.DataFrame(data=list(product(solvers, preconditioners)),
+                      columns=["solver", "preconditioner"])
+
+    paramspace = Paramspace(df)
     return expand(f"results/{wildcards.path}/{wildcards.solversuite}/{{params}}/solver.log",
                   params=paramspace.instance_patterns)
-
-# checkpoint preconditioners:
-#     output:
-#         "results/{version}/{fipyversion}/{platform}/{solversuite}/preconditioners.txt"
-#     conda:
-#         "fipy_solver_benchmarking_311"
-# #         "benchmark_{solversuite}"
-#     shell:
-#         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/preconditioners.py > {output}"
-# 
-# checkpoint solvers:
-#     output:
-#         "results/{version}/{fipyversion}/{platform}/{solversuite}/solvers.txt"
-#     conda:
-#         "fipy_solver_benchmarking_311"
-#         # "benchmark_{solversuite}"
-#     shell:
-#         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/solvers.py > {output}"
 
 rule solve:
     output:
@@ -101,5 +108,6 @@ rule plot:
     output:
         "results/{path}/{solversuite}/all.png"
     input:
-        "results/{path}/{solversuite}/params.csv",
+        "results/{path}/{solversuite}/preconditioners.txt",
+        "results/{path}/{solversuite}/solvers.txt",
         get_params
