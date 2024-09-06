@@ -81,6 +81,8 @@ rule solve:
         "solver~{solver}/preconditioner~{preconditioner}/solver.log"
     input:
         "results/{version}/{fipyversion}/{script}.py"
+    conda:
+        "benchmark_{solversuite}"
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python {input[0]} "
         "--solver={wildcards.solver} "
