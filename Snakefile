@@ -18,8 +18,9 @@ rule versions:
         #> {output}"
 
 rule all:
-    input: expand("results/{version}/{fipyversion}/nucleation.py",
-                  zip, version=VERSIONS, fipyversion=FIPYVERSIONS)
+    input:
+        expand("results/{version}/{fipyversion}/nucleation.py",
+               zip, version=VERSIONS, fipyversion=FIPYVERSIONS)
 
 rule current_version:
     input:
