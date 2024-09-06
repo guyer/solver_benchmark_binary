@@ -96,14 +96,6 @@ rule solve:
         "--preconditioner={wildcards.preconditioner}"
 #         "--numberOfElements={wildcards.size} "
 
-# def get_logs(wildcards):
-#     PATH = f"results/{wildcards.version}/{wildcards.fipyversion}/{wildcards.platform}/{wildcards.solversuite}"
-#     with open(PATH + "/solvers.txt", 'r') as f:
-#         SOLVERS = f.read().split()
-#     with open(PATH + "/preconditioners.txt", 'r') as f:
-#         PRECONDITIONERS = f.read().split()
-#     return expand(PATH+"{solver}/{preconditioner}/{size}", zip, solver=SOLVERS, preconditioner=PRECONDITIONERS,size=SIZES)
-    
 rule plot:
     output:
         "results/{path}/{solversuite}/all.png"
