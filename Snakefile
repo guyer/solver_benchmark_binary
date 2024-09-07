@@ -1,9 +1,11 @@
 from snakemake.utils import Paramspace
+import numpy as np
 import pandas as pd
 from itertools import product
 
 VERSIONS, FIPYVERSIONS = glob_wildcards("results/{version,[A-Za-z0-9]+}/{fipyversion,[^/]+}/")
-SIZES = [9, 99, 999]
+# calculate dimensions that produce six orders of magnitude in number of cells
+SIZES = (10**(np.arange(1, 6.5, 1.)/2)).round().astype(int)**2
 
 # def versions():
 #     return shell("git rev-parse --short HEAD")
@@ -61,6 +63,31 @@ checkpoint preconditioners:
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/preconditioners.py > {output}"
 
+rule params:
+    output:
+        "results/{path}/{solversuite}/params.csv"
+    input:
+        "results/{path}/{solversuite}/preconditioners.txt",
+        "results/{path}/{solversuite}/solvers.txt",
+    run:
+        s = checkpoints.solvers
+        solve_file = s.get(path=wildcards.path,
+                           solversuite=wildcards.solversuite).output[0]
+        with open(solve_file, 'r') as f:
+            solvers = f.read().split()
+
+        p = checkpoints.preconditioners
+        precon_file = p.get(path=wildcards.path,
+                            solversuite=wildcards.solversuite).output[0]
+        with open(p.get(path=wildcards.path,
+                        solversuite=wildcards.solversuite).output[0], 'r') as f:
+            preconditioners = f.read().split()
+
+        df = pd.DataFrame(data=list(product(solvers, preconditioners, SIZES)),
+                          columns=["solver", "preconditioner", "size"])
+
+        df.to_csv(output[0], index=False)
+
 def get_params(wildcards):
     s = checkpoints.solvers
     solve_file = s.get(path=wildcards.path,
@@ -75,8 +102,8 @@ def get_params(wildcards):
                     solversuite=wildcards.solversuite).output[0], 'r') as f:
         preconditioners = f.read().split()
 
-    df = pd.DataFrame(data=list(product(solvers, preconditioners)),
-                      columns=["solver", "preconditioner"])
+    df = pd.DataFrame(data=list(product(solvers, preconditioners, SIZES)),
+                      columns=["solver", "preconditioner", "size"])
 
     paramspace = Paramspace(df)
     return expand(f"results/{wildcards.path}/{wildcards.solversuite}/{{params}}/solver.log",
@@ -112,14 +139,10 @@ def get_params(wildcards):
 #         df = pd.concat((pd.read_csv(f) for f in input), ignore_index=True)
 #         df.to_csv(output[0])
 
-def output_dir(wildcards):
-    return "results/{wildcards.version}/{wildcards.fipyversion}/{wildcards.script}/{wildcards.platform}/{wildcards.solversuite}/"
-    "solver~{wildcards.solver}/preconditioner~{wildcards.preconditioner}/"
-
 rule solve:
     output:
         "results/{version}/{fipyversion}/{script}/{platform}/{solversuite}/"
-        "solver~{solver}/preconditioner~{preconditioner}/solver.log"
+        "solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.log"
     input:
         "results/{version}/{fipyversion}/{script}.py"
     conda:
@@ -128,14 +151,15 @@ rule solve:
         "FIPY_SOLVERS={wildcards.solversuite} python {input[0]}"
         " --solver={wildcards.solver}"
         " --preconditioner={wildcards.preconditioner}"
-        " --numberOfElements=9"
-        " --output=results/{wildcards.version}/{wildcards.fipyversion}/{wildcards.script}/{wildcards.platform}/{wildcards.solversuite}/"
-        "solver~{wildcards.solver}/preconditioner~{wildcards.preconditioner}"
+        " --numberOfElements={wildcards.size}"
+        " --output=results/{wildcards.version}/{wildcards.fipyversion}/"
+        "{wildcards.script}/{wildcards.platform}/{wildcards.solversuite}/"
+        "solver~{wildcards.solver}/preconditioner~{wildcards.preconditioner}/"
+        "size~{wildcards.size}"
 
 rule plot:
     output:
         "results/{path}/{solversuite}/all.png"
     input:
-        "results/{path}/{solversuite}/preconditioners.txt",
-        "results/{path}/{solversuite}/solvers.txt",
+        "results/{path}/{solversuite}/params.csv",
         get_params
