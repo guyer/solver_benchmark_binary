@@ -49,7 +49,6 @@ checkpoint solvers:
     output:
         "results/{path}/{solversuite}/solvers.txt"
     conda:
-#         "fipy_solver_benchmarking_311"
        "benchmark_{solversuite}"
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/solvers.py > {output}"
@@ -58,12 +57,11 @@ checkpoint preconditioners:
     output:
         "results/{path}/{solversuite}/preconditioners.txt"
     conda:
-#         "fipy_solver_benchmarking_311"
        "benchmark_{solversuite}"
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/preconditioners.py > {output}"
 
-rule params:
+checkpoint params:
     output:
         "results/{path}/{solversuite}/params.csv"
     input:
@@ -89,23 +87,10 @@ rule params:
         df.to_csv(output[0], index=False)
 
 def get_params(wildcards):
-    s = checkpoints.solvers
-    solve_file = s.get(path=wildcards.path,
+    p = checkpoints.params
+    param_file = p.get(path=wildcards.path,
                        solversuite=wildcards.solversuite).output[0]
-    with open(solve_file, 'r') as f:
-        solvers = f.read().split()
-
-    p = checkpoints.preconditioners
-    precon_file = p.get(path=wildcards.path,
-                        solversuite=wildcards.solversuite).output[0]
-    with open(p.get(path=wildcards.path,
-                    solversuite=wildcards.solversuite).output[0], 'r') as f:
-        preconditioners = f.read().split()
-
-    df = pd.DataFrame(data=list(product(solvers, preconditioners, SIZES)),
-                      columns=["solver", "preconditioner", "size"])
-
-    paramspace = Paramspace(df)
+    paramspace = Paramspace(pd.read_csv(param_file))
     return expand(f"results/{wildcards.path}/{wildcards.solversuite}/{{params}}/solver.log",
                   params=paramspace.instance_patterns)
 
