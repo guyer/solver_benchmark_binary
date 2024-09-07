@@ -45,7 +45,7 @@ rule ipynb2py:
     shell:
         "jupyter nbconvert {input} --to python --output-dir={wildcards.path}"
 
-checkpoint solvers:
+checkpoint list_solvers:
     output:
         "results/{path}/{solversuite}/solvers.txt"
     conda:
@@ -53,7 +53,7 @@ checkpoint solvers:
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/solvers.py > {output}"
 
-checkpoint preconditioners:
+checkpoint list_preconditioners:
     output:
         "results/{path}/{solversuite}/preconditioners.txt"
     conda:
@@ -61,30 +61,50 @@ checkpoint preconditioners:
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/preconditioners.py > {output}"
 
-checkpoint params:
-    output:
-        "results/{path}/{solversuite}/params.csv"
-    input:
-        "results/{path}/{solversuite}/preconditioners.txt",
-        "results/{path}/{solversuite}/solvers.txt",
-    run:
-        s = checkpoints.solvers
-        solve_file = s.get(path=wildcards.path,
-                           solversuite=wildcards.solversuite).output[0]
-        with open(solve_file, 'r') as f:
-            solvers = f.read().split()
+# checkpoint params:
+#     output:
+#         "results/{path}/{solversuite}/params.csv"
+#     input:
+#         "results/{path}/{solversuite}/preconditioners.txt",
+#         "results/{path}/{solversuite}/solvers.txt",
+#     run:
+#         s = checkpoints.solvers
+#         solve_file = s.get(path=wildcards.path,
+#                            solversuite=wildcards.solversuite).output[0]
+#         with open(solve_file, 'r') as f:
+#             solvers = f.read().split()
+# 
+#         p = checkpoints.preconditioners
+#         precon_file = p.get(path=wildcards.path,
+#                             solversuite=wildcards.solversuite).output[0]
+#         with open(p.get(path=wildcards.path,
+#                         solversuite=wildcards.solversuite).output[0], 'r') as f:
+#             preconditioners = f.read().split()
+# 
+#         df = pd.DataFrame(data=list(product(solvers, preconditioners, SIZES)),
+#                           columns=["solver", "preconditioner", "size"])
+# 
+#         df.to_csv(output[0], index=False)
 
-        p = checkpoints.preconditioners
-        precon_file = p.get(path=wildcards.path,
-                            solversuite=wildcards.solversuite).output[0]
-        with open(p.get(path=wildcards.path,
-                        solversuite=wildcards.solversuite).output[0], 'r') as f:
-            preconditioners = f.read().split()
+def get_solvers(wildcards):
+    s = checkpoints.solvers
+    with open(s.get(path=wildcards.path,
+                    solversuite=wildcards.solversuite).output[0], 'r') as f:
+        solvers = f.read().split()
+    return expand(f"results/{wildcards.path}/{wildcards.solversuite}/solver~{{solvers}}/all_preconditioners.csv",
+                  solvers=solvers)
 
-        df = pd.DataFrame(data=list(product(solvers, preconditioners, SIZES)),
-                          columns=["solver", "preconditioner", "size"])
+def get_preconditioners(wildcards):
+    p = checkpoints.preconditioners
+    with open(p.get(path=wildcards.path,
+                    solversuite=wildcards.solversuite).output[0], 'r') as f:
+        preconditioners = f.read().split()
+    return expand(f"results/{wildcards.path}/{wildcards.solversuite}/solver~{wildcards.solver}/preconditioner~{{preconditioners}}/all_sizes.csv",
+                  preconditioners=preconditioners)
 
-        df.to_csv(output[0], index=False)
+def get_sizes(wildcards):
+    return expand(f"results/{wildcards.path}/size~{{sizes}}/solver.csv",
+                  sizes=SIZES)
 
 def get_params(wildcards):
     p = checkpoints.params
@@ -123,6 +143,49 @@ def get_params(wildcards):
 #     run:
 #         df = pd.concat((pd.read_csv(f) for f in input), ignore_index=True)
 #         df.to_csv(output[0])
+
+rule all_solvers:
+    output:
+        "results/{path}/{solversuite}/all_solvers.csv"
+    input:
+        "results/{path}/{solversuite}/solvers.txt",
+        "results/{path}/{solversuite}/preconditioners.txt",
+        get_solvers
+    run:
+        li = [pd.read_csv(fname, index=False) for fname in input]
+        df = pd.concat(li, ignore_index=True)
+        df.to_csv(output[0], index=False)
+
+rule all_preconditioners:
+    output:
+        "results/{path}/{solversuite}/solver~{solver}/all_preconditioners.csv"
+    input:
+        "results/{path}/{solversuite}/preconditioners.txt",
+        get_preconditioners
+    run:
+        li = [pd.read_csv(fname, index=False) for fname in input]
+        df = pd.concat(li, ignore_index=True)
+        df.to_csv(output[0], index=False)
+
+rule all_sizes:
+    output:
+        "results/{path}/all_sizes.csv"
+    input:
+        get_sizes
+    run:
+        li = [pd.read_csv(fname, index=False) for fname in input]
+        df = pd.concat(li, ignore_index=True)
+        df.to_csv(output[0], index=False)
+
+rule extract_times:
+    output:
+        "results/{path}/{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.csv"
+    input:
+        "results/{path}/{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.log"
+    shell:
+        "touch {output[0]}"
+#     notebook:
+#         "codes/notebooks/extract.py.ipynb"
 
 rule solve:
     output:
