@@ -3,12 +3,12 @@ import numpy as np
 import pandas as pd
 from itertools import product
 
+include: "rules/common.smk"
+
 VERSIONS, FIPYVERSIONS = glob_wildcards("results/{version,[A-Za-z0-9]+}/{fipyversion,[^/]+}/")
 # calculate dimensions that produce six orders of magnitude in number of cells
-SIZES = (10**(np.arange(1, 6.5, 1.)/2)).round().astype(int)**2
-
-# def versions():
-#     return shell("git rev-parse --short HEAD")
+# SIZES = (10**(np.arange(1, 6.5, 1.)/2)).round().astype(int)**2
+SIZES = (10**(np.arange(1, 2.5, 1.)/2)).round().astype(int)**2
 
 # VERSIONS += [versions()]
 # FIPYVERSIONS += ["3.4.5+7.g3a4f82063"]
@@ -85,34 +85,6 @@ checkpoint list_preconditioners:
 #                           columns=["solver", "preconditioner", "size"])
 # 
 #         df.to_csv(output[0], index=False)
-
-def get_solvers(wildcards):
-    s = checkpoints.list_solvers
-    with open(s.get(path=wildcards.path,
-                    solversuite=wildcards.solversuite).output[0], 'r') as f:
-        solvers = f.read().split()
-    return expand(f"results/{wildcards.path}/{wildcards.solversuite}/solver~{{solvers}}/all_preconditioners.csv",
-                  solvers=solvers)
-
-def get_preconditioners(wildcards):
-    p = checkpoints.list_preconditioners
-    with open(p.get(path=wildcards.path,
-                    solversuite=wildcards.solversuite).output[0], 'r') as f:
-        preconditioners = f.read().split()
-    return expand(f"results/{wildcards.path}/{wildcards.solversuite}/solver~{wildcards.solver}/preconditioner~{{preconditioners}}/all_sizes.csv",
-                  preconditioners=preconditioners)
-
-def get_sizes(wildcards):
-    return expand(f"results/{wildcards.path}/size~{{sizes}}/solver.csv",
-                  sizes=SIZES)
-
-def get_params(wildcards):
-    p = checkpoints.params
-    param_file = p.get(path=wildcards.path,
-                       solversuite=wildcards.solversuite).output[0]
-    paramspace = Paramspace(pd.read_csv(param_file))
-    return expand(f"results/{wildcards.path}/{wildcards.solversuite}/{{params}}/solver.log",
-                  params=paramspace.instance_patterns)
 
 rule all_solvers:
     output:
