@@ -114,36 +114,6 @@ def get_params(wildcards):
     return expand(f"results/{wildcards.path}/{wildcards.solversuite}/{{params}}/solver.log",
                   params=paramspace.instance_patterns)
 
-# rule all_solver:
-#     output:
-#         "results/{path}/{solversuite}/all_solver.csv"
-#     input:
-#         gather_solver_csv
-#     run:
-#         df = pd.concat((pd.read_csv(f) for f in input), ignore_index=True)
-#         df.to_csv(output[0])
-#         
-# rule all_preconditioner:
-#     output:
-#         "results/{path}/solver~{solver}/all_preconditioner.csv"
-#     input:
-#         gather_preconditioner_csv
-#     run:
-#         df = pd.concat((pd.read_csv(f) for f in input), ignore_index=True)
-#         df.to_csv(output[0])
-#         
-# def gather_size_csv(wildcards):
-#     pass
-#     
-# rule all_size:
-#     output:
-#         "results/{path}/preconditioner~{preconditioner}/all_size.csv"
-#     input:
-#         gather_size_csv
-#     run:
-#         df = pd.concat((pd.read_csv(f) for f in input), ignore_index=True)
-#         df.to_csv(output[0])
-
 rule all_solvers:
     output:
         "results/{path}/{solversuite}/all_solvers.csv"
