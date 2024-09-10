@@ -87,7 +87,7 @@ checkpoint list_preconditioners:
 #         df.to_csv(output[0], index=False)
 
 def get_solvers(wildcards):
-    s = checkpoints.solvers
+    s = checkpoints.list_solvers
     with open(s.get(path=wildcards.path,
                     solversuite=wildcards.solversuite).output[0], 'r') as f:
         solvers = f.read().split()
@@ -95,7 +95,7 @@ def get_solvers(wildcards):
                   solvers=solvers)
 
 def get_preconditioners(wildcards):
-    p = checkpoints.preconditioners
+    p = checkpoints.list_preconditioners
     with open(p.get(path=wildcards.path,
                     solversuite=wildcards.solversuite).output[0], 'r') as f:
         preconditioners = f.read().split()
