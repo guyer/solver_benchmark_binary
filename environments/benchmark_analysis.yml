@@ -1,7 +1,6 @@
-name: fipy_solver_benchmarking_310
+name: benchmark_analysis
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - python=3.11
   - future
