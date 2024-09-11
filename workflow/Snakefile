@@ -133,7 +133,7 @@ rule all_sizes:
 
 rule extract_times:
     output:
-        "results/{path}/{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.csv"
+        csv="results/{path}/{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.csv"
     input:
         "results/{path}/{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.log"
     conda:
@@ -141,7 +141,7 @@ rule extract_times:
     log:
         "results/{path}/{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.log"
     shell:
-        "touch {output[0]} 2> {log}"
+        "touch {output.csv} 2> {log}"
 #     notebook:
 #         "codes/notebooks/extract.py.ipynb"
 
@@ -150,14 +150,14 @@ rule solve:
         "results/{version}/{fipyversion}/{script}/{platform}/{solversuite}/"
         "solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.log"
     input:
-        "results/{version}/{fipyversion}/{script}.py"
+        benchmark="results/{version}/{fipyversion}/{script}.py"
     conda:
         "benchmark_{solversuite}"
     log:
         "results/{version}/{fipyversion}/{script}/{platform}/{solversuite}/"
         "solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.stderr"
     shell:
-        "FIPY_SOLVERS={wildcards.solversuite} python {input[0]}"
+        "FIPY_SOLVERS={wildcards.solversuite} python {input.benchmark}"
         " --solver={wildcards.solver}"
         " --preconditioner={wildcards.preconditioner}"
         " --numberOfElements={wildcards.size}"
