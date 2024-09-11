@@ -108,13 +108,7 @@ rule all_solvers:
     log:
         "results/{path}/{solversuite}/all_solvers.log"
     run:
-        try:
-            li = [pd.read_csv(fname, index=False) for fname in input]
-            df = pd.concat(li, ignore_index=True)
-            df.to_csv(output[0], index=False)
-        except Exception as e:
-            with open(log, 'w') as f:
-                f.write(e)
+        concat_csv(input, output[0], log)
 
 rule all_preconditioners:
     output:
@@ -125,13 +119,7 @@ rule all_preconditioners:
     log:
         "results/{path}/{solversuite}/solver~{solver}/all_preconditioners.log"
     run:
-        try:
-            li = [pd.read_csv(fname, index=False) for fname in input]
-            df = pd.concat(li, ignore_index=True)
-            df.to_csv(output[0], index=False)
-        except Exception as e:
-            with open(log, 'w') as f:
-                f.write(e)
+        concat_csv(input, output[0], log)
 
 rule all_sizes:
     output:
@@ -141,13 +129,7 @@ rule all_sizes:
     log:
         "results/{path}/all_sizes.log"
     run:
-        try:
-            li = [pd.read_csv(fname, index=False) for fname in input]
-            df = pd.concat(li, ignore_index=True)
-            df.to_csv(output[0], index=False)
-        except Exception as e:
-            with open(log, 'w') as f:
-                f.write(e)
+        concat_csv(input, output[0], log)
 
 rule extract_times:
     output:
