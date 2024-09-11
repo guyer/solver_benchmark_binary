@@ -16,9 +16,10 @@ SIZES = (10**(np.arange(1, 2.5, 1.)/2)).round().astype(int)**2
 rule versions:
     input:
     output:
+    log:
+        "versions.log"
     shell:
-        "git rev-parse --short HEAD"
-        #> {output}"
+        "git rev-parse --short HEAD > {output} 2> {log}"
 
 rule all:
     input:
@@ -31,9 +32,11 @@ rule current_version:
         "current_version.txt"
     conda:
         "fipy_solver_benchmarking_311"
+    log:
+        "current_version.log"
     shell:
         "echo (mkdir -p results/$(git rev-parse --short HEAD)/"
-        "$(python -c \"import fipy; print(fipy.__version__)\")) > {output}"
+        "$(python -c \"import fipy; print(fipy.__version__)\")) > {output} 2> {log}"
         
 rule ipynb2py:
     input:
@@ -42,24 +45,31 @@ rule ipynb2py:
         "{path}/{notebook}.py"
     conda:
         "fipy_solver_benchmarking_311"
+    log:
+        stdout="{path}/{notebook}.stdout",
+        stderr="{path}/{notebook}.stderr"
     shell:
-        "jupyter nbconvert {input} --to python --output-dir={wildcards.path}"
+        "jupyter nbconvert {input} --to python --output-dir={wildcards.path} > {log.stdout} 2> {log.stderr}"
 
 checkpoint list_solvers:
     output:
         "results/{path}/{solversuite}/solvers.txt"
     conda:
        "benchmark_{solversuite}"
+    log:
+        "results/{path}/{solversuite}/solvers.log"
     shell:
-        "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/solvers.py > {output}"
+        "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/solvers.py > {output} 2> {log}"
 
 checkpoint list_preconditioners:
     output:
         "results/{path}/{solversuite}/preconditioners.txt"
     conda:
        "benchmark_{solversuite}"
+    log:
+        "results/{path}/{solversuite}/preconditioners.log"
     shell:
-        "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/preconditioners.py > {output}"
+        "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/preconditioners.py > {output} 2> {log}"
 
 # checkpoint params:
 #     output:
@@ -93,10 +103,16 @@ rule all_solvers:
         "results/{path}/{solversuite}/solvers.txt",
         "results/{path}/{solversuite}/preconditioners.txt",
         get_solvers
+    log:
+        "results/{path}/{solversuite}/all_solvers.log"
     run:
-        li = [pd.read_csv(fname, index=False) for fname in input]
-        df = pd.concat(li, ignore_index=True)
-        df.to_csv(output[0], index=False)
+        try:
+            li = [pd.read_csv(fname, index=False) for fname in input]
+            df = pd.concat(li, ignore_index=True)
+            df.to_csv(output[0], index=False)
+        except Exception as e:
+            with open(log, 'w') as f:
+                f.write(e)
 
 rule all_preconditioners:
     output:
@@ -104,28 +120,42 @@ rule all_preconditioners:
     input:
         "results/{path}/{solversuite}/preconditioners.txt",
         get_preconditioners
+    log:
+        "results/{path}/{solversuite}/solver~{solver}/all_preconditioners.log"
     run:
-        li = [pd.read_csv(fname, index=False) for fname in input]
-        df = pd.concat(li, ignore_index=True)
-        df.to_csv(output[0], index=False)
+        try:
+            li = [pd.read_csv(fname, index=False) for fname in input]
+            df = pd.concat(li, ignore_index=True)
+            df.to_csv(output[0], index=False)
+        except Exception as e:
+            with open(log, 'w') as f:
+                f.write(e)
 
 rule all_sizes:
     output:
         "results/{path}/all_sizes.csv"
     input:
         get_sizes
+    log:
+        "results/{path}/all_sizes.log"
     run:
-        li = [pd.read_csv(fname, index=False) for fname in input]
-        df = pd.concat(li, ignore_index=True)
-        df.to_csv(output[0], index=False)
+        try:
+            li = [pd.read_csv(fname, index=False) for fname in input]
+            df = pd.concat(li, ignore_index=True)
+            df.to_csv(output[0], index=False)
+        except Exception as e:
+            with open(log, 'w') as f:
+                f.write(e)
 
 rule extract_times:
     output:
         "results/{path}/{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.csv"
     input:
         "results/{path}/{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.log"
+    log:
+        "results/{path}/{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.log"
     shell:
-        "touch {output[0]}"
+        "touch {output[0]} 2> {log}"
 #     notebook:
 #         "codes/notebooks/extract.py.ipynb"
 
@@ -137,6 +167,9 @@ rule solve:
         "results/{version}/{fipyversion}/{script}.py"
     conda:
         "benchmark_{solversuite}"
+    log:
+        "results/{version}/{fipyversion}/{script}/{platform}/{solversuite}/"
+        "solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.stderr"
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python {input[0]}"
         " --solver={wildcards.solver}"
@@ -146,6 +179,7 @@ rule solve:
         "{wildcards.script}/{wildcards.platform}/{wildcards.solversuite}/"
         "solver~{wildcards.solver}/preconditioner~{wildcards.preconditioner}/"
         "size~{wildcards.size}"
+        " 2> {log}"
 
 rule plot:
     output:
