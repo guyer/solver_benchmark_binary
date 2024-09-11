@@ -3,6 +3,10 @@ Timing and solver convergence info developed while working on
 
 ## INSTALLATION
 
+- Create conda environment for snakemake:
+
+    `mamba env create --file workflow/envs/snakemake.yml`
+
 - Create conda benchmarking environments:
 
     - For any given solver suite "`<SUITE>`":
@@ -25,7 +29,7 @@ Timing and solver convergence info developed while working on
 
     - Make the environment
     
-        `mamba env create --file environments/benchmark_analysis.yml`
+        `mamba env create --file workflow/envs/analysis.yml`
         
     - Activate the environment:
 

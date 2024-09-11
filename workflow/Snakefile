@@ -17,7 +17,7 @@ rule versions:
     input:
     output:
     conda:
-        "benchmark_analysis"
+        "snakemake"
     log:
         "versions.log"
     shell:
@@ -33,7 +33,7 @@ rule current_version:
     output:
         "current_version.txt"
     conda:
-        "fipy_solver_benchmarking_311"
+        "snakemake"
     log:
         "current_version.log"
     shell:
@@ -46,7 +46,7 @@ rule ipynb2py:
     output:
         "{path}/{notebook}.py"
     conda:
-        "fipy_solver_benchmarking_311"
+        "snakemake"
     log:
         stdout="{path}/{notebook}.stdout",
         stderr="{path}/{notebook}.stderr"
