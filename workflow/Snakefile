@@ -16,6 +16,8 @@ SIZES = (10**(np.arange(1, 2.5, 1.)/2)).round().astype(int)**2
 rule versions:
     input:
     output:
+    conda:
+        "benchmark_analysis"
     log:
         "versions.log"
     shell:
@@ -152,6 +154,8 @@ rule extract_times:
         "results/{path}/{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.csv"
     input:
         "results/{path}/{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.log"
+    conda:
+        "benchmark_analysis"
     log:
         "results/{path}/{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.log"
     shell:
