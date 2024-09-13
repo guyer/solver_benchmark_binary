@@ -49,21 +49,21 @@ rule ipynb2py:
 
 checkpoint list_solvers:
     output:
-        "results/{path}/{solversuite}/solvers.txt"
+        "results/{path}/suite~{solversuite}/solvers.txt"
     conda:
        "benchmark_{solversuite}"
     log:
-        "results/{path}/{solversuite}/solvers.log"
+        "results/{path}/suite~{solversuite}/solvers.log"
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/solvers.py > {output} 2> {log}"
 
 checkpoint list_preconditioners:
     output:
-        "results/{path}/{solversuite}/preconditioners.txt"
+        "results/{path}/suite~{solversuite}/preconditioners.txt"
     conda:
        "benchmark_{solversuite}"
     log:
-        "results/{path}/{solversuite}/preconditioners.log"
+        "results/{path}/suite~{solversuite}/preconditioners.log"
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/preconditioners.py > {output} 2> {log}"
 
@@ -100,24 +100,24 @@ rule all_suites:
 
 rule all_solvers:
     output:
-        "results/{path}/{solversuite}/all_solvers.csv"
+        "results/{path}/suite~{solversuite}/all_solvers.csv"
     input:
-        "results/{path}/{solversuite}/solvers.txt",
-        "results/{path}/{solversuite}/preconditioners.txt",
+        "results/{path}/suite~{solversuite}/solvers.txt",
+        "results/{path}/suite~{solversuite}/preconditioners.txt",
         get_solvers
     log:
-        "results/{path}/{solversuite}/all_solvers.log"
+        "results/{path}/suite~{solversuite}/all_solvers.log"
     run:
         concat_csv(input, output[0], log)
 
 rule all_preconditioners:
     output:
-        "results/{path}/{solversuite}/solver~{solver}/all_preconditioners.csv"
+        "results/{path}/suite~{solversuite}/solver~{solver}/all_preconditioners.csv"
     input:
-        "results/{path}/{solversuite}/preconditioners.txt",
+        "results/{path}/suite~{solversuite}/preconditioners.txt",
         get_preconditioners
     log:
-        "results/{path}/{solversuite}/solver~{solver}/all_preconditioners.log"
+        "results/{path}/suite~{solversuite}/solver~{solver}/all_preconditioners.log"
     run:
         concat_csv(input, output[0], log)
 
@@ -145,26 +145,31 @@ rule extract_times:
 #     notebook:
 #         "codes/notebooks/extract.py.ipynb"
 
+# results/{script}/{platform}_{fipyversion}/{suite}/{solver}/{preconditioner}/{size}
+
+# results/{script}/{suite}/{solver}/{preconditioner}/{size}/{platform}/{version}/{fipyversion}
+
 rule solve:
     output:
-        "results/{version}/{fipyversion}/{script}/{platform}/{solversuite}/"
-        "solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.log"
+        "results/benchmark~{benchmark}/suite~{solversuite}/solver~{solver}/"
+        "preconditioner~{preconditioner}/size~{size}/hostname~{hostname}/"
+        "self~{version}/fipy~{fipyversion}/solver.log"
     input:
-        benchmark="results/{version}/{fipyversion}/{script}.py"
+        benchmark="results/benchmark~{benchmark}/{version}-{fipyversion}.py"
     conda:
         "benchmark_{solversuite}"
     log:
-        "results/{version}/{fipyversion}/{script}/{platform}/{solversuite}/"
-        "solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.stderr"
+        "results/benchmark~{benchmark}/suite~{solversuite}/solver~{solver}/"
+        "preconditioner~{preconditioner}/size~{size}/hostname~{hostname}/"
+        "self~{version}/fipy~{fipyversion}/solver.stderr"
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python {input.benchmark}"
         " --solver={wildcards.solver}"
         " --preconditioner={wildcards.preconditioner}"
         " --numberOfElements={wildcards.size}"
-        " --output=results/{wildcards.version}/{wildcards.fipyversion}/"
-        "{wildcards.script}/{wildcards.platform}/{wildcards.solversuite}/"
-        "solver~{wildcards.solver}/preconditioner~{wildcards.preconditioner}/"
-        "size~{wildcards.size}"
+        " --output=results/benchmark~{benchmark}/suite~{solversuite}/"
+        "solver~{solver}/preconditioner~{preconditioner}/size~{size}/"
+        "hostname~{hostname}/self~{version}/fipy~{fipyversion}/"
         " 2> {log}"
 
 rule plot:

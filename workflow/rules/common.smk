@@ -3,7 +3,7 @@ def get_solvers(wildcards):
     with open(s.get(path=wildcards.path,
                     solversuite=wildcards.solversuite).output[0], 'r') as f:
         solvers = f.read().split()
-    return expand(f"results/{wildcards.path}/{wildcards.solversuite}/solver~{{solvers}}/all_preconditioners.csv",
+    return expand(f"results/{wildcards.path}/suite~{wildcards.solversuite}/solver~{{solvers}}/all_preconditioners.csv",
                   solvers=solvers)
 
 def get_preconditioners(wildcards):
@@ -11,7 +11,7 @@ def get_preconditioners(wildcards):
     with open(p.get(path=wildcards.path,
                     solversuite=wildcards.solversuite).output[0], 'r') as f:
         preconditioners = f.read().split()
-    return expand(f"results/{wildcards.path}/{wildcards.solversuite}/solver~{wildcards.solver}/preconditioner~{{preconditioners}}/all_sizes.csv",
+    return expand(f"results/{wildcards.path}/suite~{wildcards.solversuite}/solver~{wildcards.solver}/preconditioner~{{preconditioners}}/all_sizes.csv",
                   preconditioners=preconditioners)
 
 def get_sizes(wildcards):
@@ -23,7 +23,7 @@ def get_params(wildcards):
     param_file = p.get(path=wildcards.path,
                        solversuite=wildcards.solversuite).output[0]
     paramspace = Paramspace(pd.read_csv(param_file))
-    return expand(f"results/{wildcards.path}/{wildcards.solversuite}/{{params}}/solver.log",
+    return expand(f"results//{{params}}/solver.log",
                   params=paramspace.instance_patterns)
 
 def concat_csv(input, output, log):
@@ -45,5 +45,5 @@ def git_version(path):
 def tatanka(wildcards):
     self_version = git_version(path=".")
     fipy_version = git_version(path=FIPY_PATH)
-    return expand(f"results/benchmark~{{benchmark}}/self~{self_version}/fipy~{fipy_version}/all_suites.csv",
+    return expand(f"results/benchmark~{{benchmark}}/all_suites.csv",
                   benchmark=BENCHMARKS)
