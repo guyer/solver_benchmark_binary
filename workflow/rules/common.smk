@@ -1,6 +1,3 @@
-# def versions():
-#     return shell("git rev-parse --short HEAD")
-
 def get_solvers(wildcards):
     s = checkpoints.list_solvers
     with open(s.get(path=wildcards.path,
@@ -37,3 +34,16 @@ def concat_csv(input, output, log):
     except Exception as e:
         with open(log, 'w') as f:
             f.write(e)
+        raise
+
+def git_version(path):
+    import subprocess
+    result = subprocess.run(["git", "-C", path, "describe", "--always", "--dirty"],
+                            capture_output=True, text=True)
+    return result.stdout.strip()
+
+def tatanka(wildcards):
+    self_version = git_version(path=".")
+    fipy_version = git_version(path=FIPY_PATH)
+    return expand(f"results/benchmark~{{benchmark}}/self~{self_version}/fipy~{fipy_version}/all_suites.csv",
+                  benchmark=BENCHMARKS)
