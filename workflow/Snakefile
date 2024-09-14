@@ -92,11 +92,15 @@ checkpoint list_preconditioners:
 # 
 #         df.to_csv(output[0], index=False)
 
-rule all_suites:
-    output:
-        csv="results/{path}/all_suites.csv"
-    shell:
-        "touch {output.csv}"
+# rule all_suites:
+#     output:
+#         "results/benchmark~{benchmark}/all_suites.csv"
+#     input:
+#         get_suites
+#     log:
+#         "results/benchmark~{benchmark}/all_suites.log"
+#     shell:
+#         concat_csv(input, output[0], log)
 
 rule all_solvers:
     output:
@@ -131,19 +135,63 @@ rule all_sizes:
     run:
         concat_csv(input, output[0], log)
 
+rule all_hostnames:
+    output:
+        "results/{path}/all_hostnames.csv"
+    input:
+        get_hostnames
+    log:
+        "results/{path}/all_hostnames.log"
+    run:
+        concat_csv(input, output[0], log[0])
+
+rule all_selfversions:
+    output:
+        "results/{path}/all_selfversions.csv"
+    input:
+        get_selfversions
+    log:
+        "results/{path}/all_selfversions.log"
+    run:
+        concat_csv(input, output[0], log)
+
+rule all_fipyversions:
+    output:
+        "results/{path}/all_fipyversions.csv"
+    input:
+        get_fipyversions
+    log:
+        "results/{path}/all_fipyversions.log"
+    run:
+        concat_csv(input, output[0], log)
+
 rule extract_times:
     output:
-        csv="results/{path}/{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.csv"
+        csv="{path}/solver.csv"
     input:
-        "results/{path}/{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.log"
+        "{path}/solver.log"
     conda:
         "benchmark_analysis"
     log:
-        "results/{path}/{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.log"
+        "{path}/extract_times.log"
     shell:
         "touch {output.csv} 2> {log}"
 #     notebook:
 #         "codes/notebooks/extract.py.ipynb"
+
+# rule extract_times:
+#     output:
+#         csv="results/{path}/suite~{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.csv"
+#     input:
+#         "results/{path}/suite~{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.log"
+#     conda:
+#         "benchmark_analysis"
+#     log:
+#         "results/{path}/suite~{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.log"
+#     shell:
+#         "touch {output.csv} 2> {log}"
+# #     notebook:
+# #         "codes/notebooks/extract.py.ipynb"
 
 # results/{script}/{platform}_{fipyversion}/{suite}/{solver}/{preconditioner}/{size}
 
@@ -155,21 +203,23 @@ rule solve:
         "preconditioner~{preconditioner}/size~{size}/hostname~{hostname}/"
         "self~{version}/fipy~{fipyversion}/solver.log"
     input:
-        benchmark="results/benchmark~{benchmark}/{version}-{fipyversion}.py"
+        benchmark="results/benchmark~{benchmark}/suite~{solversuite}/"
+            "solver~{solver}/preconditioner~{preconditioner}/size~{size}/"
+            "hostname~{hostname}/self~{version}/fipy~{fipyversion}/{benchmark}.py"
+    params:
+        output=lambda w, input: os.path.splitext(input[0])[0]
     conda:
         "benchmark_{solversuite}"
     log:
-        "results/benchmark~{benchmark}/suite~{solversuite}/solver~{solver}/"
-        "preconditioner~{preconditioner}/size~{size}/hostname~{hostname}/"
-        "self~{version}/fipy~{fipyversion}/solver.stderr"
+        "results/benchmark~{benchmark}/suite~{solversuite}/"
+            "solver~{solver}/preconditioner~{preconditioner}/size~{size}/"
+            "hostname~{hostname}/self~{version}/fipy~{fipyversion}/solver.stderr"
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python {input.benchmark}"
         " --solver={wildcards.solver}"
         " --preconditioner={wildcards.preconditioner}"
         " --numberOfElements={wildcards.size}"
-        " --output=results/benchmark~{benchmark}/suite~{solversuite}/"
-        "solver~{solver}/preconditioner~{preconditioner}/size~{size}/"
-        "hostname~{hostname}/self~{version}/fipy~{fipyversion}/"
+        " --output={params.output}"
         " 2> {log}"
 
 rule plot:

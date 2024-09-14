@@ -1,3 +1,8 @@
+def get_suites(wildcards):
+    suites, = glob_wildcards("results/benchmark~{wildcards.benchmark}/suite~{solversuite,[A-Za-z0-9]+}/all_solvers.csv")
+    return expand(f"results/{wildcards.path}/suite~{{solversuite}}/all_solvers.csv",
+                  solversuite=suites)
+
 def get_solvers(wildcards):
     s = checkpoints.list_solvers
     with open(s.get(path=wildcards.path,
@@ -15,8 +20,23 @@ def get_preconditioners(wildcards):
                   preconditioners=preconditioners)
 
 def get_sizes(wildcards):
-    return expand(f"results/{wildcards.path}/size~{{sizes}}/solver.csv",
+    return expand(f"results/{wildcards.path}/size~{{sizes}}/all_hostnames.csv",
                   sizes=SIZES)
+
+def get_hostnames(wildcards):
+    hostnames, = glob_wildcards("results/{wildcards.path}/hostname~{hostname,[A-Za-z0-9]+}/all_selfversions.csv")
+    return expand(f"results/{wildcards.path}/hostname~{{hostname}}/all_selfversions.csv",
+                  hostname=hostnames)
+
+def get_selfversions(wildcards):
+    selfversions, = glob_wildcards("results/{wildcards.path}/self~{selfversion,[A-Za-z0-9]+}/all_fipyversions.csv")
+    return expand(f"results/{wildcards.path}/self~{{selfversion}}/all_fipyversions.csv",
+                  selfversion=selfversions)
+
+def get_fipyversions(wildcards):
+    fipyversions, = glob_wildcards("results/{wildcards.path}/fipy~{fipyversion,[A-Za-z0-9]+}/solver.csv")
+    return expand(f"results/{wildcards.path}/fipy~{{fipyversion}}/solver.csv",
+                  fipyversion=fipyversions)
 
 def get_params(wildcards):
     p = checkpoints.params
@@ -33,7 +53,7 @@ def concat_csv(input, output, log):
         df.to_csv(output, index=False)
     except Exception as e:
         with open(log, 'w') as f:
-            f.write(e)
+            f.write(repr(e))
         raise
 
 def git_version(path):
