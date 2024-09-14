@@ -49,7 +49,10 @@ def get_params(wildcards):
 def concat_csv(input, output, log):
     try:
         li = [pd.read_csv(fname, index=False) for fname in input]
-        df = pd.concat(li, ignore_index=True)
+        if li:
+            df = pd.concat(li, ignore_index=True)
+        else:
+            df = pd.DataFrame()
         df.to_csv(output, index=False)
     except Exception as e:
         with open(log, 'w') as f:
