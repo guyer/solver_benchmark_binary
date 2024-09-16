@@ -29,6 +29,7 @@ rule add_suite_benchmark:
     input:
         "solvers~{solversuite}.txt",
         "preconditioners~{solversuite}.txt",
+        "thumbprint~{solversuite}.txt",
         tatanka_suite
     conda:
         "snakemake"
@@ -81,6 +82,20 @@ checkpoint list_preconditioners:
         "preconditioners~{solversuite}.txt"
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/preconditioners.py > {output} 2> {log}"
+
+checkpoint thumbprint:
+    output:
+        thumb=temp("thumbprint-{solversuite}.txt")
+    log:
+        "thumbprint~{solversuite}.log"
+    run:
+        import platform
+        hostname = platform.node()
+        self_version = git_version(path=".")
+        fipy_version = git_version(path=FIPY_PATH)
+
+        with open(output.thumb, "w") as f:
+            f.write(" ".join([hostname, self_version, fipy_version]))
 
 # checkpoint params:
 #     output:

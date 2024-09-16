@@ -67,11 +67,10 @@ def git_version(path):
     return result.stdout.strip()
 
 def tatanka_suite(wildcards):
-    import platform
-    hostname = platform.node()
-    self_version = git_version(path=".")
-    fipy_version = git_version(path=FIPY_PATH)
-
+    (hostname,
+     self_version,
+     fipy_version) = get_checkpoint_list(check=checkpoints.thumbprint,
+                                         solversuite=wildcards.solversuite)
     solvers = get_checkpoint_list(check=checkpoints.list_solvers,
                                   solversuite=wildcards.solversuite)
     preconditioners = get_checkpoint_list(check=checkpoints.list_preconditioners,
