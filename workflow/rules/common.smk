@@ -66,6 +66,14 @@ def git_version(path):
                             capture_output=True, text=True)
     return result.stdout.strip()
 
+def get_thumbprint():
+    import platform
+    hostname = platform.node()
+    self_version = git_version(path=".")
+    fipy_version = git_version(path=FIPY_PATH)
+
+    return " ".join([hostname, self_version, fipy_version])
+
 def tatanka_suite(wildcards):
     (hostname,
      self_version,
