@@ -3,19 +3,20 @@ def get_suites(wildcards):
     return expand(f"results/{wildcards.path}/suite~{{solversuite}}/all_solvers.csv",
                   solversuite=suites)
 
+def get_checkpoint_list(check, solversuite):
+    with open(check.get(solversuite=solversuite).output[0], 'r') as f:
+        items = f.read().split()
+    return items
+
 def get_solvers(wildcards):
-    s = checkpoints.list_solvers
-    with open(s.get(path=wildcards.path,
-                    solversuite=wildcards.solversuite).output[0], 'r') as f:
-        solvers = f.read().split()
+    solvers = get_checkpoint_list(check=checkpoints.list_solvers,
+                                  solversuite=wildcards.solversuite)
     return expand(f"results/{wildcards.path}/suite~{wildcards.solversuite}/solver~{{solvers}}/all_preconditioners.csv",
                   solvers=solvers)
 
 def get_preconditioners(wildcards):
-    p = checkpoints.list_preconditioners
-    with open(p.get(path=wildcards.path,
-                    solversuite=wildcards.solversuite).output[0], 'r') as f:
-        preconditioners = f.read().split()
+    preconditioners = get_checkpoint_list(check=checkpoints.list_preconditioners,
+                                          solversuite=wildcards.solversuite)
     return expand(f"results/{wildcards.path}/suite~{wildcards.solversuite}/solver~{wildcards.solver}/preconditioner~{{preconditioners}}/all_sizes.csv",
                   preconditioners=preconditioners)
 
