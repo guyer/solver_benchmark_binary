@@ -66,8 +66,26 @@ def git_version(path):
                             capture_output=True, text=True)
     return result.stdout.strip()
 
-def tatanka(wildcards):
+def tatanka_suite(wildcards):
+    import platform
+    hostname = platform.node()
     self_version = git_version(path=".")
     fipy_version = git_version(path=FIPY_PATH)
-    return expand(f"results/benchmark~{{benchmark}}/all_suites.csv",
-                  benchmark=BENCHMARKS)
+
+    solvers = get_checkpoint_list(check=checkpoints.list_solvers,
+                                  solversuite=wildcards.solversuite)
+    preconditioners = get_checkpoint_list(check=checkpoints.list_preconditioners,
+                                          solversuite=wildcards.solversuite)
+    return expand(f"results/benchmark~{{benchmark}}/"
+                  f"suite~{wildcards.solversuite}/"
+                  f"solver~{{solver}}/"
+                  f"preconditioner~{{preconditioner}}/"
+                  f"size~{{size}}/"
+                  f"hostname~{hostname}/"
+                  f"self~{self_version}/"
+                  f"fipy~{fipy_version}/"
+                  f"solver.log",
+                  benchmark=BENCHMARKS,
+                  solver=solvers,
+                  preconditioner=preconditioners,
+                  size=SIZES)

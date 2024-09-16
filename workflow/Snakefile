@@ -7,20 +7,32 @@ FIPY_PATH = "/Users/guyer/Documents/research/FiPy/fipy"
 
 include: "rules/common.smk"
 
+SUITES = ["petsc"]
 VERSIONS, FIPYVERSIONS = glob_wildcards("results/{version,[A-Za-z0-9]+}/{fipyversion,[^/]+}/")
 # calculate dimensions that produce six orders of magnitude in number of cells
 # SIZES = (10**(np.arange(1, 6.5, 1.)/2)).round().astype(int)**2
 SIZES = (10**(np.arange(1, 2.5, 1.)/2)).round().astype(int)**2
-BENCHMARKS = ["binary_phase_field", "diffusion", "nucleation"]
+# BENCHMARKS = ["binary_phase_field", "diffusion", "nucleation"]
+BENCHMARKS = ["binary_phase_field"]
 
 rule all:
     input:
         expand("results/{version}/{fipyversion}/nucleation.py",
                zip, version=VERSIONS, fipyversion=FIPYVERSIONS)
 
-rule benchmark:
+rule add_benchmark:
     input:
-        tatanka
+        expand(f"benchmark~{{solversuite}}.txt", solversuite=SUITES)
+
+rule add_suite_benchmark:
+    output:
+        "benchmark~{solversuite}.txt"
+    input:
+        "solvers~{solversuite}.txt",
+        "preconditioners~{solversuite}.txt",
+        tatanka_suite
+    shell:
+        "touch output[0]"
 
 rule current_version:
     input:
@@ -49,21 +61,21 @@ rule ipynb2py:
 
 checkpoint list_solvers:
     output:
-        "results/{path}/suite~{solversuite}/solvers.txt"
+        "solvers~{solversuite}.txt"
     conda:
        "benchmark_{solversuite}"
     log:
-        "results/{path}/suite~{solversuite}/solvers.log"
+        "solvers~{solversuite}.log"
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/solvers.py > {output} 2> {log}"
 
 checkpoint list_preconditioners:
     output:
-        "results/{path}/suite~{solversuite}/preconditioners.txt"
+        "preconditioners~{solversuite}.txt"
     conda:
        "benchmark_{solversuite}"
     log:
-        "results/{path}/suite~{solversuite}/preconditioners.log"
+        "preconditioners~{solversuite}.txt"
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/preconditioners.py > {output} 2> {log}"
 
@@ -106,8 +118,8 @@ rule all_solvers:
     output:
         "results/{path}/suite~{solversuite}/all_solvers.csv"
     input:
-        "results/{path}/suite~{solversuite}/solvers.txt",
-        "results/{path}/suite~{solversuite}/preconditioners.txt",
+        "solvers~{solversuite}.txt",
+        "preconditioners~{solversuite}.txt",
         get_solvers
     log:
         "results/{path}/suite~{solversuite}/all_solvers.log"
@@ -118,7 +130,7 @@ rule all_preconditioners:
     output:
         "results/{path}/suite~{solversuite}/solver~{solver}/all_preconditioners.csv"
     input:
-        "results/{path}/suite~{solversuite}/preconditioners.txt",
+        "preconditioners~{groupid}~{solversuite}.txt",
         get_preconditioners
     log:
         "results/{path}/suite~{solversuite}/solver~{solver}/all_preconditioners.log"
@@ -207,7 +219,7 @@ rule solve:
             "solver~{solver}/preconditioner~{preconditioner}/size~{size}/"
             "hostname~{hostname}/self~{version}/fipy~{fipyversion}/{benchmark}.py"
     params:
-        output=lambda w, input: os.path.splitext(input[0])[0]
+        output=lambda w, input: os.path.dirname(input[0])
     conda:
         "benchmark_{solversuite}"
     log:
