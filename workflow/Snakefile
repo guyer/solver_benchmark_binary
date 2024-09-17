@@ -245,6 +245,28 @@ rule solve:
         " --output={params.output}"
         " 2> {log}"
 
+rule solve_config:
+    output:
+        "results/{solversuite}/{benchmark}/{id}/solver.log"
+    input:
+        config="results/{solversuite}/{benchmark}/{id}/config.json",
+        benchmark="codes/scripts/{benchmark}.py"
+    params:
+        config=lambda w, input: read_config(input.config),
+        output=lambda w, output: os.path.dirname(output[0])
+    conda:
+        "benchmark_{solversuite}"
+    log:
+        "results/{solversuite}/{benchmark}/{id}/solver.stderr"
+    shell:
+        "FIPY_SOLVERS={wildcards.solversuite}"
+        " python {input.benchmark}"
+        " --solver={params.config[solver]}"
+        " --preconditioner={params.config[preconditioner]}"
+        " --numberOfElements={params.config[size]}"
+        " --output={params.output}"
+        " 2> {log}"
+
 rule plot:
     output:
         "results/{path}/{solversuite}/all.png"

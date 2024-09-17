@@ -96,3 +96,9 @@ def tatanka_suite(wildcards):
                   solver=solvers,
                   preconditioner=preconditioners,
                   size=SIZES)
+
+def read_config(path):
+    import json
+
+    with open(path, 'r') as f:
+        return json.load(f)
