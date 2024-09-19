@@ -16,12 +16,12 @@ SIZES = (10**(np.arange(1, 2.5, 1.)/2)).round().astype(int)**2
 # BENCHMARKS = ["binary_phase_field", "diffusion", "nucleation"]
 BENCHMARKS = ["binary_phase_field"]
 
-PERMUTATIONS = pd.read_json("results/permutations.json")
+# PERMUTATIONS = pd.read_json("results/permutations.json")
 
-# rule all:
-#     input:
-#         expand("results/{version}/{fipyversion}/nucleation.py",
-#                zip, version=VERSIONS, fipyversion=FIPYVERSIONS)
+rule all:
+    input:
+        permutations="results/permutations.json",
+        logs=get_all_logs
 
 rule add_benchmark:
     input:
@@ -271,8 +271,8 @@ checkpoint add_param_sweep:
         preconditioners = get_checkpoint_list(check=checkpoints.list_preconditioners,
                                               solversuite=wildcards.solversuite)
 
-        df = pd.DataFrame(data=list(product(solvers, preconditioners, SIZES)),
-                          columns=["solver", "preconditioner", "size"])
+        df = pd.DataFrame(data=list(product(BENCHMARKS, solvers, preconditioners, SIZES)),
+                          columns=["benchmark", "solver", "preconditioner", "size"])
 
         df["uuid"] = [str(uuid.uuid4()) for item in df.iterrows()]
         df = df.set_index("uuid")
@@ -284,29 +284,27 @@ checkpoint add_param_sweep:
 
         df.to_json(output[0])
 
-rule all_config:
-    output:
-    input:
-        expand("results/{solversuite}/{benchmark}/{id}/solver.log",
-               solversuite=PERMUTATIONS["suite"],
-               benchmark=["binary_phase_field"],
-               id=PERMUTATIONS.index)
+# rule all_config:
+#     output:
+#     input:
+#         expand("results/{id}/solver.log",
+#                id=PERMUTATIONS.index)
 
 rule solve_config:
     output:
-        "results/{solversuite}/{benchmark}/{id}/solver.log"
+        "results/{id}/solver.log"
     input:
-        config="results/{solversuite}/{benchmark}/{id}/config.json",
-        benchmark="codes/scripts/{benchmark}.py"
+        config="results/{id}/config.json",
+        benchmark=get_benchmark
     params:
         config=lambda w, input: read_config(input.config),
         output=lambda w, output: os.path.dirname(output[0])
     conda:
-        "benchmark_{solversuite}"
+        get_conda_environment
     log:
-        "results/{solversuite}/{benchmark}/{id}/solver.stderr"
+        "results/{id}/solver.stderr"
     shell:
-        "FIPY_SOLVERS={wildcards.solversuite}"
+        "FIPY_SOLVERS={params.config[suite]}"
         " python {input.benchmark}"
         " --solver={params.config[solver]}"
         " --preconditioner={params.config[preconditioner]}"
@@ -316,7 +314,7 @@ rule solve_config:
 
 rule make_config:
     output:
-        "results/{solversuite}/{benchmark}/{id}/config.json"
+        "results/{id}/config.json"
     input:
         "results/permutations.json"
     run:

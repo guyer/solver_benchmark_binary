@@ -87,6 +87,27 @@ def get_thumbprint():
 
     return " ".join([hostname, self_version, fipy_version])
 
+def get_conda_environment(wildcards):
+    df = pd.read_json("results/permutations.json")
+
+    return f"benchmark_{df.loc[wildcards.id, 'suite']}"
+
+def get_benchmark(wildcards):
+    df = pd.read_json("results/permutations.json")
+
+    return f"codes/scripts/{df.loc[wildcards.id, 'benchmark']}.py"
+
+def get_all_logs(wildcards):
+    if exists("results/permutations.json"):
+        df = pd.read_json("results/permutations.json")
+
+        logs = expand("results/{id}/solver.log",
+                      id=df.index)
+    else:
+        logs = []
+
+    return logs
+
 def tatanka_suite(wildcards):
     (hostname,
      self_version,
