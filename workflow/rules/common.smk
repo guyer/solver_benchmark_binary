@@ -60,6 +60,19 @@ def concat_csv(input, output, log):
             f.write(repr(e))
         raise
 
+def concat_json(input, output, log):
+    try:
+        li = [pd.read_json(fname) for fname in input]
+        if li:
+            df = pd.concat(li)
+        else:
+            df = pd.DataFrame()
+        df.to_json(output)
+    except Exception as e:
+        with open(log, 'w') as f:
+            f.write(repr(e))
+        raise
+
 def git_version(path):
     import subprocess
     result = subprocess.run(["git", "-C", path, "describe", "--always", "--dirty"],

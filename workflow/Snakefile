@@ -1,7 +1,9 @@
 from snakemake.utils import Paramspace
 import numpy as np
 import pandas as pd
-# from itertools import product
+from itertools import product
+import uuid
+import platform
 
 FIPY_PATH = "/Users/guyer/Documents/research/FiPy/fipy"
 
@@ -13,6 +15,8 @@ SUITES = ["petsc"]
 SIZES = (10**(np.arange(1, 2.5, 1.)/2)).round().astype(int)**2
 # BENCHMARKS = ["binary_phase_field", "diffusion", "nucleation"]
 BENCHMARKS = ["binary_phase_field"]
+
+PERMUTATIONS = pd.read_json("results/permutations.json")
 
 # rule all:
 #     input:
@@ -65,21 +69,21 @@ rule ipynb2py:
 
 checkpoint list_solvers:
     output:
-        "solvers~{solversuite}.txt"
+        "results/{solversuite}/solvers.txt"
     conda:
        "benchmark_{solversuite}"
     log:
-        "solvers~{solversuite}.log"
+        "results/{solversuite}/solvers.log"
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/solvers.py > {output} 2> {log}"
 
 checkpoint list_preconditioners:
     output:
-        "preconditioners~{solversuite}.txt"
+        "results/{solversuite}/preconditioners.txt"
     conda:
        "benchmark_{solversuite}"
     log:
-        "preconditioners~{solversuite}.txt"
+        "results/{solversuite}/preconditioners.log"
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/preconditioners.py > {output} 2> {log}"
 
@@ -245,6 +249,49 @@ rule solve:
         " --output={params.output}"
         " 2> {log}"
 
+rule aggregate_param_sweeps:
+    output:
+        "results/permutations.json"
+    input:
+        expand("results/{solversuite}/permutations.json", solversuite=SUITES)
+    log:
+        "results/permutations.log"
+    run:
+        concat_json(input, output[0], log[0])
+
+checkpoint add_param_sweep:
+    output:
+        "results/{solversuite}/permutations.json"
+    input:
+        "results/{solversuite}/preconditioners.txt",
+        "results/{solversuite}/solvers.txt",
+    run:
+        solvers = get_checkpoint_list(check=checkpoints.list_solvers,
+                                      solversuite=wildcards.solversuite)
+        preconditioners = get_checkpoint_list(check=checkpoints.list_preconditioners,
+                                              solversuite=wildcards.solversuite)
+
+        df = pd.DataFrame(data=list(product(solvers, preconditioners, SIZES)),
+                          columns=["solver", "preconditioner", "size"])
+
+        df["uuid"] = [str(uuid.uuid4()) for item in df.iterrows()]
+        df = df.set_index("uuid")
+
+        df["suite"] = wildcards.solversuite
+        df["hostname"] = platform.node()
+        df["version"] = git_version(path=".")
+        df["fipy_version"] = git_version(path=FIPY_PATH)
+
+        df.to_json(output[0])
+
+rule all_config:
+    output:
+    input:
+        expand("results/{solversuite}/{benchmark}/{id}/solver.log",
+               solversuite=PERMUTATIONS["suite"],
+               benchmark=["binary_phase_field"],
+               id=PERMUTATIONS.index)
+
 rule solve_config:
     output:
         "results/{solversuite}/{benchmark}/{id}/solver.log"
@@ -266,6 +313,15 @@ rule solve_config:
         " --numberOfElements={params.config[size]}"
         " --output={params.output}"
         " 2> {log}"
+
+rule make_config:
+    output:
+        "results/{solversuite}/{benchmark}/{id}/config.json"
+    input:
+        "results/permutations.json"
+    run:
+        df = pd.read_json(input[0])
+        df.loc[wildcards.id].to_json(output[0])
 
 rule plot:
     output:
