@@ -23,37 +23,6 @@ rule all:
         permutations="results/permutations.json",
         logs=get_all_logs
 
-rule add_benchmark:
-    input:
-        expand(f"benchmark~{{solversuite}}.txt", solversuite=SUITES)
-
-rule add_suite_benchmark:
-    output:
-        "benchmark~{solversuite}.txt"
-    input:
-        "solvers~{solversuite}.txt",
-        "preconditioners~{solversuite}.txt",
-        "thumbprint~{solversuite}.txt",
-        tatanka_suite
-    conda:
-        "snakemake"
-    log:
-        "benchmark~{solversuite}.log"
-    shell:
-        "touch {output}"
-
-rule current_version:
-    input:
-    output:
-        "current_version.txt"
-    conda:
-        "snakemake"
-    log:
-        "current_version.log"
-    shell:
-        "echo (mkdir -p results/$(git rev-parse --short HEAD)/"
-        "$(python -c \"import fipy; print(fipy.__version__)\")) > {output} 2> {log}"
-        
 rule ipynb2py:
     input:
         "codes/notebooks/{notebook}.ipynb"
@@ -87,113 +56,6 @@ checkpoint list_preconditioners:
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/preconditioners.py > {output} 2> {log}"
 
-checkpoint thumbprint:
-    output:
-        thumb=temp("thumbprint-{solversuite}.txt")
-    log:
-        "thumbprint~{solversuite}.log"
-    run:
-        with open(output[0], "w") as f:
-            f.write(get_thumbprint())
-
-# checkpoint params:
-#     output:
-#         "results/{path}/{solversuite}/params.csv"
-#     input:
-#         "results/{path}/{solversuite}/preconditioners.txt",
-#         "results/{path}/{solversuite}/solvers.txt",
-#     run:
-#         s = checkpoints.solvers
-#         solve_file = s.get(path=wildcards.path,
-#                            solversuite=wildcards.solversuite).output[0]
-#         with open(solve_file, 'r') as f:
-#             solvers = f.read().split()
-# 
-#         p = checkpoints.preconditioners
-#         precon_file = p.get(path=wildcards.path,
-#                             solversuite=wildcards.solversuite).output[0]
-#         with open(p.get(path=wildcards.path,
-#                         solversuite=wildcards.solversuite).output[0], 'r') as f:
-#             preconditioners = f.read().split()
-# 
-#         df = pd.DataFrame(data=list(product(solvers, preconditioners, SIZES)),
-#                           columns=["solver", "preconditioner", "size"])
-# 
-#         df.to_csv(output[0], index=False)
-
-# rule all_suites:
-#     output:
-#         "results/benchmark~{benchmark}/all_suites.csv"
-#     input:
-#         get_suites
-#     log:
-#         "results/benchmark~{benchmark}/all_suites.log"
-#     shell:
-#         concat_csv(input, output[0], log)
-
-rule all_solvers:
-    output:
-        "results/{path}/suite~{solversuite}/all_solvers.csv"
-    input:
-        "solvers~{solversuite}.txt",
-        "preconditioners~{solversuite}.txt",
-        get_solvers
-    log:
-        "results/{path}/suite~{solversuite}/all_solvers.log"
-    run:
-        concat_csv(input, output[0], log)
-
-rule all_preconditioners:
-    output:
-        "results/{path}/suite~{solversuite}/solver~{solver}/all_preconditioners.csv"
-    input:
-        "preconditioners~{groupid}~{solversuite}.txt",
-        get_preconditioners
-    log:
-        "results/{path}/suite~{solversuite}/solver~{solver}/all_preconditioners.log"
-    run:
-        concat_csv(input, output[0], log)
-
-rule all_sizes:
-    output:
-        "results/{path}/all_sizes.csv"
-    input:
-        get_sizes
-    log:
-        "results/{path}/all_sizes.log"
-    run:
-        concat_csv(input, output[0], log)
-
-rule all_hostnames:
-    output:
-        "results/{path}/all_hostnames.csv"
-    input:
-        get_hostnames
-    log:
-        "results/{path}/all_hostnames.log"
-    run:
-        concat_csv(input, output[0], log[0])
-
-rule all_selfversions:
-    output:
-        "results/{path}/all_selfversions.csv"
-    input:
-        get_selfversions
-    log:
-        "results/{path}/all_selfversions.log"
-    run:
-        concat_csv(input, output[0], log)
-
-rule all_fipyversions:
-    output:
-        "results/{path}/all_fipyversions.csv"
-    input:
-        get_fipyversions
-    log:
-        "results/{path}/all_fipyversions.log"
-    run:
-        concat_csv(input, output[0], log)
-
 rule extract_times:
     output:
         csv="{path}/solver.csv"
@@ -207,47 +69,6 @@ rule extract_times:
         "touch {output.csv} 2> {log}"
 #     notebook:
 #         "codes/notebooks/extract.py.ipynb"
-
-# rule extract_times:
-#     output:
-#         csv="results/{path}/suite~{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.csv"
-#     input:
-#         "results/{path}/suite~{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.log"
-#     conda:
-#         "benchmark_analysis"
-#     log:
-#         "results/{path}/suite~{solversuite}/solver~{solver}/preconditioner~{preconditioner}/size~{size}/solver.log"
-#     shell:
-#         "touch {output.csv} 2> {log}"
-# #     notebook:
-# #         "codes/notebooks/extract.py.ipynb"
-
-# results/{script}/{platform}_{fipyversion}/{suite}/{solver}/{preconditioner}/{size}
-
-# results/{script}/{suite}/{solver}/{preconditioner}/{size}/{platform}/{version}/{fipyversion}
-
-rule solve:
-    output:
-        "results/benchmark~{benchmark}/suite~{solversuite}/solver~{solver}/"
-        "preconditioner~{preconditioner}/size~{size}/hostname~{hostname}/"
-        "self~{version}/fipy~{fipyversion}/solver.log"
-    input:
-        benchmark="codes/scripts/{benchmark}.py"
-    params:
-        output=lambda w, output: os.path.dirname(output[0])
-    conda:
-        "benchmark_{solversuite}"
-    log:
-        "results/benchmark~{benchmark}/suite~{solversuite}/"
-            "solver~{solver}/preconditioner~{preconditioner}/size~{size}/"
-            "hostname~{hostname}/self~{version}/fipy~{fipyversion}/solver.stderr"
-    shell:
-        "FIPY_SOLVERS={wildcards.solversuite} python {input.benchmark}"
-        " --solver={wildcards.solver}"
-        " --preconditioner={wildcards.preconditioner}"
-        " --numberOfElements={wildcards.size}"
-        " --output={params.output}"
-        " 2> {log}"
 
 rule aggregate_param_sweeps:
     output:
@@ -284,13 +105,7 @@ checkpoint add_param_sweep:
 
         df.to_json(output[0])
 
-# rule all_config:
-#     output:
-#     input:
-#         expand("results/{id}/solver.log",
-#                id=PERMUTATIONS.index)
-
-rule solve_config:
+rule solve:
     output:
         "results/{id}/solver.log"
     input:
