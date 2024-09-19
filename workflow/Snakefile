@@ -38,21 +38,21 @@ rule ipynb2py:
 
 checkpoint list_solvers:
     output:
-        "results/{solversuite}/solvers.txt"
+        temp("results/{solversuite}-solvers.txt")
     conda:
        "benchmark_{solversuite}"
     log:
-        "results/{solversuite}/solvers.log"
+        "results/{solversuite}-solvers.log"
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/solvers.py > {output} 2> {log}"
 
 checkpoint list_preconditioners:
     output:
-        "results/{solversuite}/preconditioners.txt"
+        temp("results/{solversuite}-preconditioners.txt")
     conda:
        "benchmark_{solversuite}"
     log:
-        "results/{solversuite}/preconditioners.log"
+        "results/{solversuite}-preconditioners.log"
     shell:
         "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/preconditioners.py > {output} 2> {log}"
 
@@ -74,7 +74,7 @@ rule aggregate_param_sweeps:
     output:
         "results/permutations.json"
     input:
-        expand("results/{solversuite}/permutations.json", solversuite=SUITES)
+        expand("results/{solversuite}-permutations.json", solversuite=SUITES)
     log:
         "results/permutations.log"
     run:
@@ -82,10 +82,10 @@ rule aggregate_param_sweeps:
 
 checkpoint add_param_sweep:
     output:
-        "results/{solversuite}/permutations.json"
+        "results/{solversuite}-permutations.json"
     input:
-        "results/{solversuite}/preconditioners.txt",
-        "results/{solversuite}/solvers.txt",
+        "results/{solversuite}-preconditioners.txt",
+        "results/{solversuite}-solvers.txt",
     run:
         solvers = get_checkpoint_list(check=checkpoints.list_solvers,
                                       solversuite=wildcards.solversuite)
