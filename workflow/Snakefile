@@ -110,7 +110,7 @@ rule solve:
         "results/{id}/solver.log"
     input:
         config="results/{id}/config.json",
-        benchmark=get_benchmark
+        benchmark="results/{id}/benchmark.py"
     params:
         config=lambda w, input: read_config(input.config),
         output=lambda w, output: os.path.dirname(output[0])
@@ -126,6 +126,14 @@ rule solve:
         " --numberOfElements={params.config[size]}"
         " --output={params.output}"
         " 2> {log}"
+
+rule copy_script:
+    output:
+        benchmark="results/{id}/benchmark.py"
+    input:
+        benchmark=get_benchmark
+    shell:
+        "cp {input.benchmark} {output.benchmark}"
 
 rule make_config:
     output:
