@@ -64,6 +64,17 @@ def get_all_logs(wildcards):
 
     return logs
 
+def get_all_json(wildcards):
+    if exists("results/permutations.json"):
+        df = pd.read_json("results/permutations.json")
+
+        logs = expand("results/{id}/solver.json",
+                      id=df.index)
+    else:
+        logs = []
+
+    return logs
+
 def read_config(path):
     import json
 
