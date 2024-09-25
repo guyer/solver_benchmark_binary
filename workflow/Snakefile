@@ -1,4 +1,3 @@
-from snakemake.utils import Paramspace
 import numpy as np
 import pandas as pd
 from itertools import product
@@ -8,6 +7,7 @@ import platform
 FIPY_PATH = "/Users/guyer/Documents/research/FiPy/fipy"
 
 include: "rules/common.smk"
+include: "rules/logs.smk"
 
 SUITES = ["petsc"]
 # calculate dimensions that produce six orders of magnitude in number of cells
@@ -58,17 +58,15 @@ checkpoint list_preconditioners:
 
 rule extract_times:
     output:
-        csv="{path}/solver.csv"
+        "results/{id}/solver.json"
     input:
-        "{path}/solver.log"
-    conda:
-        "benchmark_analysis"
+        "results/{id}/solver.log"
+#     conda:
+#         "benchmark_analysis"
     log:
-        "{path}/extract_times.log"
-    shell:
-        "touch {output.csv} 2> {log}"
-#     notebook:
-#         "codes/notebooks/extract.py.ipynb"
+        "results/{id}/extract_times.log"
+    run:
+        events2json(input[0], output[0])
 
 rule aggregate_param_sweeps:
     output:
