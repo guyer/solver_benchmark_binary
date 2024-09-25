@@ -115,4 +115,4 @@ def events2json(input, output):
     df.loc[df["preconditioner"].isna()
            | (df["preconditioner"] == "NoneType"), "preconditioner"] = "unpreconditioned"
 
-    df.to_json(output)
+    df.to_json(output, date_format="iso")
