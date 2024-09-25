@@ -3,8 +3,6 @@ import numpy as np
 import pandas as pd
 import uuid
 
-_TIME_FORMAT = "%Y-%m-%d %H:%M:%S,%f"
-
 def read_events(fname):
     success_statuses = ['KSP_CONVERGED_RTOL', 'SCIPY_SUCCESS', 'AZ_normal', 
                         'KSP_CONVERGED_ITS', 'KSP_CONVERGED_RTOL', 
@@ -29,6 +27,10 @@ def read_events(fname):
              logger,
              function,
              msg) = [s.strip() for s in entries]
+
+            # parse time format from logger %(asctime)
+            time_stamp = pd.to_datetime(time_stamp,
+                                        format="%Y-%m-%d %H:%M:%S,%f")
 
             if (logger, function) == ("fipy.solvers", "<module>"):
                 pass
@@ -83,25 +85,25 @@ def read_events(fname):
                     solve_time = np.nan
             elif (level, function) == ("DEBUG", "_solve_"):
                 if msg == "BEGIN solve":
-                    begin_solve_time = pd.to_datetime(time_stamp, format=_TIME_FORMAT)
+                    begin_solve_time = time_stamp
                     solve_time = np.nan
                 elif msg.startswith("END solve - "):
                     solve_time = msg.split('-')[-1]
                     solve_time = pd.to_timedelta(solve_time)
                     begin_solve_time = np.nan
                 elif msg == "END solve":
-                    solve_time = pd.to_datetime(time_stamp, format=_TIME_FORMAT) - begin_solve_time
+                    solve_time = time_stamp - begin_solve_time
                     begin_solve_time = np.nan
             elif (level, function) == ("DEBUG", "_prepareLinearSystem"):
                 if msg == "BEGIN _prepareLinearSystem":
-                    begin_prepare_time = pd.to_datetime(time_stamp, format=_TIME_FORMAT)
+                    begin_prepare_time = time_stamp
                     prepare_time = np.nan
                 elif msg.startswith("END _prepareLinearSystem - "):
                     prepare_time = msg.split('-')[-1]
                     prepare_time = pd.to_timedelta(prepare_time)
                     begin_prepare_time = np.nan
                 elif msg == "END _prepareLinearSystem":
-                    prepare_time = pd.to_datetime(time_stamp, format=_TIME_FORMAT) - begin_prepare_time
+                    prepare_time = time_stamp - begin_prepare_time
                     begin_prepare_time = np.nan
 
     return events
@@ -111,7 +113,6 @@ def events2json(input, output):
 
     df = pd.json_normalize(events)
     
-    df["time_stamp"] = pd.to_datetime(df["time_stamp"], format=_TIME_FORMAT)
     df.loc[df["preconditioner"].isna()
            | (df["preconditioner"] == "NoneType"), "preconditioner"] = "unpreconditioned"
 
