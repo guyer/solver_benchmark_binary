@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import uuid
 
+_TIME_FORMAT = "%Y-%m-%d %H:%M:%S,%f"
+
 def read_events(fname):
     success_statuses = ['KSP_CONVERGED_RTOL', 'SCIPY_SUCCESS', 'AZ_normal', 
                         'KSP_CONVERGED_ITS', 'KSP_CONVERGED_RTOL', 
@@ -81,17 +83,17 @@ def read_events(fname):
                     solve_time = np.nan
             elif (level, function) == ("DEBUG", "_solve_"):
                 if msg == "BEGIN solve":
-                    begin_solve_time = pd.to_datetime(time_stamp)
+                    begin_solve_time = pd.to_datetime(time_stamp, format=_TIME_FORMAT)
                     solve_time = np.nan
                 elif msg == "END solve":
-                    solve_time = pd.to_datetime(time_stamp) - begin_solve_time
+                    solve_time = pd.to_datetime(time_stamp, format=_TIME_FORMAT) - begin_solve_time
                     begin_solve_time = np.nan
             elif (level, function) == ("DEBUG", "_prepareLinearSystem"):
                 if msg == "BEGIN _prepareLinearSystem":
-                    begin_prepare_time = pd.to_datetime(time_stamp)
+                    begin_prepare_time = pd.to_datetime(time_stamp, format=_TIME_FORMAT)
                     prepare_time = np.nan
                 elif msg == "END _prepareLinearSystem":
-                    prepare_time = pd.to_datetime(time_stamp) - begin_prepare_time
+                    prepare_time = pd.to_datetime(time_stamp, format=_TIME_FORMAT) - begin_prepare_time
                     begin_prepare_time = np.nan
 
     return events
@@ -101,9 +103,7 @@ def events2json(input, output):
 
     df = pd.json_normalize(events)
     
-    df["time_stamp"] = pd.to_datetime(df["time_stamp"], format="mixed")
-    df["solve_time"] = pd.to_timedelta(df["solve_time"])
-    df["prepare_time"] = pd.to_timedelta(df["prepare_time"])
+    df["time_stamp"] = pd.to_datetime(df["time_stamp"], format=_TIME_FORMAT)
     df.loc[df["preconditioner"].isna()
            | (df["preconditioner"] == "NoneType"), "preconditioner"] = "unpreconditioned"
 
