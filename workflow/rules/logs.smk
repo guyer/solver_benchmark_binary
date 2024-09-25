@@ -85,6 +85,10 @@ def read_events(fname):
                 if msg == "BEGIN solve":
                     begin_solve_time = pd.to_datetime(time_stamp, format=_TIME_FORMAT)
                     solve_time = np.nan
+                elif msg.startswith("END solve - "):
+                    solve_time = msg.split('-')[-1]
+                    solve_time = pd.to_timedelta(solve_time)
+                    begin_solve_time = np.nan
                 elif msg == "END solve":
                     solve_time = pd.to_datetime(time_stamp, format=_TIME_FORMAT) - begin_solve_time
                     begin_solve_time = np.nan
@@ -92,6 +96,10 @@ def read_events(fname):
                 if msg == "BEGIN _prepareLinearSystem":
                     begin_prepare_time = pd.to_datetime(time_stamp, format=_TIME_FORMAT)
                     prepare_time = np.nan
+                elif msg.startswith("END _prepareLinearSystem - "):
+                    prepare_time = msg.split('-')[-1]
+                    prepare_time = pd.to_timedelta(prepare_time)
+                    begin_prepare_time = np.nan
                 elif msg == "END _prepareLinearSystem":
                     prepare_time = pd.to_datetime(time_stamp, format=_TIME_FORMAT) - begin_prepare_time
                     begin_prepare_time = np.nan
