@@ -29,6 +29,7 @@ def read_events(fname):
              msg) = [s.strip() for s in entries]
 
             # parse time format from logger %(asctime)
+            # https://docs.python.org/3/library/logging.html#logging.Formatter.formatTime
             time_stamp = pd.to_datetime(time_stamp,
                                         format="%Y-%m-%d %H:%M:%S,%f")
 
