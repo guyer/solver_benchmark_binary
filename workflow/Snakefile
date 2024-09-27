@@ -20,8 +20,26 @@ BENCHMARKS = ["binary_phase_field"]
 
 rule all:
     input:
+        "results/all.json"
+
+checkpoint total_times:
+    output:
+        "results/total_times.json"
+    input:
+        "results/all.json"
+    run:
+        extract_total_times(input[0], output[0])
+
+rule aggregate_results:
+    output:
+        "results/all.json"
+    input:
         permutations="results/permutations.json",
-        logs=get_all_logs
+        logs=get_all_json
+    log:
+        "results/all.log"
+    run:
+        concat_json(input.logs, output[0], log[0])
 
 rule ipynb2py:
     input:
