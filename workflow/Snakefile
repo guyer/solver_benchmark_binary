@@ -60,13 +60,17 @@ rule extract_times:
     output:
         "results/{id}/solver.json"
     input:
-        "results/{id}/solver.log"
+        log="results/{id}/solver.log",
+        config="results/{id}/config.json"
 #     conda:
 #         "benchmark_analysis"
     log:
         "results/{id}/extract_times.log"
     run:
-        events2json(input[0], output[0])
+        events2json(logf=input.log,
+                    configf=input.config,
+                    output=output[0],
+                    uuid=wildcards.id)
 
 rule aggregate_param_sweeps:
     output:

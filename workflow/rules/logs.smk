@@ -109,13 +109,18 @@ def read_events(fname):
 
     return events
 
-def events2json(input, output):
-    events = read_events(input)
+def events2json(logf, configf, output, uuid):
+    events = read_events(logf)
 
     df = pd.json_normalize(events)
     
     if "preconditioner" in df.columns:
         df.loc[df["preconditioner"].isna()
                | (df["preconditioner"] == "NoneType"), "preconditioner"] = "unpreconditioned"
+
+    # Add configuration to each record, tidy-style
+    config = pd.read_json(configf, orient="index").T
+    config["uuid"] = uuid
+    df = config.join(df, lsuffix="_L", how="cross")
 
     df.to_json(output, date_format="iso")
