@@ -64,6 +64,19 @@ def get_all_logs(wildcards):
 
     return logs
 
+def get_all_plots(wildcards):
+    if exists(checkpoints.total_times.get().output[0]):
+        df = pd.read_json(checkpoints.total_times.get().output[0])
+
+        gb = df.groupby(by=["benchmark", "hostname", "version", "fipy_version"])
+
+        plots = expand("plots/benchmark~{key[0]}/hostname~{key[1]}/self~{key[2]}/fipy~{key[3]}/plot.png",
+                       key=list(gb.groups.keys()))
+    else:
+        plots = []
+
+    return plots
+
 def get_all_json(wildcards):
     if exists("results/permutations.json"):
         df = pd.read_json("results/permutations.json")

@@ -8,6 +8,7 @@ FIPY_PATH = "/Users/guyer/Documents/research/FiPy/fipy"
 
 include: "rules/common.smk"
 include: "rules/logs.smk"
+include: "rules/plot.smk"
 
 SUITES = ["petsc"]
 # calculate dimensions that produce six orders of magnitude in number of cells
@@ -21,6 +22,11 @@ BENCHMARKS = ["binary_phase_field"]
 rule all:
     input:
         "results/all.json"
+
+rule all_plots:
+    input:
+        "results/total_times.json",
+        get_all_plots
 
 checkpoint total_times:
     output:
@@ -40,6 +46,19 @@ rule aggregate_results:
         "results/all.log"
     run:
         concat_json(input.logs, output[0], log[0])
+
+rule plot_permutations:
+    output:
+        plot="plots/benchmark~{benchmark}/hostname~{hostname}/self~{version}/fipy~{fipyversion}/plot.png",
+    input:
+        "results/total_times.json"
+    run:
+        df = pd.read_json(input[0])
+        df = df.query(f"benchmark == '{wildcards.benchmark}'"
+                      f" & hostname == '{wildcards.hostname}'"
+                      f" & version == '{wildcards.version}'"
+                      f" & fipy_version == '{wildcards.fipyversion}'")
+        plot_all(df, output.plot, ymin=1e-2, ymax=1e2)
 
 rule ipynb2py:
     input:
