@@ -28,7 +28,7 @@ def concat_json(input, output, log):
     try:
         li = [pd.read_json(fname) for fname in input]
         if li:
-            df = pd.concat(li)
+            df = pd.concat(li, ignore_index=True)
         else:
             df = pd.DataFrame()
         df.to_json(output)
