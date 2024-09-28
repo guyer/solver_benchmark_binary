@@ -17,7 +17,7 @@ SIZES = (10**(np.arange(1, 2.5, 1.)/2)).round().astype(int)**2
 # BENCHMARKS = ["binary_phase_field", "diffusion", "nucleation"]
 BENCHMARKS = ["binary_phase_field"]
 
-# PERMUTATIONS = pd.read_json("results/permutations.json")
+permutations = pd.read_json("results/permutations.json")
 
 rule all:
     input:
@@ -40,8 +40,8 @@ rule aggregate_results:
     output:
         "results/all.json"
     input:
-        permutations="results/permutations.json",
-        logs=get_all_json
+        logs=expand("results/{id}/solver.json",
+                    id=permutations.index)
     log:
         "results/all.log"
     run:
@@ -188,8 +188,7 @@ rule make_config:
     input:
         "results/permutations.json"
     run:
-        df = pd.read_json(input[0])
-        df.loc[wildcards.id].to_json(output[0])
+        permutations.loc[wildcards.id].to_json(output[0])
 
 rule plot:
     output:

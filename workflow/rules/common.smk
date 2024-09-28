@@ -44,25 +44,10 @@ def git_version(path):
     return result.stdout.strip()
 
 def get_conda_environment(wildcards):
-    df = pd.read_json("results/permutations.json")
-
-    return f"benchmark_{df.loc[wildcards.id, 'suite']}"
+    return f"benchmark_{permutations.loc[wildcards.id, 'suite']}"
 
 def get_benchmark(wildcards):
-    df = pd.read_json("results/permutations.json")
-
-    return f"codes/scripts/{df.loc[wildcards.id, 'benchmark']}.py"
-
-def get_all_logs(wildcards):
-    if exists("results/permutations.json"):
-        df = pd.read_json("results/permutations.json")
-
-        logs = expand("results/{id}/solver.log",
-                      id=df.index)
-    else:
-        logs = []
-
-    return logs
+    return f"codes/scripts/{permutations.loc[wildcards.id, 'benchmark']}.py"
 
 def get_all_plots(wildcards):
     if exists(checkpoints.total_times.get().output[0]):
@@ -77,17 +62,6 @@ def get_all_plots(wildcards):
         plots = []
 
     return plots
-
-def get_all_json(wildcards):
-    if exists("results/permutations.json"):
-        df = pd.read_json("results/permutations.json")
-
-        logs = expand("results/{id}/solver.json",
-                      id=df.index)
-    else:
-        logs = []
-
-    return logs
 
 def read_config(path):
     import json
