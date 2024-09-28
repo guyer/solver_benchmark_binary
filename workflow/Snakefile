@@ -49,7 +49,9 @@ rule aggregate_results:
 
 rule plot_permutations:
     output:
-        plot="plots/benchmark~{benchmark}/hostname~{hostname}/self~{version}/fipy~{fipyversion}/plot.png",
+        total="plots/benchmark~{benchmark}/hostname~{hostname}/self~{version}/fipy~{fipyversion}/total.png",
+        prepare="plots/benchmark~{benchmark}/hostname~{hostname}/self~{version}/fipy~{fipyversion}/prepare.png",
+        solve="plots/benchmark~{benchmark}/hostname~{hostname}/self~{version}/fipy~{fipyversion}/solve.png",
     input:
         "results/total_times.json"
     run:
@@ -58,7 +60,9 @@ rule plot_permutations:
                       f" & hostname == '{wildcards.hostname}'"
                       f" & version == '{wildcards.version}'"
                       f" & fipy_version == '{wildcards.fipyversion}'")
-        plot_all(df, output.plot, ymin=1e-2, ymax=1e2)
+        plot_all(df, output.total, ymin=1e-2, ymax=1e2)
+        plot_all(df, output.prepare, data_set="prepare_seconds", ylabel="prepare time", ymin=1e-2, ymax=1e2)
+        plot_all(df, output.solve, data_set="solve_seconds", ylabel="solve time", ymin=1e-4, ymax=1e2)
 
 rule ipynb2py:
     input:
