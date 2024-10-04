@@ -17,7 +17,7 @@ SIZES = (10**(np.arange(1, 2.5, 1.)/2)).round().astype(int)**2
 # BENCHMARKS = ["binary_phase_field", "diffusion", "nucleation"]
 BENCHMARKS = ["binary_phase_field"]
 
-permutations = pd.read_json("results/permutations.json")
+permutations = pd.read_json("config/permutations.json")
 
 rule all:
     input:
