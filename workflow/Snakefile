@@ -66,16 +66,16 @@ rule plot_permutations:
 
 rule ipynb2py:
     input:
-        "codes/notebooks/{notebook}.ipynb"
+        "workflow/notebooks/{notebook}.ipynb"
     output:
-        temp("codes/scripts/{notebook}.py")
+        temp("workflow/scripts/{notebook}.py")
     conda:
         "snakemake"
     log:
-        stdout="codes/scripts/{notebook}.stdout",
-        stderr="codes/scripts/{notebook}.stderr"
+        stdout="workflow/scripts/{notebook}.stdout",
+        stderr="workflow/scripts/{notebook}.stderr"
     shell:
-        "jupyter nbconvert {input} --to python --output-dir=codes/scripts/ > {log.stdout} 2> {log.stderr}"
+        "jupyter nbconvert {input} --to python --output-dir=workflow/scripts/ > {log.stdout} 2> {log.stderr}"
 
 checkpoint list_solvers:
     output:
@@ -85,7 +85,7 @@ checkpoint list_solvers:
     log:
         "results/{solversuite}-solvers.log"
     shell:
-        "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/solvers.py > {output} 2> {log}"
+        "FIPY_SOLVERS={wildcards.solversuite} python workflow/scripts/solvers.py > {output} 2> {log}"
 
 checkpoint list_preconditioners:
     output:
@@ -95,7 +95,7 @@ checkpoint list_preconditioners:
     log:
         "results/{solversuite}-preconditioners.log"
     shell:
-        "FIPY_SOLVERS={wildcards.solversuite} python codes/scripts/preconditioners.py > {output} 2> {log}"
+        "FIPY_SOLVERS={wildcards.solversuite} python workflow/scripts/preconditioners.py > {output} 2> {log}"
 
 rule extract_times:
     output:
