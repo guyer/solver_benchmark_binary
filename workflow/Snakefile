@@ -168,7 +168,7 @@ rule solve:
         " --preconditioner={params.config[preconditioner]}"
         " --numberOfElements={params.config[size]}"
         " --output={params.output}"
-        " --restart results.old/nucleation/nucleation18/t=300.0.npz"
+        " --restart resources/t=300.0.npz"
         " --totaltime=301"
         " --checkpoint_interval=1."
         " 2> {log}"
