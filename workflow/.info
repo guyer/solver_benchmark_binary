@@ -1,0 +1,10 @@
+Snakefile
+	Snakemake workflow entrypoint.
+envs
+	Conda environment files.
+notebooks
+	[Jupyter](https://jupyter.org/) notebook files.
+rules
+	Snakemake modules.
+scripts
+	Python and bash programs.

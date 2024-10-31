@@ -5,19 +5,13 @@ NOTES.md
 	Lost all context at this point?
 README.md
 	Description of `solvers_and_timings/`.
-pyproject.toml
-	Package metadata for Py3k.
-setup.py
-	Package installer for Py27.
 TODO.md
 	Tasks to work on.
-codes
-	Runnable programs.
-data
-	Data used by notebooks.
-environments
-	Conda environment files.
+resources
+	Data used by workflows.
 results
 	Simulation results.
 src
 	Analysis package.
+workflow
+	Snakemake workflow definition.
