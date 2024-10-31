@@ -7,6 +7,8 @@ README.md
 	Description of `solvers_and_timings/`.
 TODO.md
 	Tasks to work on.
+config
+    Snakemake workflow configuration.
 resources
 	Data used by workflows.
 results
