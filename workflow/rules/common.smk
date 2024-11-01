@@ -55,7 +55,7 @@ def get_all_plots(wildcards):
 
         gb = df.groupby(by=["benchmark", "hostname", "version", "fipy_version"])
 
-        plots = expand("plots/benchmark~{key[0]}/hostname~{key[1]}/self~{key[2]}/fipy~{key[3]}/{plot}.png",
+        plots = expand("results/plots/benchmark~{key[0]}/hostname~{key[1]}/self~{key[2]}/fipy~{key[3]}/{plot}.png",
                        key=list(gb.groups.keys()),
                        plot=["total", "prepare", "solve"])
     else:

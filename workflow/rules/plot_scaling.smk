@@ -1,10 +1,11 @@
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
 from matplotlib.legend import Legend
 
 
-def plot_all(df, color_by_suite=True,
+def plot_all(df, output, color_by_suite=True,
              by=["package.solver", "solver_class", "preconditioner"],
              data_set="elapsed_seconds", ylabel="elapsed time", title=None,
              xmin=None, xmax=None, ymin=None, ymax=None, ax=None):
@@ -17,7 +18,9 @@ def plot_all(df, color_by_suite=True,
         'pyamgx': 'cyan',
         'petsc-RCV': 'pink'
     }
-    
+
+    matplotlib.use('Agg')
+
     # plt.figure()
     if ax is None:
         fig, ax = plt.subplots(figsize=(8,6),
@@ -78,7 +81,9 @@ def plot_all(df, color_by_suite=True,
         ax.set_title(title)
 
     # plt.show()
-    
+
+    plt.savefig(output)
+
     return ax
 
 def plot_solve_fraction(df, color_by_suite=True,

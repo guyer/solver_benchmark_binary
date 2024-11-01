@@ -8,7 +8,7 @@ FIPY_PATH = "/Users/guyer/Documents/research/FiPy/fipy"
 
 include: "rules/common.smk"
 include: "rules/logs.smk"
-include: "rules/plot.smk"
+include: "rules/plot_scaling.smk"
 
 SUITES = ["petsc"]
 # calculate dimensions that produce six orders of magnitude in number of cells
@@ -49,9 +49,9 @@ rule aggregate_results:
 
 rule plot_permutations:
     output:
-        total="plots/benchmark~{benchmark}/hostname~{hostname}/self~{version}/fipy~{fipyversion}/total.png",
-        prepare="plots/benchmark~{benchmark}/hostname~{hostname}/self~{version}/fipy~{fipyversion}/prepare.png",
-        solve="plots/benchmark~{benchmark}/hostname~{hostname}/self~{version}/fipy~{fipyversion}/solve.png",
+        total="results/plots/benchmark~{benchmark}/hostname~{hostname}/self~{version}/fipy~{fipyversion}/total.png",
+        prepare="results/plots/benchmark~{benchmark}/hostname~{hostname}/self~{version}/fipy~{fipyversion}/prepare.png",
+        solve="results/plots/benchmark~{benchmark}/hostname~{hostname}/self~{version}/fipy~{fipyversion}/solve.png",
     input:
         "results/total_times.json"
     run:
