@@ -47,7 +47,7 @@ def get_conda_environment(wildcards):
     return f"benchmark_{permutations.loc[wildcards.id, 'suite']}"
 
 def get_benchmark(wildcards):
-    return f"codes/scripts/{permutations.loc[wildcards.id, 'benchmark']}.py"
+    return f"workflow/scripts/{permutations.loc[wildcards.id, 'benchmark']}.py"
 
 def get_all_plots(wildcards):
     if exists(checkpoints.total_times.get().output[0]):

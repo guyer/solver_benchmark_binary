@@ -66,7 +66,7 @@ rule plot_permutations:
 
 rule ipynb2py:
     input:
-        "workflow/notebooks/{notebook}.ipynb"
+        "workflow/notebooks/{notebook}.py.ipynb"
     output:
         temp("workflow/scripts/{notebook}.py")
     conda:
@@ -75,7 +75,7 @@ rule ipynb2py:
         stdout="workflow/scripts/{notebook}.stdout",
         stderr="workflow/scripts/{notebook}.stderr"
     shell:
-        "jupyter nbconvert {input} --to python --output-dir=workflow/scripts/ > {log.stdout} 2> {log.stderr}"
+        "jupyter nbconvert {input} --to python --output-dir=workflow/scripts/ --output {wildcards.notebook}.py > {log.stdout} 2> {log.stderr}"
 
 checkpoint list_solvers:
     output:
