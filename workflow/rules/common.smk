@@ -58,6 +58,7 @@ def get_all_plots(wildcards):
         plots = expand("results/plots/benchmark~{key[0]}/hostname~{key[1]}/self~{key[2]}/fipy~{key[3]}/{plot}.png",
                        key=list(gb.groups.keys()),
                        plot=["total", "prepare", "solve"])
+        plots = [report(plot) for plot in plots]
     else:
         plots = []
 
