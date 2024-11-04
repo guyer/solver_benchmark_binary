@@ -27,11 +27,6 @@ rule all:
         "results/total_times.json",
         get_all_plots
 
-rule all_plots:
-    input:
-        "results/total_times.json",
-        get_all_plots
-
 checkpoint total_times:
     output:
         "results/total_times.json"
