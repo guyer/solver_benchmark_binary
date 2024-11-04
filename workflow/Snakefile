@@ -191,10 +191,3 @@ rule make_config:
         "results/permutations.json"
     run:
         permutations.loc[wildcards.id].to_json(output[0])
-
-rule plot:
-    output:
-        "results/{path}/{solversuite}/all.png"
-    input:
-        "results/{path}/{solversuite}/params.csv",
-        get_params
