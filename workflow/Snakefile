@@ -56,6 +56,12 @@ rule plot_permutations:
         total="results/plots/benchmark~{benchmark}/hostname~{hostname}/self~{version}/fipy~{fipyversion}/total.png",
         prepare="results/plots/benchmark~{benchmark}/hostname~{hostname}/self~{version}/fipy~{fipyversion}/prepare.png",
         solve="results/plots/benchmark~{benchmark}/hostname~{hostname}/self~{version}/fipy~{fipyversion}/solve.png",
+        plots=report(
+            directory("results/plots/benchmark~{benchmark}/hostname~{hostname}/self~{version}/fipy~{fipyversion}"),
+            patterns=["{name}.png"],
+            category="{fipyversion}",
+            labels={"name": "{name}"}
+        )
     input:
         "results/total_times.json"
     run:
