@@ -53,9 +53,9 @@ def get_all_plots(wildcards):
     if exists(checkpoints.total_times.get().output[0]):
         df = pd.read_json(checkpoints.total_times.get().output[0])
 
-        gb = df.groupby(by=["version", "fipy_version"])
+        gb = df.groupby(by=["fipy_version"])
 
-        plots = expand("results/plots/self~{key[0]}/fipy~{key[1]}/{plot}.png",
+        plots = expand("results/plots/fipy~{key[0]}/{plot}.png",
                        key=list(gb.groups.keys()),
                        plot=["total", "prepare", "solve"])
     else:
