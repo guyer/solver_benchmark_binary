@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+configfile: "config/config.yml"
 
 FIPY_PATH = "/Users/guyer/Documents/research/FiPy/fipy"
 SUITES = ["petsc"]
