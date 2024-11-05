@@ -1,23 +1,23 @@
 import numpy as np
 import pandas as pd
-from itertools import product
-import uuid
-import platform
+
 
 FIPY_PATH = "/Users/guyer/Documents/research/FiPy/fipy"
-
-include: "rules/common.smk"
-include: "rules/logs.smk"
-include: "rules/plot_scaling.smk"
-
-report: "report/workflow.rst"
-
 SUITES = ["petsc"]
 # calculate dimensions that produce six orders of magnitude in number of cells
 # SIZES = (10**(np.arange(1, 6.5, 1.)/2)).round().astype(int)**2
 SIZES = (10**(np.arange(1, 2.5, 1.)/2)).round().astype(int)**2
 # BENCHMARKS = ["binary_phase_field", "diffusion", "nucleation"]
 BENCHMARKS = ["binary_phase_field"]
+
+include: "rules/common.smk"
+include: "rules/aggregate.smk"
+include: "rules/permutations.smk"
+include: "rules/logs.smk"
+include: "rules/solve.smk"
+include: "rules/plot_scaling.smk"
+
+report: "report/workflow.rst"
 
 permutations = pd.read_csv("config/permutations.csv", index_col="uuid")
 
@@ -26,14 +26,6 @@ rule all:
         "results/all.json",
         "results/total_times.json",
         get_all_plots
-
-checkpoint total_times:
-    output:
-        "results/total_times.json"
-    input:
-        "results/all.json"
-    run:
-        extract_total_times(input[0], output[0])
 
 rule aggregate_results:
     output:
@@ -46,148 +38,3 @@ rule aggregate_results:
     run:
         concat_json(input.logs, output[0], log[0])
 
-rule plot_permutations:
-    output:
-        total="results/plots/fipy~{fipyversion}/total.png",
-        prepare="results/plots/fipy~{fipyversion}/prepare.png",
-        solve="results/plots/fipy~{fipyversion}/solve.png",
-        plots=report(
-            directory("results/plots/fipy~{fipyversion}"),
-            patterns=["{name}.png"],
-            category="{fipyversion}",
-            labels={"name": "{name}"}
-        )
-    input:
-        "results/total_times.json"
-    run:
-        df = pd.read_json(input[0])
-        df = df.query(f"fipy_version == '{wildcards.fipyversion}'")
-        plot_all(df, output.total, ymin=1e-2, ymax=1e2)
-        plot_all(df, output.prepare, data_set="prepare_seconds", ylabel="prepare time", ymin=1e-2, ymax=1e2)
-        plot_all(df, output.solve, data_set="solve_seconds", ylabel="solve time", ymin=1e-4, ymax=1e2)
-
-rule ipynb2py:
-    input:
-        "workflow/notebooks/{notebook}.py.ipynb"
-    output:
-        temp("workflow/scripts/{notebook}.py")
-    conda:
-        "snakemake"
-    log:
-        stdout="workflow/scripts/{notebook}.stdout",
-        stderr="workflow/scripts/{notebook}.stderr"
-    shell:
-        "jupyter nbconvert {input} --to python --output-dir=workflow/scripts/ --output {wildcards.notebook}.py > {log.stdout} 2> {log.stderr}"
-
-checkpoint list_solvers:
-    output:
-        temp("results/{solversuite}-solvers.txt")
-    conda:
-       "benchmark_{solversuite}"
-    log:
-        "results/{solversuite}-solvers.log"
-    shell:
-        "FIPY_SOLVERS={wildcards.solversuite} python workflow/scripts/solvers.py > {output} 2> {log}"
-
-checkpoint list_preconditioners:
-    output:
-        temp("results/{solversuite}-preconditioners.txt")
-    conda:
-       "benchmark_{solversuite}"
-    log:
-        "results/{solversuite}-preconditioners.log"
-    shell:
-        "FIPY_SOLVERS={wildcards.solversuite} python workflow/scripts/preconditioners.py > {output} 2> {log}"
-
-rule extract_times:
-    output:
-        "results/{id}/solver.json"
-    input:
-        log="results/{id}/solver.log",
-        config="results/{id}/config.json"
-#     conda:
-#         "benchmark_analysis"
-    log:
-        "results/{id}/extract_times.log"
-    run:
-        events2json(logf=input.log,
-                    configf=input.config,
-                    output=output[0],
-                    uuid=wildcards.id)
-
-rule aggregate_param_sweeps:
-    output:
-        "results/permutations.json"
-    input:
-        expand("results/{solversuite}-permutations.json", solversuite=SUITES)
-    log:
-        "results/permutations.log"
-    run:
-        concat_json(input, output[0], log[0])
-
-checkpoint add_param_sweep:
-    output:
-        "results/{solversuite}-permutations.json"
-    input:
-        "results/{solversuite}-preconditioners.txt",
-        "results/{solversuite}-solvers.txt",
-    run:
-        solvers = get_checkpoint_list(check=checkpoints.list_solvers,
-                                      solversuite=wildcards.solversuite)
-        preconditioners = get_checkpoint_list(check=checkpoints.list_preconditioners,
-                                              solversuite=wildcards.solversuite)
-
-        df = pd.DataFrame(data=list(product(BENCHMARKS, solvers, preconditioners, SIZES)),
-                          columns=["benchmark", "solver", "preconditioner", "size"])
-
-        df["uuid"] = [str(uuid.uuid4()) for item in df.iterrows()]
-        df = df.set_index("uuid")
-
-        df["suite"] = wildcards.solversuite
-        df["hostname"] = platform.node()
-        df["version"] = git_version(path=".")
-        df["fipy_version"] = git_version(path=FIPY_PATH)
-
-        df.to_json(output[0])
-
-rule solve:
-    output:
-        "results/{id}/solver.log"
-    input:
-        config="results/{id}/config.json",
-        benchmark="results/{id}/benchmark.py"
-    params:
-        config=lambda w, input: read_config(input.config),
-        output=lambda w, output: os.path.dirname(output[0])
-    conda:
-        get_conda_environment
-    log:
-        "results/{id}/solver.stderr"
-    shell:
-        "FIPY_SOLVERS={params.config[suite]}"
-        " python {input.benchmark}"
-        " --solver={params.config[solver]}"
-        " --preconditioner={params.config[preconditioner]}"
-        " --numberOfElements={params.config[size]}"
-        " --output={params.output}"
-        " --restart resources/t=300.0.npz"
-        " --totaltime=301"
-        " --checkpoint_interval=1."
-        " 2> {log}"
-        " || touch {output[0]}"
-
-rule copy_script:
-    output:
-        benchmark="results/{id}/benchmark.py"
-    input:
-        benchmark=get_benchmark
-    shell:
-        "cp {input.benchmark} {output.benchmark}"
-
-rule make_config:
-    output:
-        "results/{id}/config.json"
-    input:
-        "results/permutations.json"
-    run:
-        permutations.loc[wildcards.id].to_json(output[0])
