@@ -22,7 +22,7 @@ rule solve:
         " --totaltime=301"
         " --checkpoint_interval=1."
         " 2> {log}"
-        " || touch {output[0]}"
+        " || touch {output}"
 
 rule copy_script:
     output:
