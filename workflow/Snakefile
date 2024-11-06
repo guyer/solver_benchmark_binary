@@ -3,13 +3,10 @@ import pandas as pd
 
 configfile: "config/config.yml"
 
-FIPY_PATH = "/Users/guyer/Documents/research/FiPy/fipy"
-SUITES = ["petsc"]
-# calculate dimensions that produce six orders of magnitude in number of cells
-# SIZES = (10**(np.arange(1, 6.5, 1.)/2)).round().astype(int)**2
-SIZES = (10**(np.arange(1, 2.5, 1.)/2)).round().astype(int)**2
-# BENCHMARKS = ["binary_phase_field", "diffusion", "nucleation"]
-BENCHMARKS = ["binary_phase_field"]
+# calculate dimensions that produce steps in orders of magnitude in number of cells
+SIZES = (10**(np.arange(np.log10(config["size"]["min"]),
+                        np.log10(config["size"]["max"])+1,
+                        1.)/2)).round().astype(int)**2
 
 include: "rules/common.smk"
 include: "rules/aggregate.smk"

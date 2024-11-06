@@ -6,7 +6,8 @@ rule aggregate_param_sweeps:
     output:
         "results/permutations.json"
     input:
-        expand("results/{solversuite}-permutations.json", solversuite=SUITES)
+        expand("results/{solversuite}-permutations.json",
+               solversuite=config["suites"])
     log:
         "results/permutations.log"
     run:
@@ -24,7 +25,10 @@ checkpoint add_param_sweep:
         preconditioners = get_checkpoint_list(check=checkpoints.list_preconditioners,
                                               solversuite=wildcards.solversuite)
 
-        df = pd.DataFrame(data=list(product(BENCHMARKS, solvers, preconditioners, SIZES)),
+        df = pd.DataFrame(data=list(product(config["benchmarks"],
+                                            solvers,
+                                            preconditioners,
+                                            SIZES)),
                           columns=["benchmark", "solver", "preconditioner", "size"])
 
         df["uuid"] = [str(uuid.uuid4()) for item in df.iterrows()]
@@ -33,7 +37,7 @@ checkpoint add_param_sweep:
         df["suite"] = wildcards.solversuite
         df["hostname"] = platform.node()
         df["version"] = git_version(path=".")
-        df["fipy_version"] = git_version(path=FIPY_PATH)
+        df["fipy_version"] = git_version(path=config["fipy_path"])
 
         df.to_json(output[0])
 
@@ -45,7 +49,9 @@ checkpoint list_solvers:
     log:
         "results/{solversuite}-solvers.log"
     shell:
-        "FIPY_SOLVERS={wildcards.solversuite} python workflow/scripts/solvers.py > {output} 2> {log}"
+        "FIPY_SOLVERS={wildcards.solversuite}"
+        " python workflow/scripts/solvers.py"
+        " > {output} 2> {log}"
 
 checkpoint list_preconditioners:
     output:
@@ -55,4 +61,6 @@ checkpoint list_preconditioners:
     log:
         "results/{solversuite}-preconditioners.log"
     shell:
-        "FIPY_SOLVERS={wildcards.solversuite} python workflow/scripts/preconditioners.py > {output} 2> {log}"
+        "FIPY_SOLVERS={wildcards.solversuite}"
+        " python workflow/scripts/preconditioners.py"
+        " > {output} 2> {log}"

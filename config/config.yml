@@ -1,1 +1,15 @@
+fipy_path: "/Users/guyer/Documents/research/FiPy/fipy"
 fipy_rev: HEAD
+
+size:
+  min: 10
+  max: 100
+#  max: 1e6
+
+suites:
+- "petsc"
+
+benchmarks:
+- "binary_phase_field"
+# - "diffusion"
+# - "nucleation"
