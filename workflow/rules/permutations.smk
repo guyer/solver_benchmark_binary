@@ -51,7 +51,7 @@ checkpoint list_solvers:
     shell:
         "FIPY_SOLVERS={wildcards.solversuite}"
         " python workflow/scripts/solvers.py"
-        " > {output} 2> {log}"
+        " > {output:q} 2> {log:q}"
 
 checkpoint list_preconditioners:
     output:
@@ -63,4 +63,4 @@ checkpoint list_preconditioners:
     shell:
         "FIPY_SOLVERS={wildcards.solversuite}"
         " python workflow/scripts/preconditioners.py"
-        " > {output} 2> {log}"
+        " > {output:q} 2> {log:q}"

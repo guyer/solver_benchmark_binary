@@ -13,16 +13,16 @@ rule solve:
         "results/{id}/solver.stderr"
     shell:
         "FIPY_SOLVERS={params.config[suite]}"
-        " python {input.benchmark}"
+        " python {input.benchmark:q}"
         " --solver={params.config[solver]}"
         " --preconditioner={params.config[preconditioner]}"
         " --numberOfElements={params.config[size]}"
-        " --output={params.output}"
+        " --output={params.output:q}"
         " --restart resources/t=300.0.npz"
         " --totaltime=301"
         " --checkpoint_interval=1."
-        " 2> {log}"
-        " || touch {output}"
+        " 2> {log:q}"
+        " || touch {output:q}"
 
 rule copy_script:
     output:
@@ -30,7 +30,7 @@ rule copy_script:
     input:
         benchmark=get_benchmark
     shell:
-        "cp {input.benchmark} {output.benchmark}"
+        "cp {input.benchmark:q} {output.benchmark:q}"
 
 rule ipynb2py:
     input:
@@ -43,7 +43,7 @@ rule ipynb2py:
         stdout="workflow/scripts/{notebook}.stdout",
         stderr="workflow/scripts/{notebook}.stderr"
     shell:
-        "jupyter nbconvert {input} --to python --output-dir=workflow/scripts/ --output {wildcards.notebook}.py > {log.stdout} 2> {log.stderr}"
+        "jupyter nbconvert {input:q} --to python --output-dir=workflow/scripts/ --output {wildcards.notebook:q}.py > {log.stdout:q} 2> {log.stderr:q}"
 
 rule make_config:
     output:
