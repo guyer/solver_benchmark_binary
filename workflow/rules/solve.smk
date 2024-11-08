@@ -12,17 +12,19 @@ rule solve:
     log:
         "results/{id}/solver.stderr"
     shell:
-        "FIPY_SOLVERS={params.config[suite]}"
-        " python {input.benchmark:q}"
-        " --solver={params.config[solver]}"
-        " --preconditioner={params.config[preconditioner]}"
-        " --numberOfElements={params.config[size]}"
-        " --output={params.output:q}"
-        " --restart resources/t=300.0.npz"
-        " --totaltime=301"
-        " --checkpoint_interval=1."
-        " 2> {log:q}"
-        " || touch {output:q}"
+        r"""
+        FIPY_SOLVERS={params.config[suite]} \
+            python {input.benchmark:q} \
+            --solver={params.config[solver]} \
+            --preconditioner={params.config[preconditioner]} \
+            --numberOfElements={params.config[size]} \
+            --output={params.output:q} \
+            --restart resources/t=300.0.npz \
+            --totaltime=301 \
+            --checkpoint_interval=1. \
+            2> {log:q} \
+            || touch {output:q}
+        """
 
 rule copy_script:
     output:
@@ -43,12 +45,17 @@ rule ipynb2py:
         stdout="workflow/scripts/{notebook}.stdout",
         stderr="workflow/scripts/{notebook}.stderr"
     shell:
-        "jupyter nbconvert {input:q} --to python --output-dir=workflow/scripts/ --output {wildcards.notebook:q}.py > {log.stdout:q} 2> {log.stderr:q}"
+        r"""
+        jupyter nbconvert {input:q} --to python \
+            --output-dir=workflow/scripts/ \
+            --output {wildcards.notebook:q}.py \
+            > {log.stdout:q} 2> {log.stderr:q}
+        """
 
 rule make_config:
     output:
         "results/{id}/config.json"
     input:
-        "results/permutations.json"
+        "config/all_permutations.csv"
     run:
         permutations.loc[wildcards.id].to_json(output[0])

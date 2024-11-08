@@ -1,5 +1,5 @@
-def get_checkpoint_list(check, solversuite):
-    with open(check.get(solversuite=solversuite).output[0], 'r') as f:
+def get_checkpoint_list(check, suite):
+    with open(check.get(suite=suite).output[0], 'r') as f:
         items = f.read().split()
     return items
 
@@ -44,7 +44,9 @@ def git_version(path):
     return result.stdout.strip()
 
 def get_conda_environment(wildcards):
-    return f"benchmark_{permutations.loc[wildcards.id, 'suite']}"
+    rev = permutations.loc[wildcards.id, 'fipy_rev']
+    suite = {permutations.loc[wildcards.id, 'suite']}
+    return f"envs/fipy~{rev}/benchmark_{suite}"
 
 def get_benchmark(wildcards):
     return f"workflow/scripts/{permutations.loc[wildcards.id, 'benchmark']}.py"

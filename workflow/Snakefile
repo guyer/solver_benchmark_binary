@@ -1,15 +1,10 @@
-import numpy as np
 import pandas as pd
 
 configfile: "config/config.yml"
 
-# calculate dimensions that produce steps in orders of magnitude in number of cells
-SIZES = (10**(np.arange(np.log10(config["size"]["min"]),
-                        np.log10(config["size"]["max"])+1,
-                        1.)/2)).round().astype(int)**2
-
 include: "rules/common.smk"
 include: "rules/aggregate.smk"
+include: "rules/clone.smk"
 include: "rules/permutations.smk"
 include: "rules/logs.smk"
 include: "rules/solve.smk"
@@ -17,7 +12,7 @@ include: "rules/plot_scaling.smk"
 
 report: "report/workflow.rst"
 
-permutations = pd.read_csv("config/permutations.csv", index_col="uuid")
+permutations = pd.read_csv("config/all_permutations.csv", index_col="uuid")
 
 rule all:
     input:
@@ -32,7 +27,7 @@ rule aggregate_results:
         logs=expand("results/{id}/solver.json",
                     id=permutations.index)
     log:
-        "results/all.log"
+        "logs/aggregate_results.log"
     run:
         concat_json(input.logs, output[0], log[0])
 

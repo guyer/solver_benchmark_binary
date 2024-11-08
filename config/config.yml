@@ -1,5 +1,7 @@
-fipy_path: "/Users/guyer/Documents/research/FiPy/fipy"
-fipy_rev: HEAD
+fipy_url: "https://github.com/usnistgov/fipy.git"
+
+fipy_revs:
+- "b0d350d3c"
 
 size:
   min: 10
