@@ -12,8 +12,6 @@ include: "rules/plot_scaling.smk"
 
 report: "report/workflow.rst"
 
-permutations = pd.read_csv("config/all_permutations.csv", index_col="uuid")
-
 rule all:
     input:
         "results/all.json",
@@ -25,7 +23,7 @@ rule aggregate_results:
         "results/all.json"
     input:
         logs=expand("results/{id}/solver.json",
-                    id=permutations.index)
+                    id=get_all_permutation_ids)
     log:
         "logs/aggregate_results.log"
     run:

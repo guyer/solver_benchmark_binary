@@ -10,7 +10,7 @@ SIZES = (10**(np.arange(np.log10(config["size"]["min"]),
                         1.)
               /2)).round().astype(int)**2
 
-rule aggregate_param_sweeps2:
+checkpoint aggregate_param_sweeps2:
     output:
         "config/all_permutations.csv"
     input:
@@ -38,7 +38,7 @@ checkpoint add_param_sweep:
     input:
         preconditioners="clones/fipy~{rev}/{suite}_preconditioners.txt",
         solvers="clones/fipy~{rev}/{suite}_solvers.txt",
-        clone="clones/fipy~{rev}"
+        clone="clones/fipy~{rev}/repo/"
     run:
         solvers = get_checkpoint_list(check=checkpoints.list_solvers,
                                       suite=wildcards.suite)

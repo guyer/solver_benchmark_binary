@@ -58,4 +58,5 @@ rule make_config:
     input:
         "config/all_permutations.csv"
     run:
+        permutations = get_all_permutations(wildcards)
         permutations.loc[wildcards.id].to_json(output[0])

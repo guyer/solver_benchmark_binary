@@ -46,7 +46,7 @@ def git_version(path):
 def get_conda_environment(wildcards):
     rev = permutations.loc[wildcards.id, 'fipy_rev']
     suite = {permutations.loc[wildcards.id, 'suite']}
-    return f"envs/fipy~{rev}/benchmark_{suite}"
+    return f"../envs/fipy~{rev}/benchmark_{suite}"
 
 def get_benchmark(wildcards):
     return f"workflow/scripts/{permutations.loc[wildcards.id, 'benchmark']}.py"
@@ -64,6 +64,30 @@ def get_all_plots(wildcards):
         plots = []
 
     return plots
+
+def get_all_permutation_ids(wildcards):
+    df = get_all_permutations(wildcards)
+
+    return df.index
+
+def get_all_permutations(wildcards):
+    path = checkpoints.aggregate_param_sweeps2.get().output[0]
+    if exists(path):
+        df = pd.read_csv(path,
+                         index_col="uuid")
+    else:
+        df = pd.DataFrame(columns=["benchmark",
+                                   "solver",
+                                   "preconditioner",
+                                   "size",
+                                   "uuid",
+                                   "fipy_rev",
+                                   "fipy_version",
+                                   "suite",
+                                   "hostname"],
+                          index_col="uuid")
+
+    return df
 
 def read_config(path):
     import json

@@ -5,9 +5,10 @@ checkpoint list_solvers:
         "clones/fipy~{rev}/{suite}_solvers.txt"
     input:
         conda="workflow/envs/fipy~{rev}/benchmark_{suite}.yml",
-        script="workflow/scripts/solvers.py"
+        script="workflow/scripts/solvers.py",
+        clone="clones/fipy~{rev}/repo/"
     conda:
-       "envs/fipy~{rev}/benchmark_{suite}.yml"
+       "../envs/fipy~{rev}/benchmark_{suite}.yml"
     log:
         "logs/fipy~{rev}/suite~{suite}/list_solvers.log"
     shell:
@@ -22,9 +23,10 @@ checkpoint list_preconditioners:
         "clones/fipy~{rev}/{suite}_preconditioners.txt"
     input:
         conda="workflow/envs/fipy~{rev}/benchmark_{suite}.yml",
-        script="workflow/scripts/preconditioners.py"
+        script="workflow/scripts/preconditioners.py",
+        clone="clones/fipy~{rev}/repo/"
     conda:
-       "envs/fipy~{rev}/benchmark_{suite}.yml"
+       "../envs/fipy~{rev}/benchmark_{suite}.yml"
     log:
         "logs/fipy~{rev}/suite~{suite}/list_preconditioners.log"
     shell:
@@ -36,9 +38,9 @@ checkpoint list_preconditioners:
 
 rule miney:
     output:
-        repo=directory("clones/fipy~{rev}")
+        repo=directory("clones/fipy~{rev}/repo/"),
     input:
-        env=expand("workflow/envs/fipy~{{rev}}/benchmark_{suite}.yml",
+        env=expand("workflow/rules/../envs/fipy~{{rev}}/benchmark_{suite}.yml",
                    suite=config["suites"]),
         post=expand("workflow/envs/fipy~{{rev}}/benchmark_{suite}.post-deploy.yml",
                     suite=config["suites"])
@@ -54,8 +56,8 @@ rule miney:
 
 rule meeny:
     output:
-        env="workflow/envs/fipy~{rev}/benchmark_{suite}.yml",
-        post="workflow/envs/fipy~{rev}/benchmark_{suite}.post-deploy.yml"
+        env="workflow/rules/../envs/fipy~{rev}/benchmark_{suite}.yml",
+        post="workflow/rules/../envs/fipy~{rev}/benchmark_{suite}.post-deploy.yml"
     input:
         env="workflow/envs/benchmark_{suite}.yml",
     shell:
