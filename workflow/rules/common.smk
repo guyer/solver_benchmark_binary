@@ -1,5 +1,5 @@
-def get_checkpoint_list(check, suite):
-    with open(check.get(suite=suite).output[0], 'r') as f:
+def get_checkpoint_list(check, rev, suite):
+    with open(check.get(rev=rev, suite=suite).output[0], 'r') as f:
         items = f.read().split()
     return items
 
@@ -13,7 +13,7 @@ def get_params(wildcards):
 
 def concat_csv(input, output, log):
     try:
-        li = [pd.read_csv(fname, index=False) for fname in input]
+        li = [pd.read_csv(fname, index_col=False) for fname in input]
         if li:
             df = pd.concat(li, ignore_index=True)
         else:
@@ -44,12 +44,15 @@ def git_version(path):
     return result.stdout.strip()
 
 def get_conda_environment(wildcards):
+    permutations = get_all_permutations(wildcards)
     rev = permutations.loc[wildcards.id, 'fipy_rev']
-    suite = {permutations.loc[wildcards.id, 'suite']}
-    return f"../envs/fipy~{rev}/benchmark_{suite}"
+    suite = permutations.loc[wildcards.id, 'suite']
+    return f"../envs/fipy~{rev}/benchmark_{suite}.yml"
 
 def get_benchmark(wildcards):
-    return f"workflow/scripts/{permutations.loc[wildcards.id, 'benchmark']}.py"
+    permutations = get_all_permutations(wildcards)
+    benchmarks = permutations.loc[wildcards.id, 'benchmark']
+    return f"workflow/scripts/{benchmarks}.py"
 
 def get_all_plots(wildcards):
     if exists(checkpoints.total_times.get().output[0]):

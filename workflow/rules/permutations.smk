@@ -41,9 +41,11 @@ checkpoint add_param_sweep:
         clone="clones/fipy~{rev}/repo/"
     run:
         solvers = get_checkpoint_list(check=checkpoints.list_solvers,
+                                      rev=wildcards.rev,
                                       suite=wildcards.suite)
         preconditioners = \
                   get_checkpoint_list(check=checkpoints.list_preconditioners,
+                                      rev=wildcards.rev,
                                       suite=wildcards.suite)
 
         df = pd.DataFrame(data=list(product(config["benchmarks"],
