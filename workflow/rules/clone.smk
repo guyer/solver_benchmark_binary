@@ -1,10 +1,12 @@
+from pathlib import Path
 from textwrap import dedent
 
 checkpoint list_solvers:
     output:
         "clones/fipy~{rev}/{suite}_solvers.txt"
     input:
-        conda="workflow/rules/../envs/fipy~{rev}/benchmark_{suite}.yml",
+        conda=(Path(workflow.current_basedir)
+               / "../envs/fipy~{rev}/benchmark_{suite}.yml"),
         script="workflow/scripts/solvers.py",
         clone="clones/fipy~{rev}/repo/"
     conda:
@@ -22,7 +24,8 @@ checkpoint list_preconditioners:
     output:
         "clones/fipy~{rev}/{suite}_preconditioners.txt"
     input:
-        conda="workflow/rules/../envs/fipy~{rev}/benchmark_{suite}.yml",
+        conda=(Path(workflow.current_basedir)
+               / "../envs/fipy~{rev}/benchmark_{suite}.yml"),
         script="workflow/scripts/preconditioners.py",
         clone="clones/fipy~{rev}/repo/"
     conda:
@@ -40,9 +43,11 @@ rule miney:
     output:
         repo=directory("clones/fipy~{rev}/repo/"),
     input:
-        env=expand("workflow/rules/../envs/fipy~{{rev}}/benchmark_{suite}.yml",
+        env=expand((Path(workflow.current_basedir)
+                    / "../envs/fipy~{{rev}}/benchmark_{suite}.yml"),
                    suite=config["suites"]),
-        post=expand("workflow/rules/../envs/fipy~{{rev}}/benchmark_{suite}.post-deploy.sh",
+        post=expand((Path(workflow.current_basedir)
+                     / "../envs/fipy~{{rev}}/benchmark_{suite}.post-deploy.sh"),
                     suite=config["suites"])
     params:
         fipy_repo=lambda _: config["fipy_url"]
@@ -56,8 +61,10 @@ rule miney:
 
 rule meeny:
     output:
-        env="workflow/rules/../envs/fipy~{rev}/benchmark_{suite}.yml",
-        post="workflow/rules/../envs/fipy~{rev}/benchmark_{suite}.post-deploy.sh"
+        env=(Path(workflow.current_basedir)
+             / "../envs/fipy~{rev}/benchmark_{suite}.yml"),
+        post=(Path(workflow.current_basedir)
+              / "../envs/fipy~{rev}/benchmark_{suite}.post-deploy.sh")
     input:
         env="workflow/envs/benchmark_{suite}.yml"
     log:
