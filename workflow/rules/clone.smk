@@ -3,12 +3,12 @@ from textwrap import dedent
 
 checkpoint list_solvers:
     output:
-        "clones/fipy~{rev}/{suite}_solvers.txt"
+        "resources/fipy~{rev}/{suite}_solvers.txt"
     input:
         conda=(Path(workflow.current_basedir)
                / "../envs/fipy~{rev}/benchmark_{suite}.yml"),
         script="workflow/scripts/solvers.py",
-        clone="clones/fipy~{rev}/repo/"
+        clone="resources/fipy~{rev}/repo/"
     conda:
        "../envs/fipy~{rev}/benchmark_{suite}.yml"
     log:
@@ -22,12 +22,12 @@ checkpoint list_solvers:
 
 checkpoint list_preconditioners:
     output:
-        "clones/fipy~{rev}/{suite}_preconditioners.txt"
+        "resources/fipy~{rev}/{suite}_preconditioners.txt"
     input:
         conda=(Path(workflow.current_basedir)
                / "../envs/fipy~{rev}/benchmark_{suite}.yml"),
         script="workflow/scripts/preconditioners.py",
-        clone="clones/fipy~{rev}/repo/"
+        clone="resources/fipy~{rev}/repo/"
     conda:
        "../envs/fipy~{rev}/benchmark_{suite}.yml"
     log:
@@ -41,7 +41,7 @@ checkpoint list_preconditioners:
 
 rule miney:
     output:
-        repo=directory("clones/fipy~{rev}/repo/"),
+        repo=directory("resources/fipy~{rev}/repo/"),
     input:
         env=expand((Path(workflow.current_basedir)
                     / "../envs/fipy~{{rev}}/benchmark_{suite}.yml"),
@@ -76,6 +76,6 @@ rule meeny:
         cat <<EOF >> {output.post:q}
         #!/usr/bin/env bash
         
-        pip install --editable "clones/fipy~{wildcards.rev}/repo"
+        pip install --editable "resources/fipy~{wildcards.rev}/repo"
         EOF        
         """)

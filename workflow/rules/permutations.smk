@@ -36,9 +36,9 @@ checkpoint add_param_sweep:
     output:
         "config/fipy~{rev}/{suite}_permutations.csv"
     input:
-        preconditioners="clones/fipy~{rev}/{suite}_preconditioners.txt",
-        solvers="clones/fipy~{rev}/{suite}_solvers.txt",
-        clone="clones/fipy~{rev}/repo/"
+        preconditioners="resources/fipy~{rev}/{suite}_preconditioners.txt",
+        solvers="resources/fipy~{rev}/{suite}_solvers.txt",
+        clone="resources/fipy~{rev}/repo/"
     run:
         solvers = get_checkpoint_list(check=checkpoints.list_solvers,
                                       rev=wildcards.rev,
