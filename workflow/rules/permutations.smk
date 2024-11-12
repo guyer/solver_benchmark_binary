@@ -14,7 +14,7 @@ checkpoint aggregate_param_sweeps2:
     output:
         "config/all_permutations.csv"
     input:
-        expand("config/fipy~{rev}/all_permutations.csv",
+        expand("config/fipy~{rev}/permutations.csv",
                rev=config["fipy_revs"])
     log:
         "logs/aggregate_param_sweeps2"
@@ -23,7 +23,7 @@ checkpoint aggregate_param_sweeps2:
 
 rule aggregate_param_sweeps:
     output:
-        "config/fipy~{rev}/all_permutations.csv"
+        "config/fipy~{rev}/permutations.csv"
     input:
         expand("config/fipy~{{rev}}/{suite}_permutations.csv",
                suite=config["suites"])
