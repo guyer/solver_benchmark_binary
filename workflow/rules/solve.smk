@@ -8,7 +8,7 @@ rule solve:
         config=lambda w, input: read_config(input.config),
         output=lambda w, output: os.path.dirname(output[0])
     conda:
-        get_conda_environment
+        get_conda_environment_from_id
     log:
         "results/{id}/solver.stderr"
     shell:

@@ -43,11 +43,16 @@ def git_version(path):
                             capture_output=True, text=True)
     return result.stdout.strip()
 
-def get_conda_environment(wildcards):
+def get_conda_environment_from_id(wildcards):
     permutations = get_all_permutations(wildcards)
     rev = permutations.loc[wildcards.id, 'fipy_rev']
     suite = permutations.loc[wildcards.id, 'suite']
     return f"../envs/fipy~{rev}/benchmark_{suite}.yml"
+
+def get_conda_environment_from_rev_and_suite(wildcards):
+    check = checkpoints.make_conda_env
+    return check.get(rev=wildcards.rev,
+                     suite=wildcards.suite).output["env"]
 
 def get_benchmark(wildcards):
     permutations = get_all_permutations(wildcards)

@@ -10,7 +10,7 @@ checkpoint list_solvers:
         script="workflow/scripts/solvers.py",
         clone="resources/fipy~{rev}/repo/"
     conda:
-       "../envs/fipy~{rev}/benchmark_{suite}.yml"
+        get_conda_environment_from_rev_and_suite
     log:
         "logs/fipy~{rev}/suite~{suite}/list_solvers.log"
     shell:
@@ -29,7 +29,7 @@ checkpoint list_preconditioners:
         script="workflow/scripts/preconditioners.py",
         clone="resources/fipy~{rev}/repo/"
     conda:
-       "../envs/fipy~{rev}/benchmark_{suite}.yml"
+        get_conda_environment_from_rev_and_suite
     log:
         "logs/fipy~{rev}/suite~{suite}/list_preconditioners.log"
     shell:
@@ -39,7 +39,7 @@ checkpoint list_preconditioners:
             > {output:q} 2> {log:q}
         """
 
-rule miney:
+rule clone_repo:
     output:
         repo=directory("resources/fipy~{rev}/repo/"),
     input:
@@ -59,7 +59,7 @@ rule miney:
         popd
         """
 
-rule meeny:
+checkpoint make_conda_env:
     output:
         env=(Path(workflow.current_basedir)
              / "../envs/fipy~{rev}/benchmark_{suite}.yml"),
@@ -68,7 +68,7 @@ rule meeny:
     input:
         env="workflow/envs/benchmark_{suite}.yml"
     log:
-        "logs/fipy~{rev}/meeny_{suite}.log"
+        "logs/fipy~{rev}/make_conda_env_{suite}.log"
     shell:
         dedent("""
         cp {input.env:q} {output.env:q}
