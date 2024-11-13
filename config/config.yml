@@ -1,7 +1,7 @@
 fipy_url: "https://github.com/usnistgov/fipy.git"
 
 fipy_revs:
-- "b0d350d3c"
+- "2c7ac213"
 
 size:
   min: 10
