@@ -1,7 +1,12 @@
 fipy_url: "https://github.com/usnistgov/fipy.git"
 
 fipy_revs:
-- "2c7ac213"
+# - "62cbf2211"
+# - "d8a569e79"
+- "b873c7e3f"
+- "2054173bf"
+- "36bff3800"
+- "2c7ac213b"
 
 size:
   min: 10
