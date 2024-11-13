@@ -51,6 +51,7 @@ def get_conda_environment_from_id(wildcards):
 
 def get_conda_environment_from_rev_and_suite(wildcards):
     check = checkpoints.make_conda_env
+    _ = checkpoints.clone_repo.get(rev=wildcards.rev)
     return check.get(rev=wildcards.rev,
                      suite=wildcards.suite).output["env"]
 

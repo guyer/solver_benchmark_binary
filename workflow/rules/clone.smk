@@ -39,7 +39,7 @@ checkpoint list_preconditioners:
             > {output:q} 2> {log:q}
         """
 
-rule clone_repo:
+checkpoint clone_repo:
     output:
         repo=directory("resources/fipy~{rev}/repo/"),
     input:
