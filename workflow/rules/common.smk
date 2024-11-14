@@ -3,14 +3,6 @@ def get_checkpoint_list(check, rev, suite):
         items = f.read().split()
     return items
 
-def get_params(wildcards):
-    p = checkpoints.params
-    param_file = p.get(path=wildcards.path,
-                       solversuite=wildcards.solversuite).output[0]
-    paramspace = Paramspace(pd.read_csv(param_file))
-    return expand(f"results//{{params}}/solver.log",
-                  params=paramspace.instance_patterns)
-
 def concat_csv(input, output, log):
     try:
         li = [pd.read_csv(fname, index_col=False) for fname in input]
