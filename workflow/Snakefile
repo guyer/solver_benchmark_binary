@@ -14,8 +14,6 @@ report: "report/workflow.rst"
 
 rule all:
     input:
-        "results/all.json",
-        "results/total_times.json",
         get_all_plots
 
 rule aggregate_results:
