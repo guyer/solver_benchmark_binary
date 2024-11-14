@@ -33,7 +33,7 @@ rule aggregate_param_sweeps:
     run:
         concat_csv(input, output[0], log[0])
 
-checkpoint add_param_sweep:
+rule add_param_sweep:
     output:
         "config/fipy~{rev}/{suite}_permutations.csv"
     input:
