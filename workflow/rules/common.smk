@@ -53,8 +53,9 @@ def get_benchmark(wildcards):
     return f"workflow/scripts/{benchmarks}.py"
 
 def get_all_plots(wildcards):
-    if exists(checkpoints.total_times.get().output[0]):
-        df = pd.read_json(checkpoints.total_times.get().output[0])
+    path = checkpoints.total_times.get().output[0]
+    if exists(path):
+        df = pd.read_json(path)
 
         gb = df.groupby(by=["fipy_version"])
 
