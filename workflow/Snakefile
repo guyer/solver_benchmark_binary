@@ -14,7 +14,9 @@ report: "report/workflow.rst"
 
 rule all:
     input:
-        get_all_plots
+        expand("results/plots/fipy~{rev}/{plot}.png",
+               rev=config["fipy_revs"],
+               plot=["total", "prepare", "solve"])
 
 rule aggregate_results:
     output:

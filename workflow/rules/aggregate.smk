@@ -44,7 +44,7 @@ def extract_total_times(input, output):
 
     df2.to_json(output, date_format="iso")
 
-checkpoint total_times:
+rule total_times:
     output:
         "results/total_times.json"
     input:

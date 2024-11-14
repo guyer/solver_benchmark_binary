@@ -52,21 +52,6 @@ def get_benchmark(wildcards):
     benchmarks = permutations.loc[wildcards.id, 'benchmark']
     return f"workflow/scripts/{benchmarks}.py"
 
-def get_all_plots(wildcards):
-    path = checkpoints.total_times.get().output[0]
-    if exists(path):
-        df = pd.read_json(path)
-
-        gb = df.groupby(by=["fipy_version"])
-
-        plots = expand("results/plots/fipy~{rev}/{plot}.png",
-                       rev=list(gb.groups.keys()),
-                       plot=["total", "prepare", "solve"])
-    else:
-        plots = []
-
-    return plots
-
 def get_all_permutation_ids(wildcards):
     df = get_all_permutations(wildcards)
 
