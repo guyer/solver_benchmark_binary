@@ -65,8 +65,8 @@ def get_all_permutations(wildcards):
                                    "fipy_rev",
                                    "fipy_version",
                                    "suite",
-                                   "hostname"],
-                          index_col="uuid")
+                                   "hostname"])
+        df.set_index("uuid")
 
     return df
 
