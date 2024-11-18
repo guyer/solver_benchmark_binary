@@ -15,7 +15,7 @@ rule plot_permutations:
         "results/total_times.json"
     run:
         df = pd.read_json(input[0])
-        df = df.query(f"fipy_version == '{wildcards.rev}'")
+        df = df.query(f"fipy_rev == '{wildcards.rev}'")
         plot_all(df, output.total, ymin=1e-2, ymax=1e2)
         plot_all(df, output.prepare, data_set="prepare_seconds", ylabel="prepare time", ymin=1e-2, ymax=1e2)
         plot_all(df, output.solve, data_set="solve_seconds", ylabel="solve time", ymin=1e-4, ymax=1e2)
