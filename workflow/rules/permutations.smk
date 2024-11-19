@@ -11,25 +11,15 @@ SIZES = (10**(np.arange(np.log10(config["size"]["min"]),
                         1.)
               /2)).round().astype(int)**2
 
-checkpoint aggregate_param_sweeps2:
+checkpoint aggregate_permutations:
     output:
         "config/all_permutations.csv"
     input:
-        expand("config/fipy~{rev}/permutations.csv",
-               rev=config["fipy_revs"])
-    log:
-        "logs/aggregate_param_sweeps2"
-    run:
-        concat_csv(input, output[0], log[0])
-
-rule aggregate_param_sweeps:
-    output:
-        "config/fipy~{rev}/permutations.csv"
-    input:
-        expand("config/fipy~{{rev}}/{suite}_permutations.csv",
+        expand("config/fipy~{rev}/{suite}_permutations.csv",
+               rev=config["fipy_revs"],
                suite=config["suites"])
     log:
-        "logs/fipy~{rev}/aggregate_param_sweeps.log"
+        "logs/aggregate_permutations.log"
     run:
         concat_csv(input, output[0], log[0])
 

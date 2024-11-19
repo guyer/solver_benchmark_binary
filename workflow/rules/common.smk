@@ -52,7 +52,7 @@ def get_all_permutation_ids(wildcards):
     return df.index
 
 def get_all_permutations(wildcards):
-    path = checkpoints.aggregate_param_sweeps2.get().output[0]
+    path = checkpoints.aggregate_permutations.get().output[0]
     if exists(path):
         df = pd.read_csv(path,
                          index_col="uuid")
