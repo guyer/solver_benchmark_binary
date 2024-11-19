@@ -23,7 +23,7 @@ checkpoint aggregate_permutations:
     run:
         concat_csv(input, output[0], log[0])
 
-rule add_param_sweep:
+rule rev_and_suite_permutations:
     output:
         "config/fipy~{rev}/{suite}_permutations.csv"
     input:
@@ -31,10 +31,10 @@ rule add_param_sweep:
         solvers="resources/fipy~{rev}/{suite}_solvers.txt",
         clone="resources/fipy~{rev}/repo/"
     log:
-        "logs/fipy~{rev}/{suite}_add_param_sweep.log"
+        "logs/fipy~{rev}/{suite}_permutations.log"
     run:
         # https://stackoverflow.com/a/55849527/2019542
-        logger = logging.getLogger('add_param_sweep')
+        logger = logging.getLogger('rev_and_suite_permutations')
         fh = logging.FileHandler(str(log))
         fh.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
