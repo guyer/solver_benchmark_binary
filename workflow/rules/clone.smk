@@ -6,12 +6,12 @@ checkpoint list_solvers:
         "resources/fipy~{rev}/{suite}_solvers.txt"
     input:
         conda=(Path(workflow.current_basedir)
-               / "../envs/fipy~{rev}/benchmark_{suite}.yml"),
+               / "../envs/fipy~{rev}/benchmark_{suite}.yml").as_posix(),
         script="workflow/scripts/solvers.py",
         clone="resources/fipy~{rev}/repo/"
     conda:
         (Path(workflow.current_basedir)
-             / "../envs/fipy~{rev}/benchmark_{suite}.yml")
+             / "../envs/fipy~{rev}/benchmark_{suite}.yml").as_posix()
     log:
         "logs/fipy~{rev}/suite~{suite}/list_solvers.log"
     shell:
@@ -26,12 +26,12 @@ checkpoint list_preconditioners:
         "resources/fipy~{rev}/{suite}_preconditioners.txt"
     input:
         conda=(Path(workflow.current_basedir)
-               / "../envs/fipy~{rev}/benchmark_{suite}.yml"),
+               / "../envs/fipy~{rev}/benchmark_{suite}.yml").as_posix(),
         script="workflow/scripts/preconditioners.py",
         clone="resources/fipy~{rev}/repo/"
     conda:
         (Path(workflow.current_basedir)
-             / "../envs/fipy~{rev}/benchmark_{suite}.yml")
+             / "../envs/fipy~{rev}/benchmark_{suite}.yml").as_posix()
     log:
         "logs/fipy~{rev}/suite~{suite}/list_preconditioners.log"
     shell:
@@ -46,10 +46,11 @@ rule clone_repo:
         repo=directory("resources/fipy~{rev}/repo/"),
     input:
         env=expand((Path(workflow.current_basedir)
-                    / "../envs/fipy~{{rev}}/benchmark_{suite}.yml"),
+                    / "../envs/fipy~{{rev}}/benchmark_{suite}.yml").as_posix(),
                    suite=config["suites"]),
         post=expand((Path(workflow.current_basedir)
-                     / "../envs/fipy~{{rev}}/benchmark_{suite}.post-deploy.sh"),
+                     / "../envs/fipy~{{rev}}"
+                     / "benchmark_{suite}.post-deploy.sh").as_posix(),
                     suite=config["suites"])
     params:
         fipy_repo=lambda _: config["fipy_url"]
@@ -64,9 +65,10 @@ rule clone_repo:
 rule make_conda_env:
     output:
         env=(Path(workflow.current_basedir)
-             / "../envs/fipy~{rev}/benchmark_{suite}.yml"),
+             / "../envs/fipy~{rev}/benchmark_{suite}.yml").as_posix(),
         post=(Path(workflow.current_basedir)
-              / "../envs/fipy~{rev}/benchmark_{suite}.post-deploy.sh")
+              / "../envs/fipy~{rev}"
+              / "benchmark_{suite}.post-deploy.sh").as_posix()
     input:
         env="workflow/envs/benchmark_{suite}.yml"
     log:
