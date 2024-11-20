@@ -14,6 +14,7 @@ report: "report/workflow.rst"
 
 rule all:
     input:
+        "results/total_times.json",
         expand("results/plots/fipy~{rev}/{plot}.png",
                rev=config["fipy_revs"],
                plot=["total", "prepare", "solve"])
@@ -22,6 +23,7 @@ rule aggregate_results:
     output:
         "results/all.json"
     input:
+        "config/all_permutations.csv",
         logs=expand("results/{id}/solver.json",
                     id=get_all_permutation_ids)
     log:
