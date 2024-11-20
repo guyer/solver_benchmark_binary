@@ -9,8 +9,7 @@ checkpoint list_solvers:
         script="workflow/scripts/solvers.py",
         clone="resources/fipy~{rev}/repo/"
     conda:
-        (Path(workflow.current_basedir)
-             / "../envs/fipy~{rev}/benchmark_{suite}.yml").as_posix()
+        get_conda_environment_from_rev_and_suite
     log:
         "logs/fipy~{rev}/suite~{suite}/list_solvers.log"
     shell:
@@ -28,8 +27,7 @@ checkpoint list_preconditioners:
         script="workflow/scripts/preconditioners.py",
         clone="resources/fipy~{rev}/repo/"
     conda:
-        (Path(workflow.current_basedir)
-             / "../envs/fipy~{rev}/benchmark_{suite}.yml").as_posix()
+        get_conda_environment_from_rev_and_suite
     log:
         "logs/fipy~{rev}/suite~{suite}/list_preconditioners.log"
     shell:
@@ -57,7 +55,7 @@ rule clone_repo:
         popd
         """
 
-rule make_conda_env:
+checkpoint make_conda_env:
     output:
         env="../envs/fipy~{rev}/benchmark_{suite}.yml",
         post="../envs/fipy~{rev}/benchmark_{suite}.post-deploy.sh"
