@@ -61,15 +61,9 @@ rule make_config:
         "results/{id}/config.json"
     input:
         "config/all_permutations.csv"
+    conda:
+        "../envs/snakemake.yml"
     log:
         "logs/make_config_{id}.log"
-    run:
-        import traceback
-
-        with open(log[0], "w") as logf:
-            try:
-                permutations = get_all_permutations(wildcards)
-                permutations.loc[wildcards.id].to_json(output[0])
-            except Exception:
-                traceback.print_exc(file=logf)
-                pass
+    script:
+        "../scripts/make_config.py"
