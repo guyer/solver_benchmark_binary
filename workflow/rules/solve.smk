@@ -31,8 +31,12 @@ rule copy_script:
         benchmark="results/{id}/benchmark.py"
     input:
         benchmark=get_benchmark
+    conda:
+        "../envs/snakemake.yml"
+    log:
+        "logs/copy_script_{id}.log"
     shell:
-        "cp {input.benchmark:q} {output.benchmark:q}"
+        "cp {input.benchmark:q} {output.benchmark:q} 2> {log:q}"
 
 rule ipynb2py:
     input:
@@ -40,7 +44,7 @@ rule ipynb2py:
     output:
         temp("workflow/scripts/{notebook}.py")
     conda:
-        "snakemake"
+        "../envs/snakemake.yml"
     log:
         stdout="workflow/scripts/{notebook}.stdout",
         stderr="workflow/scripts/{notebook}.stderr"

@@ -13,6 +13,11 @@ dependencies:
   - pygments
   - pandas
   - nbconvert
+  - ipython
+  - ca-certificates
+  - certifi
+  - openssl
+  - tree
   - pip:
     #  at the time of writing - 7. Feb 24 - pysam on bioconda will require
     #  a lower python version than snakemake, install pysam

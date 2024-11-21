@@ -29,7 +29,7 @@ rule total_times:
     log:
         "logs/total_times.log"
     conda:
-        "snakemake"
+        "../envs/snakemake.yml"
     shell:
         r"""
         python {input.script} {input.all} \

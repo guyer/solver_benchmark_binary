@@ -42,6 +42,8 @@ rule make_conda_env:
     input:
         env="workflow/envs/benchmark_{suite}.yml",
         repo="resources/fipy~{rev}/repo/"
+    conda:
+        "../envs/snakemake.yml"
     log:
         "logs/fipy~{rev}/make_conda_env_{suite}.log"
     shell:
@@ -62,6 +64,8 @@ rule clone_repo:
         repo=directory("resources/fipy~{rev}/repo/"),
     params:
         fipy_repo=lambda _: config["fipy_url"]
+    conda:
+        "../envs/snakemake.yml"
     shell:
         """
         git clone --filter=blob:none {params.fipy_repo:q} {output[repo]:q}
