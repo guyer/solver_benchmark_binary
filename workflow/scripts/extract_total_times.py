@@ -1,8 +1,8 @@
 import sys
 import pandas as pd
 
-assert len(sys.argv) == 1
-input, = sys.argv
+assert len(sys.argv) == 2, str(sys.argv)
+input = sys.argv[1]
 
 df = pd.read_json(input, convert_dates=["time_stamp"])
 df["solve_time"] = pd.to_timedelta(df["solve_time"])
@@ -23,6 +23,4 @@ df2["elapsed_seconds"] = df2["time_delta"] / second
 df2["prepare_seconds"] = df2["prepare_time"] / second
 df2["solve_seconds"] = df2["solve_time"] / second
 
-df2.sort_values("numberOfElements").to_json(output, date_format="iso")
-
-df2.to_json(sys.stdout, date_format="iso")
+df2.sort_values("numberOfElements").to_json(sys.stdout, date_format="iso")
