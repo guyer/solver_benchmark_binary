@@ -48,7 +48,7 @@ rule make_conda_env:
         "logs/fipy~{rev}/make_conda_env_{suite}.log"
     shell:
         dedent("""
-        pwd > {log}
+        exec 2> "{log:q}"  # send all stderr from this script to the log file
 
         cp {input.env:q} {output.env:q}
         
@@ -66,8 +66,12 @@ rule clone_repo:
         fipy_repo=lambda _: config["fipy_url"]
     conda:
         "../envs/snakemake.yml"
+    log:
+        "logs/fipy~{rev}/clone_repo.log"
     shell:
         """
+        exec 2> "{log:q}"  # send all stderr from this script to the log file
+
         git clone --filter=blob:none {params.fipy_repo:q} {output[repo]:q}
         pushd {output[repo]:q}
         git checkout {wildcards.rev:q}

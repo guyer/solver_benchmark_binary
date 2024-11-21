@@ -61,6 +61,15 @@ rule make_config:
         "results/{id}/config.json"
     input:
         "config/all_permutations.csv"
+    log:
+        "logs/make_config_{id}.log"
     run:
-        permutations = get_all_permutations(wildcards)
-        permutations.loc[wildcards.id].to_json(output[0])
+        import traceback
+
+        with open(log[0], "w") as logf:
+            try:
+                permutations = get_all_permutations(wildcards)
+                permutations.loc[wildcards.id].to_json(output[0])
+            except Exception:
+                traceback.print_exc(file=logf)
+                pass
