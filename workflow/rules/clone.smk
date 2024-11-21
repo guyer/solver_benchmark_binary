@@ -5,16 +5,10 @@ checkpoint list_solvers:
     output:
         "resources/fipy~{rev}/{suite}_solvers.txt"
     input:
-#         conda="../envs/fipy~{rev}/benchmark_{suite}.yml",
-        conda=(Path(workflow.current_basedir)
-               / "../envs/fipy~{rev}/benchmark_{suite}.yml").as_posix(),
+        conda="workflow/envs/fipy~{rev}/benchmark_{suite}.yml",
         script="workflow/scripts/solvers.py",
-#         clone="resources/fipy~{rev}/repo/"
     conda:
-        get_conda_environment_from_rev_and_suite
-#         "../envs/fipy~{rev}/benchmark_{suite}.ymlA"
-#         (Path(workflow.current_basedir)
-#              / "../envs/fipy~{rev}/benchmark_{suite}.yml").as_posix()
+        "../envs/fipy~{rev}/benchmark_{suite}.yml"
     log:
         "logs/fipy~{rev}/suite~{suite}/list_solvers.log"
     shell:
@@ -28,14 +22,10 @@ checkpoint list_preconditioners:
     output:
         "resources/fipy~{rev}/{suite}_preconditioners.txt"
     input:
-#         conda="../envs/fipy~{rev}/benchmark_{suite}.yml",
-        conda=(Path(workflow.current_basedir)
-               / "../envs/fipy~{rev}/benchmark_{suite}.yml").as_posix(),
+        conda="workflow/envs/fipy~{rev}/benchmark_{suite}.yml",
         script="workflow/scripts/preconditioners.py",
-#         clone="resources/fipy~{rev}/repo/"
     conda:
-        get_conda_environment_from_rev_and_suite
-#         "../envs/fipy~{rev}/benchmark_{suite}.ymlB"
+        "../envs/fipy~{rev}/benchmark_{suite}.yml"
     log:
         "logs/fipy~{rev}/suite~{suite}/list_preconditioners.log"
     shell:
@@ -45,17 +35,10 @@ checkpoint list_preconditioners:
             > {output:q} 2> {log:q}
         """
 
-
-
-checkpoint make_conda_env:
+rule make_conda_env:
     output:
-#         env="../envs/fipy~{rev}/benchmark_{suite}.yml",
-#         post="../envs/fipy~{rev}/benchmark_{suite}.post-deploy.sh"
-        env=(Path(workflow.current_basedir)
-             / "../envs/fipy~{rev}/benchmark_{suite}.yml").as_posix(),
-        post=(Path(workflow.current_basedir)
-              / "../envs/fipy~{rev}"
-              / "benchmark_{suite}.post-deploy.sh").as_posix()
+        env="workflow/envs/fipy~{rev}/benchmark_{suite}.yml",
+        post="workflow/envs/fipy~{rev}/benchmark_{suite}.post-deploy.sh"
     input:
         env="workflow/envs/benchmark_{suite}.yml",
         repo="resources/fipy~{rev}/repo/"

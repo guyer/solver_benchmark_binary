@@ -43,13 +43,6 @@ def get_conda_environment_from_id(wildcards):
     suite = permutations.loc[wildcards.id, 'suite']
     return f"../envs/fipy~{rev}/benchmark_{suite}.yml"
 
-def get_conda_environment_from_rev_and_suite(wildcards):
-    check = checkpoints.make_conda_env
-    env = check.get(rev=wildcards.rev,
-                    suite=wildcards.suite).output["env"]
-#     return (Path(workflow.current_basedir) / env).as_posix()
-    return env
-
 def get_benchmark(wildcards):
     permutations = get_all_permutations(wildcards)
     benchmarks = permutations.loc[wildcards.id, 'benchmark']
