@@ -31,3 +31,14 @@ rule aggregate_results:
     run:
         concat_json(input.logs, output[0], log[0])
 
+# this rule addressses a bootstrapping problem
+# list_solvers and list_preconditioners require
+# conda environments to run, but the conda environments
+# may not be created, yet. Checkpoint rules produce
+# messed up graphs.
+
+rule all_envs:
+    input:
+        expand("workflow/envs/fipy~{rev}/benchmark_{suite}.yml",
+               rev=config["fipy_revs"],
+               suite=config["suites"])
