@@ -1,3 +1,5 @@
+from pathlib import Path
+
 def get_checkpoint_list(check, rev, suite):
     with open(check.get(rev=rev, suite=suite).output[0], 'r') as f:
         items = f.read().split()
@@ -43,9 +45,9 @@ def get_conda_environment_from_id(wildcards):
 
 def get_conda_environment_from_rev_and_suite(wildcards):
     check = checkpoints.make_conda_env
-    _ = checkpoints.clone_repo.get(rev=wildcards.rev)
-    return check.get(rev=wildcards.rev,
-                     suite=wildcards.suite).output["env"]
+    env = check.get(rev=wildcards.rev,
+                    suite=wildcards.suite).output["env"]
+    return (Path(workflow.current_basedir) / env).as_posix()
 
 def get_benchmark(wildcards):
     permutations = get_all_permutations(wildcards)

@@ -37,30 +37,13 @@ checkpoint list_preconditioners:
             > {output:q} 2> {log:q}
         """
 
-rule clone_repo:
-    output:
-        repo=directory("resources/fipy~{rev}/repo/"),
-    input:
-        env=expand("../envs/fipy~{{rev}}/benchmark_{suite}.yml",
-                   suite=config["suites"]),
-        post=expand("../envs/fipy~{{rev}}/benchmark_{suite}.post-deploy.sh",
-                    suite=config["suites"])
-    params:
-        fipy_repo=lambda _: config["fipy_url"]
-    shell:
-        """
-        git clone --filter=blob:none {params.fipy_repo:q} {output[repo]:q}
-        pushd {output[repo]:q}
-        git checkout {wildcards.rev:q}
-        popd
-        """
-
 checkpoint make_conda_env:
     output:
         env="../envs/fipy~{rev}/benchmark_{suite}.yml",
         post="../envs/fipy~{rev}/benchmark_{suite}.post-deploy.sh"
     input:
-        env="workflow/envs/benchmark_{suite}.yml"
+        env="workflow/envs/benchmark_{suite}.yml",
+        repo="resources/fipy~{rev}/repo/"
     log:
         "logs/fipy~{rev}/make_conda_env_{suite}.log"
     shell:
@@ -73,3 +56,16 @@ checkpoint make_conda_env:
         pip install --editable "resources/fipy~{wildcards.rev}/repo"
         EOF        
         """)
+
+rule clone_repo:
+    output:
+        repo=directory("resources/fipy~{rev}/repo/"),
+    params:
+        fipy_repo=lambda _: config["fipy_url"]
+    shell:
+        """
+        git clone --filter=blob:none {params.fipy_repo:q} {output[repo]:q}
+        pushd {output[repo]:q}
+        git checkout {wildcards.rev:q}
+        popd
+        """
