@@ -13,4 +13,4 @@ try:
     permutations.loc[snakemake.wildcards.id].to_json(snakemake.output[0])
 except Exception as e:
     logger.error(e, exc_info=True)
-    pass
+    raise e

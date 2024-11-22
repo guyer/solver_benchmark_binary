@@ -1,5 +1,3 @@
-import pandas as pd
-
 rule plot_permutations:
     output:
         total="results/plots/fipy~{rev}/total.png",

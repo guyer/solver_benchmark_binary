@@ -8,7 +8,6 @@ include: "rules/clone.smk"
 include: "rules/permutations.smk"
 include: "rules/logs.smk"
 include: "rules/solve.smk"
-include: "rules/plot_scaling.smk"
 
 report: "report/workflow.rst"
 

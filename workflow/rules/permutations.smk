@@ -14,8 +14,8 @@ rule rev_and_suite_permutations:
     output:
         "config/fipy~{rev}/{suite}_permutations.csv"
     input:
-        preconditioners="resources/fipy~{rev}/{suite}_preconditioners.txt",
-        solvers="resources/fipy~{rev}/{suite}_solvers.txt",
+        preconditioners=get_preconditioners,
+        solvers=get_solvers,
         clone="resources/fipy~{rev}/repo/"
     conda:
         "../envs/snakemake.yml"

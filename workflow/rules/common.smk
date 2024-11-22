@@ -1,10 +1,5 @@
 from pathlib import Path
 
-def get_checkpoint_list(check, rev, suite):
-    with open(check.get(rev=rev, suite=suite).output[0], 'r') as f:
-        items = f.read().split()
-    return items
-
 def concat_csv(input, output, log):
     try:
         li = [pd.read_csv(fname, index_col=False) for fname in input]
@@ -16,7 +11,7 @@ def concat_csv(input, output, log):
     except Exception as e:
         with open(log, 'w') as f:
             f.write(repr(e))
-        raise
+        raise e
 
 def concat_json(input, output, log):
     try:
@@ -29,13 +24,7 @@ def concat_json(input, output, log):
     except Exception as e:
         with open(log, 'w') as f:
             f.write(repr(e))
-        raise
-
-def git_version(path):
-    import subprocess
-    result = subprocess.run(["git", "-C", path, "describe", "--always", "--dirty"],
-                            capture_output=True, text=True)
-    return result.stdout.strip()
+        raise e
 
 def get_conda_environment_from_id(wildcards):
     permutations = get_all_permutations(wildcards)
@@ -72,8 +61,34 @@ def get_all_permutations(wildcards):
 
     return df
 
+def extract_config_by_id(wildcards, output, log):
+    import logging
+
+    # https://stackoverflow.com/a/55849527/2019542
+    logger = logging.getLogger('make_config')
+    fh = logging.FileHandler(str(log))
+    fh.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+
+    try:
+        permutations = get_all_permutations(wildcards)
+        permutations.loc[wildcards.id].to_json(output)
+    except Exception as e:
+        logger.error(e, exc_info=True)
+        raise e
+
 def read_config(path):
     import json
 
     with open(path, 'r') as f:
         return json.load(f)
+
+def get_preconditioners(wildcards):
+    return checkpoints.list_preconditioners.get(rev=wildcards.rev,
+                                                suite=wildcards.suite).output[0]
+
+def get_solvers(wildcards):
+    return checkpoints.list_solvers.get(rev=wildcards.rev,
+                                        suite=wildcards.suite).output[0]

@@ -2,7 +2,19 @@ from itertools import product
 import uuid
 import platform
 import numpy as np
+import pandas as pd
 import logging
+import subprocess
+
+def get_checkpoint_list(listf):
+    with open(listf, 'r') as f:
+        items = f.read().split()
+    return items
+
+def git_version(path):
+    result = subprocess.run(["git", "-C", path, "describe", "--always", "--dirty"],
+                            capture_output=True, text=True)
+    return result.stdout.strip()
 
 # https://stackoverflow.com/a/55849527/2019542
 logger = logging.getLogger('rev_and_suite_permutations')
@@ -13,13 +25,10 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 try:
-    solvers = get_checkpoint_list(check=snakemake.checkpoints.list_solvers,
-                                  rev=snakemake.wildcards.rev,
-                                  suite=snakemake.wildcards.suite)
-    preconditioners = \
-              get_checkpoint_list(check=snakemake.checkpoints.list_preconditioners,
-                                  rev=snakemake.wildcards.rev,
-                                  suite=snakemake.wildcards.suite)
+    global checkpoints
+
+    solvers = get_checkpoint_list(snakemake.input.solvers)
+    preconditioners = get_checkpoint_list(snakemake.input.preconditioners)
 
     # calculate dimensions that produce steps in orders of magnitude
     # in number of cells for square 2D grids
@@ -40,12 +49,12 @@ try:
     df["uuid"] = [str(uuid.uuid4()) for item in df.iterrows()]
     df = df.set_index("uuid")
 
-    df["fipy_rev"] = wildcards.rev
-    df["fipy_version"] = git_version(path=input.clone)
-    df["suite"] = wildcards.suite
+    df["fipy_rev"] = snakemake.wildcards.rev
+    df["fipy_version"] = git_version(path=snakemake.input.clone)
+    df["suite"] = snakemake.wildcards.suite
     df["hostname"] = platform.node()
 
-    df.to_csv(output[0])
+    df.to_csv(snakemake.output[0])
 except Exception as e:
     logger.error(e, exc_info=True)
-    pass
+    raise e

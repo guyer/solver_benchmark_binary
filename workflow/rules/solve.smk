@@ -61,9 +61,7 @@ rule make_config:
         "results/{id}/config.json"
     input:
         "config/all_permutations.csv"
-    conda:
-        "../envs/snakemake.yml"
     log:
         "logs/make_config_{id}.log"
-    script:
-        "../scripts/make_config.py"
+    run:
+        extract_config_by_id(wildcards, output[0], log[0])

@@ -48,7 +48,7 @@ rule make_conda_env:
         "logs/fipy~{rev}/make_conda_env_{suite}.log"
     shell:
         dedent("""
-        exec 2> "{log:q}"  # send all stderr from this script to the log file
+        exec 2> {log:q}  # send all stderr from this script to the log file
 
         cp {input.env:q} {output.env:q}
         
@@ -70,7 +70,7 @@ rule clone_repo:
         "logs/fipy~{rev}/clone_repo.log"
     shell:
         """
-        exec 2> "{log:q}"  # send all stderr from this script to the log file
+        exec 2> {log:q}  # send all stderr from this script to the log file
 
         git clone --filter=blob:none {params.fipy_repo:q} {output[repo]:q}
         pushd {output[repo]:q}
