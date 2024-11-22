@@ -16,6 +16,10 @@ size:
 suites:
 - "petsc"
 
+restart: "resources/t=300.0.npz"
+checkpoint_interval: 1.
+totaltime: 301.
+
 benchmarks:
 - "binary_phase_field"
 # - "diffusion"
