@@ -14,8 +14,9 @@ report: "report/workflow.rst"
 rule all:
     input:
         "results/total_times.json",
-        expand("results/plots/fipy~{rev}/{plot}.png",
+        expand("results/plots/fipy~{rev}/{benchmark}/{plot}.png",
                rev=config["fipy_revs"],
+               benchmark=config["benchmarks"],
                plot=["total", "prepare", "solve"])
 
 rule aggregate_results:
