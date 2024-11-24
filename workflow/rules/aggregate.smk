@@ -27,14 +27,9 @@ rule total_times:
         "results/total_times.json"
     input:
         all="results/all.json",
-        script="workflow/scripts/extract_total_times.py"
     log:
         "logs/total_times.log"
     conda:
         "../envs/snakemake.yml"
-    shell:
-        r"""
-        python {input.script} {input.all} \
-            > {output:q} 2> {log:q}
-        """
-
+    script:
+        "../scripts/extract_total_times.py"
