@@ -1,7 +1,9 @@
 .ipynb_checkpoints
 *.pyc
+logs/**
 results/**
 .snakemake/**
+config/all_permutations.csv
 config/fipy~*
 resources/fipy~*
 workflow/envs/fipy~*
