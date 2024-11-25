@@ -1,3 +1,5 @@
+import pandas as pd
+
 def concat_csv(input, output, log):
     try:
         li = [pd.read_csv(fname, index_col=False) for fname in input]

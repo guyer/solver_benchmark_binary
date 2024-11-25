@@ -10,6 +10,7 @@ include: "rules/solve.smk"
 report: "report/workflow.rst"
 
 rule all:
+    localrule: True
     input:
         "results/total_times.json",
         expand("results/plots/fipy~{rev}/{benchmark}/{plot}.png",
@@ -18,6 +19,7 @@ rule all:
                plot=["total", "prepare", "solve"])
 
 rule aggregate_results:
+    localrule: True
     output:
         "results/all.json"
     input:
@@ -36,6 +38,7 @@ rule aggregate_results:
 # messed up graphs.
 
 rule all_envs:
+    localrule: True
     input:
         expand("workflow/envs/fipy~{rev}/benchmark_{suite}.yml",
                rev=config["fipy_revs"],

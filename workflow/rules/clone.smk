@@ -37,6 +37,7 @@ rule make_conda_env:
         "../scripts/make_conda_env.sh"
 
 rule clone_repo:
+    localrule: True
     output:
         repo=directory("resources/fipy~{rev}/repo/"),
     params:

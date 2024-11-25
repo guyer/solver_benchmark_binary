@@ -23,6 +23,7 @@ rule plot_permutations:
         "../scripts/plot_permutations.py"
 
 rule total_times:
+    localrule: True
     output:
         "results/total_times.json"
     input:
