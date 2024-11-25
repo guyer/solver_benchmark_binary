@@ -20,7 +20,7 @@ checkpoint list_preconditioners:
     log:
         "logs/fipy~{rev}/suite~{suite}/list_preconditioners.log"
     script:
-        "../scripts/preconditioners.py"
+        "../scripts/list_preconditioners.py"
 
 rule make_conda_env:
     output:

@@ -1,6 +1,7 @@
 """Introspect FiPy for names of preconditioners in active suite
 """
 
+import logging
 import os
 
 if "FIPY_SOLVERS" not in os.environ:
