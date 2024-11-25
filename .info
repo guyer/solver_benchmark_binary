@@ -4,16 +4,18 @@ NOTES.md
 	Information about first round results.
 	Lost all context at this point?
 README.md
-	Description of `solvers_and_timings/`.
+	Description of this workflow.
 TODO.md
 	Tasks to work on.
 config
-    Snakemake workflow configuration.
+	Snakemake workflow configuration.
+images
+	Workflow graphs.
+logs
+	Workflow progress reports.
 resources
 	Data used by workflows.
 results
-	Simulation results.
-src
-	Analysis package.
+	Workflow results.
 workflow
 	Snakemake workflow definition.
