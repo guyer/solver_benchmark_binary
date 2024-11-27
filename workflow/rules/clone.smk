@@ -23,6 +23,7 @@ checkpoint list_preconditioners:
         "../scripts/list_preconditioners.py"
 
 rule make_conda_env:
+    localrule: True
     output:
         env="workflow/envs/fipy~{rev}/benchmark_{suite}.yml",
         post="workflow/envs/fipy~{rev}/benchmark_{suite}.post-deploy.sh"
