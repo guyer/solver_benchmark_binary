@@ -37,7 +37,7 @@ rule aggregate_results:
 # may not be created, yet. Checkpoint rules produce
 # messed up graphs.
 
-rule all_envs:
+rule bootstrap:
     localrule: True
     input:
         expand("workflow/envs/fipy~{rev}/benchmark_{suite}.yml",

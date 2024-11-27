@@ -28,12 +28,8 @@ environments created for them before simulation variants can be run.  From
 the base directory of this repository:
 
 ```bash
-snakemake --use-conda all_envs
+snakemake --use-conda bootstrap
 ```
-
-Progress can be tracked by launching
-[panoptes](https://github.com/panoptes-organization/panoptes) and invoking
-`snakemake` with the `--wms-monitor` option.
 
 #### Simulation and Analysis
 
@@ -43,6 +39,10 @@ Once the FiPy revision environments have been established by the
 ```bash
 snakemake --use-conda all
 ```
+
+Progress can be tracked by launching
+[panoptes](https://github.com/panoptes-organization/panoptes) and invoking
+`snakemake` with the `--wms-monitor` option.
 
 ### Reporting
 
