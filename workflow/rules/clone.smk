@@ -1,4 +1,5 @@
 checkpoint list_solvers:
+    localrule: True
     output:
         "resources/fipy~{rev}/{suite}_solvers.txt"
     input:
@@ -11,6 +12,7 @@ checkpoint list_solvers:
         "../scripts/list_solvers.py"
 
 checkpoint list_preconditioners:
+    localrule: True
     output:
         "resources/fipy~{rev}/{suite}_preconditioners.txt"
     input:
