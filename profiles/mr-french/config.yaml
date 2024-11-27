@@ -1,0 +1,7 @@
+printshellcmds: True
+jobs: 16
+executor: slurm
+default-resources:
+  - mem=1mb
+  - runtime=2
+  - slurm_partition="fast"
