@@ -7,5 +7,5 @@ cp "${snakemake_input[env]}" "${snakemake_output[env]}"
 cat <<EOF >> "${snakemake_output[post]}"
 #!/usr/bin/env bash
 
-pip install --editable "resources/fipy~${snakemake_wildcards[rev]}/repo"
+pip install --editable "${snakemake_input[repo]}"
 EOF
