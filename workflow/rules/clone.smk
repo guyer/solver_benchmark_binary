@@ -31,7 +31,7 @@ rule make_conda_env:
         post="workflow/envs/fipy~{rev}/benchmark_{suite}.post-deploy.sh"
     input:
         env="workflow/envs/benchmark_{suite}.yml",
-        repo=workflow.source_path("resources/fipy~{rev}/repo/")
+        repo=workflow.source_path("../../resources/fipy~{rev}/repo/")
     conda:
         "../envs/snakemake.yml"
     log:
