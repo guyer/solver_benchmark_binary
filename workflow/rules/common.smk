@@ -44,7 +44,7 @@ def get_all_permutation_ids(wildcards):
     return df.index
 
 def get_repo(wildcards):
-    path = "../../resources/fipy~{wildcards.rev}/repo/".format(wildcards=wildcards)
+    path = "../resources/fipy~{wildcards.rev}/repo/".format(wildcards=wildcards)
     return os.path.join(workflow.basedir, path)
 
 def get_all_permutations(wildcards):
