@@ -42,10 +42,4 @@ rule bootstrap:
     input:
         expand("workflow/envs/fipy~{rev}/benchmark_{suite}.yml",
                rev=config["fipy_revs"],
-               suite=config["suites"]),
-        expand("resources/fipy~{rev}/{suite}_solvers.txt",
-               rev=config["fipy_revs"],
-               suite=config["suites"]),
-        expand("resources/fipy~{rev}/{suite}_preconditioners.txt",
-               rev=config["fipy_revs"],
                suite=config["suites"])
