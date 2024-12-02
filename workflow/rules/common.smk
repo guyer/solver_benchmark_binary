@@ -42,6 +42,10 @@ def get_all_permutation_ids(wildcards):
 
     return df.index
 
+def get_repo(wildcards):
+    path = "../../resources/fipy~{wildcards.rev}/repo/".format(wildcards=wildcards)
+    return workflow.source_path(path)
+
 def get_all_permutations(wildcards):
     path = checkpoints.aggregate_permutations.get().output[0]
     if exists(path):
