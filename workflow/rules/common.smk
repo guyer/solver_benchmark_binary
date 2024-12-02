@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 
 def concat_csv(input, output, log):
@@ -44,7 +45,7 @@ def get_all_permutation_ids(wildcards):
 
 def get_repo(wildcards):
     path = "../../resources/fipy~{wildcards.rev}/repo/".format(wildcards=wildcards)
-    return workflow.source_path(path)
+    return os.path.join(workflow.basedir, path)
 
 def get_all_permutations(wildcards):
     path = checkpoints.aggregate_permutations.get().output[0]
