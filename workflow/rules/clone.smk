@@ -27,27 +27,10 @@ checkpoint list_preconditioners:
 rule make_conda_env:
     localrule: True
     output:
-        env="workflow/envs/fipy~{rev}/benchmark_{suite}.yml",
-        post="workflow/envs/fipy~{rev}/benchmark_{suite}.post-deploy.sh"
+        "workflow/envs/fipy~{rev}/benchmark_{suite}.yml",
     input:
-        env="workflow/envs/benchmark_{suite}.yml",
-        repo=get_repo
-    conda:
-        "../envs/snakemake.yml"
+        template="workflow/envs/benchmark_{suite}.yml",
     log:
         "logs/fipy~{rev}/make_conda_env_{suite}.log"
-    script:
-        "../scripts/make_conda_env.sh"
-
-rule clone_repo:
-    localrule: True
-    output:
-        repo=directory("resources/fipy~{rev}/repo/"),
-    params:
-        fipy_repo=lambda _: config["fipy_url"]
-    conda:
-        "../envs/snakemake.yml"
-    log:
-        "logs/fipy~{rev}/clone_repo.log"
-    script:
-        "../scripts/clone_repo.sh"
+    template_engine:
+        "jinja2"
