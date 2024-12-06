@@ -23,4 +23,4 @@ dependencies:
   - jupyterlab_code_formatter
   - pip:
     - git+https://github.com/usnistgov/steppyngstounes.git#egg=steppyngstounes
-    - git+?config[fipy_url]@?wildcards[rev]#egg=fipy
+    - ?"git+" + config["fipy_url"] + "@" + wildcards["rev"] + "#egg=fipy"
