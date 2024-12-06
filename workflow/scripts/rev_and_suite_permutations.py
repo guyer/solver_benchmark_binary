@@ -4,17 +4,11 @@ import platform
 import numpy as np
 import pandas as pd
 import logging
-import subprocess
 
 def get_checkpoint_list(listf):
     with open(listf, 'r') as f:
         items = f.read().split()
     return items
-
-def git_version(path):
-    result = subprocess.run(["git", "-C", path, "describe", "--always", "--dirty"],
-                            capture_output=True, text=True)
-    return result.stdout.strip()
 
 # https://stackoverflow.com/a/55849527/2019542
 logger = logging.getLogger('rev_and_suite_permutations')
@@ -50,7 +44,6 @@ try:
     df = df.set_index("uuid")
 
     df["fipy_rev"] = snakemake.wildcards.rev
-    df["fipy_version"] = git_version(path=snakemake.input.clone)
     df["suite"] = snakemake.wildcards.suite
     df["hostname"] = platform.node()
 
