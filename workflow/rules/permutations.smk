@@ -17,7 +17,6 @@ rule rev_and_suite_permutations:
     input:
         preconditioners=get_preconditioners,
         solvers=get_solvers,
-        clone="resources/fipy~{rev}/repo/"
     conda:
         "../envs/snakemake.yml"
     log:
