@@ -1,30 +1,30 @@
-checkpoint list_solvers:
+rule list_solvers:
     localrule: True
     output:
         "resources/fipy~{rev}/{suite}_solvers.txt"
     input:
         "workflow/envs/fipy~{rev}/benchmark_{suite}.yml"
     conda:
-        "../envs/fipy~{rev}/benchmark_{suite}.yml"
+        get_conda_environment
     log:
         "logs/fipy~{rev}/suite~{suite}/list_solvers.log"
     script:
         "../scripts/list_solvers.py"
 
-checkpoint list_preconditioners:
+rule list_preconditioners:
     localrule: True
     output:
         "resources/fipy~{rev}/{suite}_preconditioners.txt"
     input:
         "workflow/envs/fipy~{rev}/benchmark_{suite}.yml"
     conda:
-        "../envs/fipy~{rev}/benchmark_{suite}.yml"
+        get_conda_environment
     log:
         "logs/fipy~{rev}/suite~{suite}/list_preconditioners.log"
     script:
         "../scripts/list_preconditioners.py"
 
-rule render_conda_template:
+checkpoint render_conda_template:
     localrule: True
     output:
         "workflow/envs/fipy~{rev}/benchmark_{suite}.yml",

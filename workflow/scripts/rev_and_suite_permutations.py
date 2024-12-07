@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import logging
 
-def get_checkpoint_list(listf):
+def get_list_from_file(listf):
     with open(listf, 'r') as f:
         items = f.read().split()
     return items
@@ -19,10 +19,8 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 try:
-    global checkpoints
-
-    solvers = get_checkpoint_list(snakemake.input.solvers)
-    preconditioners = get_checkpoint_list(snakemake.input.preconditioners)
+    solvers = get_list_from_file(snakemake.input.solvers)
+    preconditioners = get_list_from_file(snakemake.input.preconditioners)
 
     # calculate dimensions that produce steps in orders of magnitude
     # in number of cells for square 2D grids
