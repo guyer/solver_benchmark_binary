@@ -50,21 +50,8 @@ def get_all_permutation_ids(wildcards):
 
 def get_all_permutations(wildcards):
     path = checkpoints.aggregate_permutations.get().output[0]
-    if exists(path):
-        df = pd.read_csv(path,
-                         index_col="uuid")
-    else:
-        df = pd.DataFrame(columns=["benchmark",
-                                   "solver",
-                                   "preconditioner",
-                                   "size",
-                                   "uuid",
-                                   "fipy_rev",
-                                   "suite",
-                                   "hostname"])
-        df.set_index("uuid")
-
-    return df
+    return pd.read_csv(path,
+                       index_col="uuid")
 
 def extract_config_by_id(wildcards, output, log):
     import logging
