@@ -20,4 +20,4 @@ rule make_config:
     log:
         "logs/make_config_{id}.log"
     run:
-        extract_config_by_id(wildcards, output[0], log[0])
+        extract_config_by_id(wildcards, input[0], output[0], log[0])

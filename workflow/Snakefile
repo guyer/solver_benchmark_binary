@@ -23,9 +23,9 @@ rule aggregate_results:
     output:
         "results/all.json"
     input:
-        "config/all_permutations.csv",
+        all="config/all_permutations.csv",
         logs=expand("results/{id}/solver.json",
-                    id=get_all_permutation_ids)
+                    id=glob_wildcards("results/{id}/solver.json").id)
     log:
         "logs/aggregate_results.log"
     run:
