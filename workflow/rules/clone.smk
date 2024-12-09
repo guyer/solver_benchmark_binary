@@ -5,7 +5,7 @@ rule list_solvers:
     input:
         "workflow/envs/fipy~{rev}/benchmark_{suite}.yml"
     conda:
-        get_conda_environment
+        "workflow/envs/fipy~{rev}/benchmark_{suite}.yml"
     log:
         "logs/fipy~{rev}/suite~{suite}/list_solvers.log"
     script:
@@ -18,14 +18,15 @@ rule list_preconditioners:
     input:
         "workflow/envs/fipy~{rev}/benchmark_{suite}.yml"
     conda:
-        get_conda_environment
+        "workflow/envs/fipy~{rev}/benchmark_{suite}.yml"
     log:
         "logs/fipy~{rev}/suite~{suite}/list_preconditioners.log"
     script:
         "../scripts/list_preconditioners.py"
 
-checkpoint render_conda_template:
+rule render_conda_template:
     localrule: True
+    priority: 1000
     output:
         "workflow/envs/fipy~{rev}/benchmark_{suite}.yml",
     input:
