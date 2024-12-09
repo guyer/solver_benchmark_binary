@@ -43,19 +43,10 @@ def get_conda_environment(wildcards):
     return os.path.join("..",
                         os.path.relpath(path, start="workflow/"))
 
-def get_benchmark(wildcards):
-    permutations = get_all_permutations(wildcards)
-    benchmarks = permutations.loc[wildcards.id, 'benchmark']
-    return f"workflow/scripts/{benchmarks}.py"
-
 def get_all_permutation_ids(wildcards):
     df = get_all_permutations(wildcards)
 
     return df.index
-
-def get_repo(wildcards):
-    path = "../resources/fipy~{wildcards.rev}/repo/".format(wildcards=wildcards)
-    return os.path.join(workflow.basedir, path)
 
 def get_all_permutations(wildcards):
     path = checkpoints.aggregate_permutations.get().output[0]
