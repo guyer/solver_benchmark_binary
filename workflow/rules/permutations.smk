@@ -1,4 +1,4 @@
-rule aggregate_permutations:
+checkpoint aggregate_permutations:
     localrule: True
     output:
         "config/all_permutations.csv"

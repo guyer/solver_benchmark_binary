@@ -28,8 +28,7 @@ def concat_json(input, output, log):
         raise e
 
 def get_conda_environment_from_id(wildcards):
-    permutations = pd.read_csv("config/all_permutations.csv",
-                               index_col="uuid")
+    permutations = get_all_permutations(wildcards)
     rev = permutations.loc[wildcards.id, 'fipy_rev']
     suite = permutations.loc[wildcards.id, 'suite']
     return f"../envs/fipy~{rev}/benchmark_{suite}.yml"
@@ -44,7 +43,17 @@ def get_conda_environment(wildcards):
     return os.path.join("..",
                         os.path.relpath(path, start="workflow/"))
 
-def extract_config_by_id(wildcards, input, output, log):
+def get_all_permutation_ids(wildcards):
+    df = get_all_permutations(wildcards)
+
+    return df.index
+
+def get_all_permutations(wildcards):
+    path = checkpoints.aggregate_permutations.get().output[0]
+    return pd.read_csv(path,
+                       index_col="uuid")
+
+def extract_config_by_id(wildcards, output, log):
     import logging
 
     # https://stackoverflow.com/a/55849527/2019542
@@ -56,8 +65,7 @@ def extract_config_by_id(wildcards, input, output, log):
     logger.addHandler(fh)
 
     try:
-        permutations = pd.read_csv(input,
-                                   index_col="uuid")
+        permutations = get_all_permutations(wildcards)
         permutations.loc[wildcards.id].to_json(output)
     except Exception as e:
         logger.error(e, exc_info=True)
