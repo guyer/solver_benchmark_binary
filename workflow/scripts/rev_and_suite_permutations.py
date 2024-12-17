@@ -20,7 +20,6 @@ logger.addHandler(fh)
 
 try:
     solvers = get_list_from_file(snakemake.input.solvers)
-    preconditioners = get_list_from_file(snakemake.input.preconditioners)
 
     # calculate dimensions that produce steps in orders of magnitude
     # in number of cells for square 2D grids
