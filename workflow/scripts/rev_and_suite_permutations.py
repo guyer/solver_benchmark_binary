@@ -24,18 +24,13 @@ try:
 
     # calculate dimensions that produce steps in orders of magnitude
     # in number of cells for square 2D grids
-    SIZES = (10**(np.arange(np.log10(snakemake.config["size"]["min"]),
-                            np.log10(snakemake.config["size"]["max"])+1,
-                            1.)
-                  /2)).round().astype(int)**2
+    SIZES = [snakemake.config["size"]["min"]]
 
     df = pd.DataFrame(data=list(product(snakemake.config["benchmarks"],
                                         solvers,
-                                        preconditioners,
                                         SIZES)),
                       columns=["benchmark",
                                "solver",
-                               "preconditioner",
                                "size"])
 
     df["uuid"] = [str(uuid.uuid4()) for item in df.iterrows()]
