@@ -1,6 +1,8 @@
 rule solve:
     output:
         "results/{id}/solver.log"
+    input:
+        "config/all_permutations.csv"
     conda:
         get_conda_environment_from_id
     log:
