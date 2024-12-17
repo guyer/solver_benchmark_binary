@@ -1,8 +1,6 @@
 rule solve:
     output:
         "results/{id}/solver.log"
-    params:
-        config=lambda w, input: read_config(input.config),
     conda:
         get_conda_environment_from_id
     log:
