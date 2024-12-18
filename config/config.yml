@@ -1,27 +1,5 @@
 fipy_url: "https://github.com/usnistgov/fipy.git"
 
 fipy_revs:
-# - "62cbf2211"
-# - "d8a569e79"
 - "c246c5c9f" # patched "b873c7e3f"
 # - "8c0aec6d3" # patched "2054173bf"
-# - "2e82a58e7" # patched "36bff3800"
-# - "2876d0a7b" # patched "2c7ac213b"
-
-size:
-  min: 10
-  max: 11
-#  max: 1e6
-
-suites:
-- "petsc"
-
-restart: "resources/t=300.0.npz"
-checkpoint_interval: 1.
-totaltime: 301.
-view: False
-
-benchmarks:
-- "binary_phase_field"
-# - "diffusion"
-# - "nucleation"

@@ -15,22 +15,29 @@ rule solve:
         "config/all_permutations.csv"
     conda:
         get_conda_environment_from_id
-    log:
-        notebook="logs/notebooks/benchmark_{id}.ipynb"
-    notebook:
-        "notebooks/binary_phase_field.py.ipynb"
+    shell:
+        """
+        conda info > {output}
+        """
 
 checkpoint aggregate_permutations:
     output:
         "config/all_permutations.csv"
     input:
         "workflow/envs/fipy_benchmark_petsc.yml"
-    conda:
-        "envs/snakemake.yml"
-    log:
-        "logs/fipy_petsc_permutations.log"
-    script:
-        "scripts/rev_and_suite_permutations.py"
+    run:
+        import pandas as pd
+        import uuid
+
+        SIZES = [100]
+
+        df = pd.DataFrame(data=SIZES,
+                          columns=["size"])
+
+        df["uuid"] = [str(uuid.uuid4()) for item in df.iterrows()]
+        df = df.set_index("uuid")
+
+        df.to_csv(output[0])
 
 checkpoint render_conda_template:
     localrule: True
@@ -38,7 +45,5 @@ checkpoint render_conda_template:
         "workflow/envs/fipy_benchmark_petsc.yml",
     input:
         template="workflow/envs/benchmark_petsc.yml",
-    log:
-        "logs/render_conda_template_petsc.log"
     template_engine:
         "yte"
