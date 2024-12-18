@@ -6,7 +6,7 @@ rule solve:
     params:
         config=lambda w, input: read_config(input.config),
     conda:
-        get_conda_environment
+        "../../results/fipy~{rev}/suite~{suite}/benchmark.yml"
     log:
         notebook="logs/fipy~{rev}/suite~{suite}/{id}/notebooks/benchmark.ipynb"
     notebook:
