@@ -31,8 +31,6 @@ try:
     df["uuid"] = [str(uuid.uuid4()) for item in df.iterrows()]
     df = df.set_index("uuid")
 
-    df["fipy_rev"] = snakemake.wildcards.rev
-    df["suite"] = snakemake.wildcards.suite
     df["hostname"] = platform.node()
 
     df.to_csv(snakemake.output[0])
