@@ -19,17 +19,13 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 try:
-    solvers = get_list_from_file(snakemake.input.solvers)
-
     # calculate dimensions that produce steps in orders of magnitude
     # in number of cells for square 2D grids
     SIZES = [snakemake.config["size"]["min"]]
 
     df = pd.DataFrame(data=list(product(snakemake.config["benchmarks"],
-                                        solvers,
                                         SIZES)),
                       columns=["benchmark",
-                               "solver",
                                "size"])
 
     df["uuid"] = [str(uuid.uuid4()) for item in df.iterrows()]
