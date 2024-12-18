@@ -27,12 +27,6 @@ def concat_json(input, output, log):
             f.write(repr(e))
         raise e
 
-def get_conda_environment_from_id(wildcards):
-    permutations = get_all_permutations(wildcards)
-    rev = permutations.loc[wildcards.id, 'fipy_rev']
-    suite = permutations.loc[wildcards.id, 'suite']
-    return f"../envs/fipy~{rev}/benchmark_{suite}.yml"
-
 def get_conda_environment(wildcards):
     path = checkpoints.render_conda_template.get(**wildcards).output[0]
     # https://snakemake.readthedocs.io/en/stable/project_info/faq.html#how-does-snakemake-interpret-relative-paths
@@ -43,9 +37,10 @@ def get_conda_environment(wildcards):
     return os.path.join("..",
                         os.path.relpath(path, start="workflow/"))
 
-def get_all_permutation_ids(wildcards):
-    df = get_all_permutations(wildcards)
-
+def get_permutation_ids(wildcards):
+    path = checkpoints.rev_and_suite_permutations.get(**wildcards).output[0]
+    df = pd.read_csv(path,
+                     index_col="uuid")
     return df.index
 
 def get_all_permutations(wildcards):
@@ -53,7 +48,7 @@ def get_all_permutations(wildcards):
     return pd.read_csv(path,
                        index_col="uuid")
 
-def extract_config_by_id(wildcards, output, log):
+def extract_config_by_id(wildcards, input, output, log):
     import logging
 
     # https://stackoverflow.com/a/55849527/2019542
@@ -65,7 +60,8 @@ def extract_config_by_id(wildcards, output, log):
     logger.addHandler(fh)
 
     try:
-        permutations = get_all_permutations(wildcards)
+        permutations = pd.read_csv(input,
+                       index_col="uuid")
         permutations.loc[wildcards.id].to_json(output)
     except Exception as e:
         logger.error(e, exc_info=True)

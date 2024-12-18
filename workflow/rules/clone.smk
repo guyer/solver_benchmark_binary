@@ -1,9 +1,9 @@
 rule list_solvers:
     localrule: True
     output:
-        "resources/fipy~{rev}/{suite}_solvers.txt"
+        "results/fipy~{rev}/suite~{suite}/solvers.txt"
     input:
-        "workflow/envs/fipy~{rev}/benchmark_{suite}.yml"
+        "results/fipy~{rev}/suite~{suite}/benchmark.yml"
     conda:
         get_conda_environment
     log:
@@ -14,9 +14,9 @@ rule list_solvers:
 rule list_preconditioners:
     localrule: True
     output:
-        "resources/fipy~{rev}/{suite}_preconditioners.txt"
+        "results/fipy~{rev}/suite~{suite}/preconditioners.txt"
     input:
-        "workflow/envs/fipy~{rev}/benchmark_{suite}.yml"
+        "results/fipy~{rev}/suite~{suite}/benchmark.yml"
     conda:
         get_conda_environment
     log:
@@ -27,10 +27,10 @@ rule list_preconditioners:
 checkpoint render_conda_template:
     localrule: True
     output:
-        "workflow/envs/fipy~{rev}/benchmark_{suite}.yml",
+        "results/fipy~{rev}/suite~{suite}/benchmark.yml"
     input:
         template="workflow/envs/benchmark_{suite}.yml",
     log:
-        "logs/fipy~{rev}/render_conda_template_{suite}.log"
+        "logs/fipy~{rev}/suite~{suite}/render_conda_template.log"
     template_engine:
         "yte"

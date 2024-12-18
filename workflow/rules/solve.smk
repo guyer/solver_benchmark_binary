@@ -1,23 +1,23 @@
 rule solve:
     output:
-        "results/{id}/solver.log"
+        "results/fipy~{rev}/suite~{suite}/{id}/solver.log"
     input:
-        config="results/{id}/config.json",
+        config="results/fipy~{rev}/suite~{suite}/{id}/config.json",
     params:
         config=lambda w, input: read_config(input.config),
     conda:
-        get_conda_environment_from_id
+        get_conda_environment
     log:
-        notebook="logs/notebooks/benchmark_{id}.ipynb"
+        notebook="logs/fipy~{rev}/suite~{suite}/{id}/notebooks/benchmark.ipynb"
     notebook:
         "../notebooks/binary_phase_field.py.ipynb"
 
 rule make_config:
     output:
-        "results/{id}/config.json"
+        "results/fipy~{rev}/suite~{suite}/{id}/config.json"
     input:
-        "config/all_permutations.csv"
+        "results/fipy~{rev}/suite~{suite}/permutations.csv"
     log:
-        "logs/make_config_{id}.log"
+        "logs/fipy~{rev}/suite~{suite}/{id}/make_config.log"
     run:
-        extract_config_by_id(wildcards, output[0], log[0])
+        extract_config_by_id(wildcards, input[0], output[0], log[0])

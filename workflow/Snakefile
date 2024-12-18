@@ -18,14 +18,25 @@ rule all:
                benchmark=config["benchmarks"],
                plot=["total", "prepare", "solve"])
 
-rule aggregate_results:
-    localrule: True
+rule aggregate_all_results:
     output:
         "results/all.json"
     input:
-        logs=expand("results/{id}/solver.json",
-                    id=get_all_permutation_ids)
+        logs=expand("results/fipy~{rev}/suite~{suite}/results.json",
+                    rev=config["fipy_revs"],
+                    suite=config["suites"])
     log:
-        "logs/aggregate_results.log"
+        "logs/aggregate_all_results.log"
+    run:
+        concat_json(input.logs, output[0], log[0])
+
+rule aggregate_results:
+    output:
+        "results/fipy~{rev}/suite~{suite}/results.json"
+    input:
+        logs=expand("results/fipy~{{rev}}/suite~{{suite}}/{id}/solver.json",
+                    id=get_permutation_ids)
+    log:
+        "logs/fipy~{rev}/suite~{suite}/aggregate_results.log"
     run:
         concat_json(input.logs, output[0], log[0])
