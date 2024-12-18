@@ -1,10 +1,10 @@
 checkpoint render_conda_template:
     localrule: True
     output:
-        "workflow/envs/fipy~{rev}/benchmark_{suite}.yml",
+        "workflow/envs/fipy_benchmark_petsc.yml",
     input:
-        template="workflow/envs/benchmark_{suite}.yml",
+        template="workflow/envs/benchmark_petsc.yml",
     log:
-        "logs/fipy~{rev}/render_conda_template_{suite}.log"
+        "logs/render_conda_template_petsc.log"
     template_engine:
         "yte"

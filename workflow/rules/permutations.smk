@@ -1,24 +1,11 @@
 checkpoint aggregate_permutations:
-    localrule: True
     output:
         "config/all_permutations.csv"
     input:
-        expand("config/fipy~{rev}/{suite}_permutations.csv",
-               rev=config["fipy_revs"],
-               suite=config["suites"])
-    log:
-        "logs/aggregate_permutations.log"
-    run:
-        concat_csv(input, output[0], log[0])
-
-rule rev_and_suite_permutations:
-    output:
-        "config/fipy~{rev}/{suite}_permutations.csv"
-    input:
-        "workflow/envs/fipy~{rev}/benchmark_{suite}.yml"
+        "workflow/envs/fipy_benchmark_petsc.yml"
     conda:
         "../envs/snakemake.yml"
     log:
-        "logs/fipy~{rev}/{suite}_permutations.log"
+        "logs/fipy_petsc_permutations.log"
     script:
         "../scripts/rev_and_suite_permutations.py"
