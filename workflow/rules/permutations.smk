@@ -14,6 +14,8 @@ checkpoint aggregate_permutations:
 rule rev_and_suite_permutations:
     output:
         "config/fipy~{rev}/{suite}_permutations.csv"
+    input:
+        "workflow/envs/fipy~{rev}/benchmark_{suite}.yml"
     conda:
         "../envs/snakemake.yml"
     log:
