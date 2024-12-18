@@ -29,9 +29,7 @@ def concat_json(input, output, log):
 
 def get_conda_environment_from_id(wildcards):
     permutations = get_all_permutations(wildcards)
-    rev = permutations.loc[wildcards.id, 'fipy_rev']
-    suite = permutations.loc[wildcards.id, 'suite']
-    return f"../envs/fipy~{rev}/benchmark_{suite}.yml"
+    return "workflow/envs/fipy_benchmark_petsc.yml"
 
 def get_conda_environment(wildcards):
     path = checkpoints.render_conda_template.get(**wildcards).output[0]
