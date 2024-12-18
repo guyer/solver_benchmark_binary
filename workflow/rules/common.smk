@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 def get_conda_environment_from_id(wildcards):
-    return "../envs/fipy_benchmark_petsc.yml"
+    return "envs/fipy_benchmark_petsc.yml"
 
 def get_all_permutation_ids(wildcards):
     df = get_all_permutations(wildcards)
