@@ -11,12 +11,6 @@ report: "report/workflow.rst"
 
 rule all:
     localrule: True
-    output:
-        "results/all.json"
     input:
         logs=expand("results/{id}/solver.json",
                     id=get_all_permutation_ids)
-    log:
-        "logs/aggregate_results.log"
-    run:
-        concat_json(input.logs, output[0], log[0])
