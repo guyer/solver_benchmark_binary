@@ -19,8 +19,13 @@ if __name__ == "__main__":
     logger.addHandler(fh)
 
     try:
-        solvers = ["LinearGMRESSolver"]
-            
+        solvers = []
+
+        for k, v in fp.solvers.__dict__.items():
+            if k not in ["Solver", "DefaultSolver", "DefaultAsymmetricSolver", "DummySolver", "GeneralSolver"]:
+                if isinstance(v, type) and issubclass(v, fp.solver.Solver):
+                    solvers.append(k)
+
         with open(snakemake.output[0], 'w') as f:
             f.write(" ".join(sorted(solvers)))
     except Exception as e:

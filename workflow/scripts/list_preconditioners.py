@@ -19,7 +19,11 @@ if __name__ == "__main__":
     logger.addHandler(fh)
 
     try:
-        preconditioners = ["JacobiPreconditioner"]
+        preconditioners = []
+
+        for k, v in fp.solvers.__dict__.items():
+            if isinstance(v, type) and issubclass(v, fp.preconditioner.Preconditioner):
+                preconditioners.append(k)
 
         with open(snakemake.output[0], 'w') as f:
             f.write(" ".join(sorted(preconditioners)))
