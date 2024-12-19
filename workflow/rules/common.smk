@@ -43,11 +43,6 @@ def get_permutation_ids(wildcards):
                      index_col="uuid")
     return df.index
 
-def get_all_permutations(wildcards):
-    path = checkpoints.aggregate_permutations.get().output[0]
-    return pd.read_csv(path,
-                       index_col="uuid")
-
 def extract_config_by_id(wildcards, input, output, log):
     import logging
 
