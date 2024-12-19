@@ -1,12 +1,12 @@
 rule extract_times:
     output:
-        "results/{id}/solver.json"
+        "results/fipy~{rev}/suite~{suite}/{id}/solver.json"
     input:
-        log="results/{id}/solver.log",
-        config="results/{id}/config.json"
+        log="results/fipy~{rev}/suite~{suite}/{id}/solver.log",
+        config="results/fipy~{rev}/suite~{suite}/{id}/config.json"
     conda:
         "../envs/snakemake.yml"
     log:
-        "results/{id}/extract_times.log"
+        "logs/fipy~{rev}/suite~{suite}/{id}/extract_times.log"
     script:
         "../scripts/extract_times.py"
