@@ -39,7 +39,7 @@ def get_conda_environment(wildcards):
 
 def get_permutation_ids(wildcards):
     path = checkpoints.rev_and_suite_permutations.get(**wildcards).output[0]
-    df = pd.read_csv(path)
+    df = pd.read_csv(path, index_col="index")
     return df.index
 
 def extract_config_by_id(wildcards, input, output, log):
@@ -54,8 +54,8 @@ def extract_config_by_id(wildcards, input, output, log):
     logger.addHandler(fh)
 
     try:
-        permutations = pd.read_csv(input)
-        permutations.loc[wildcards.id].to_json(output)
+        permutations = pd.read_csv(input, index_col="index")
+        permutations.loc[int(wildcards.id)].to_json(output)
     except Exception as e:
         logger.error(e, exc_info=True)
         raise e

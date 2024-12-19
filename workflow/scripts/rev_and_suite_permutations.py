@@ -41,7 +41,7 @@ try:
     df["suite"] = snakemake.wildcards.suite
     df["hostname"] = platform.node()
 
-    df.to_csv(snakemake.output[0])
+    df.to_csv(snakemake.output[0], index_label="index")
 except Exception as e:
     logger.error(e, exc_info=True)
     raise e
