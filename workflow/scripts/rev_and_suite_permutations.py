@@ -1,5 +1,4 @@
 from itertools import product
-import uuid
 import platform
 import numpy as np
 import pandas as pd
@@ -37,9 +36,6 @@ try:
                                "solver",
                                "preconditioner",
                                "size"])
-
-    df["uuid"] = [str(uuid.uuid4()) for item in df.iterrows()]
-    df = df.set_index("uuid")
 
     df["fipy_rev"] = snakemake.wildcards.rev
     df["suite"] = snakemake.wildcards.suite
