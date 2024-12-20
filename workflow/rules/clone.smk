@@ -3,7 +3,7 @@ rule list_solvers:
     output:
         "results/fipy~{rev}/suite~{suite}/solvers.txt"
     input:
-        "results/fipy~{rev}/suite~{suite}/benchmark.yml"
+        "results/fipy~{rev}/suite~{suite}/environment.yml"
     conda:
         get_conda_environment
     log:
@@ -16,7 +16,7 @@ rule list_preconditioners:
     output:
         "results/fipy~{rev}/suite~{suite}/preconditioners.txt"
     input:
-        "results/fipy~{rev}/suite~{suite}/benchmark.yml"
+        "results/fipy~{rev}/suite~{suite}/environment.yml"
     conda:
         get_conda_environment
     log:
@@ -27,7 +27,7 @@ rule list_preconditioners:
 checkpoint render_conda_template:
     localrule: True
     output:
-        "results/fipy~{rev}/suite~{suite}/benchmark.yml"
+        "results/fipy~{rev}/suite~{suite}/environment.yml"
     input:
         template="workflow/envs/benchmark_{suite}.yml",
     log:
