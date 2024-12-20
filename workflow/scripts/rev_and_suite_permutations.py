@@ -23,15 +23,19 @@ try:
 
     # calculate dimensions that produce steps in orders of magnitude
     # in number of cells for square 2D grids
-    SIZES = (10**(np.arange(np.log10(snakemake.config["size"]["min"]),
-                            np.log10(snakemake.config["size"]["max"])+1,
-                            1.)
-                  /2)).round().astype(int)**2
+    min_size = snakemake.config["size"].get("min", 10)
+    max_size = snakemake.config["size"].get("max", 1000000)
+    size_steps = snakemake.config["size"].get("steps", 6)
+    dimension = 2
+    sizes = np.logspace(np.log10(min_size) / dimension,
+                        np.log10(max_size) / dimension,
+                        size_steps,
+                        dtype=int)**dimension
 
     df = pd.DataFrame(data=list(product(snakemake.config["benchmarks"],
                                         solvers,
                                         preconditioners,
-                                        SIZES)),
+                                        sizes)),
                       columns=["benchmark",
                                "solver",
                                "preconditioner",
