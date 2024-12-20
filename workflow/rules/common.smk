@@ -40,7 +40,7 @@ def get_conda_environment(wildcards):
 def get_permutation_ids(wildcards):
     path = checkpoints.rev_and_suite_permutations.get(**wildcards).output[0]
     df = pd.read_csv(path, index_col="index")
-    return df.index
+    return df.index.map("{:07d}".format)
 
 def extract_config_by_id(wildcards, input, output, log):
     import logging
