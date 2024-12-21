@@ -10,8 +10,8 @@ fipy_revs:
 
 size:
   min: 10
-  max: 100
-  steps: 2
+  max: 1000000
+  steps: 6
 
 suites:
 - "petsc"
