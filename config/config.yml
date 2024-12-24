@@ -22,6 +22,8 @@ totaltime: 301.
 view: False
 
 benchmarks:
-- "binary_phase_field"
+    binary_phase_field:
+        dimension: 2
+
 # - "diffusion"
 # - "nucleation"
