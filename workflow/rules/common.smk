@@ -55,7 +55,7 @@ def extract_config_by_id(wildcards, input, output, log):
     logger.addHandler(fh)
 
     try:
-        permutations = pd.read_csv(input, index_col="index")
+        permutations = pd.read_csv(input)
         permutations.loc[int(wildcards.id)].to_json(output)
     except Exception as e:
         logger.error(e, exc_info=True)
