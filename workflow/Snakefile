@@ -18,6 +18,10 @@ rule all:
                benchmark=config["benchmarks"],
                plot=["total", "prepare", "solve"])
 
+rule bootstrap:
+    input:
+        "config/all_permutations.csv"
+
 rule aggregate_all_results:
     output:
         "results/all.json"
