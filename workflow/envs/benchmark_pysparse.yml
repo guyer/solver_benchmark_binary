@@ -1,0 +1,19 @@
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - numpy
+  - scipy
+  - matplotlib-base
+  - future
+  - packaging
+  - mayavi # [unix]
+  - traitsui <7.0.0
+  - gmsh <4.0|>=4.5.2
+  - pip
+  - pysparse
+  - jupyter
+  - jupyterlab_code_formatter
+  - pip:
+    - git+https://github.com/usnistgov/steppyngstounes.git#egg=steppyngstounes
+    - ?"git+" + config["fipy_url"] + "@" + wildcards["rev"] + "#egg=fipy"
