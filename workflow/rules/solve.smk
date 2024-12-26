@@ -3,6 +3,7 @@ rule solve:
         "results/fipy~{rev}/suite~{suite}/{id}/solver.log"
     input:
         config="results/fipy~{rev}/suite~{suite}/{id}/config.json",
+        env="results/fipy~{rev}/suite~{suite}/environment.yml"
     params:
         config=lambda w, input: read_config(input.config),
     conda:
@@ -16,7 +17,7 @@ rule make_config:
     output:
         "results/fipy~{rev}/suite~{suite}/{id}/config.json"
     input:
-        "results/fipy~{rev}/suite~{suite}/permutations.csv"
+        "config/all_permutations.csv"
     log:
         "logs/fipy~{rev}/suite~{suite}/{id}/make_config.log"
     run:

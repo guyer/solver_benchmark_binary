@@ -38,8 +38,9 @@ def get_conda_environment(wildcards):
                         os.path.relpath(path, start="workflow/"))
 
 def get_permutation_ids(wildcards):
-    path = checkpoints.rev_and_suite_permutations.get(**wildcards).output[0]
-    df = pd.read_csv(path, index_col="index")
+#     path = checkpoints.all_permutations.get(**wildcards).output[0]
+    path = "config/all_permutations.csv"
+    df = pd.read_csv(path)
     return df.index.map("{:07d}".format)
 
 def extract_config_by_id(wildcards, input, output, log):

@@ -34,6 +34,7 @@ rule aggregate_results:
     output:
         "results/fipy~{rev}/suite~{suite}/results.json"
     input:
+        permutations="config/all_permutations.csv",
         logs=expand("results/fipy~{{rev}}/suite~{{suite}}/{id}/solver.json",
                     id=get_permutation_ids)
     log:
