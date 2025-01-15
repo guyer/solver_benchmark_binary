@@ -7,12 +7,14 @@ dependencies:
   - matplotlib-base
   - future
   - packaging
-  - mayavi # [unix]
-  - traitsui <7.0.0
+  - mayavi
   - gmsh <4.0|>=4.5.2
-  - pip ==9.0.3
-  - pysparse
+  - pip
+  - mpich
+  - mpi4py
+  - pytrilinos
   - jupyter
+  - jupyterlab_code_formatter
   - pip:
     - git+https://github.com/usnistgov/steppyngstounes.git#egg=steppyngstounes
     - ?"git+" + config["fipy_url"] + "@" + wildcards["rev"] + "#egg=fipy"
