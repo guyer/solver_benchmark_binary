@@ -4,20 +4,20 @@ fipy_revs:
 # - "62cbf2211"
 # - "d8a569e79"
 - "c246c5c9f" # patched "b873c7e3f"
-- "8c0aec6d3" # patched "2054173bf"
-- "2e82a58e7" # patched "36bff3800"
-- "2876d0a7b" # patched "2c7ac213b"
+# - "8c0aec6d3" # patched "2054173bf"
+# - "2e82a58e7" # patched "36bff3800"
+# - "2876d0a7b" # patched "2c7ac213b"
 
 size:
   min: 10
-  max: 1000000
-  steps: 6
+  max: 100
+  steps: 2
 
 suites:
 - "petsc"
-- "pysparse"
-- "no-pysparse"
-- "scipy"
+# - "pysparse"
+# - "no-pysparse"
+# - "scipy"
 
 restart: "resources/t=300.0.npz"
 checkpoint_interval: 1.

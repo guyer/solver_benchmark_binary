@@ -34,12 +34,16 @@ if __name__ == "__main__":
         exclude = ["Solver", "DefaultSolver", "DefaultAsymmetricSolver",
                    "DummySolver", "GeneralSolver"]
         solvers = [solver for solver in solvers if solver not in exclude]
+        
+        solvers = ["LinearGMRESSolver"]
 
         with open(snakemake.output["solvers"], 'w') as f:
             json.dump({"solver": solvers}, f)
 
         preconditioners = get_classes(cls=fp.preconditioner.Preconditioner)
         preconditioners.append("none")
+
+        preconditioners = ["JacobiPreconditioner", "LUPreconditioner"]
 
         with open(snakemake.output["preconditioners"], 'w') as f:
             json.dump({"preconditioner": preconditioners}, f)
