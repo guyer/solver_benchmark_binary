@@ -20,7 +20,9 @@ rule all:
 
 rule bootstrap:
     input:
-        "config/all_permutations.csv"
+        expand("results/fipy~{rev}/suite~{suite}/environment.yml",
+               rev=config["fipy_revs"],
+               suite=config["suites"])
 
 rule aggregate_all_results:
     output:

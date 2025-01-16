@@ -1,4 +1,4 @@
-checkpoint render_conda_template:
+rule render_conda_template:
     localrule: True
     output:
         "results/fipy~{rev}/suite~{suite}/environment.yml"

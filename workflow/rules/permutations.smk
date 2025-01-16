@@ -70,7 +70,7 @@ rule get_solvers_preconditioners:
     input:
         "results/fipy~{rev}/suite~{suite}/environment.yml"
     conda:
-        get_conda_environment
+        "../../results/fipy~{rev}/suite~{suite}/environment.yml"
     log:
         "logs/fipy~{rev}/suite~{suite}/get_solvers_preconditioners.log"
     script:
