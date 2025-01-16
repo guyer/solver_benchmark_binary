@@ -67,8 +67,6 @@ rule get_solvers_preconditioners:
     output:
         solvers="results/fipy~{rev}/suite~{suite}/solvers.json",
         preconditioners="results/fipy~{rev}/suite~{suite}/preconditioners.json"
-    input:
-        "results/fipy~{rev}/suite~{suite}/environment.yml"
     conda:
         "../../results/fipy~{rev}/suite~{suite}/environment.yml"
     log:
