@@ -46,8 +46,8 @@ rule solver_preconditioner_permutations:
     output:
         "config/fipy~{rev}/suite~{suite}/permutations.csv"
     input:
-        solvers="config/fipy~{rev}/suite~{suite}/solvers.json",
-        preconditioners="config/fipy~{rev}/suite~{suite}/preconditioners.json"
+        solvers="results/fipy~{rev}/suite~{suite}/solvers.json",
+        preconditioners="results/fipy~{rev}/suite~{suite}/preconditioners.json"
     log:
         "logs/fipy~{rev}/suite~{suite}/solver_preconditioner_permutations.log"
     run:
@@ -65,8 +65,8 @@ rule solver_preconditioner_permutations:
 
 rule get_solvers_preconditioners:
     output:
-        solvers="config/fipy~{rev}/suite~{suite}/solvers.json",
-        preconditioners="config/fipy~{rev}/suite~{suite}/preconditioners.json"
+        solvers="results/fipy~{rev}/suite~{suite}/solvers.json",
+        preconditioners="results/fipy~{rev}/suite~{suite}/preconditioners.json"
     input:
         "results/fipy~{rev}/suite~{suite}/environment.yml"
     conda:
