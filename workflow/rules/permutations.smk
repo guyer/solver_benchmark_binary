@@ -68,7 +68,7 @@ rule get_solvers_preconditioners:
         solvers="results/fipy~{rev}/suite~{suite}/solvers.json",
         preconditioners="results/fipy~{rev}/suite~{suite}/preconditioners.json"
     conda:
-        ancient("../../results/fipy~{rev}/suite~{suite}/environment.yml")
+        "../../results/fipy~{rev}/suite~{suite}/environment.yml"
     log:
         "logs/fipy~{rev}/suite~{suite}/get_solvers_preconditioners.log"
     script:
