@@ -2,7 +2,8 @@ rule solve:
     output:
         "results/fipy~{rev}/suite~{suite}/{id}/solver.log"
     input:
-        env="results/fipy~{rev}/suite~{suite}/environment.yml"
+        env="results/fipy~{rev}/suite~{suite}/environment.yml",
+        config=config["simulations"]
     params:
         config=get_config_by_id,
     conda:

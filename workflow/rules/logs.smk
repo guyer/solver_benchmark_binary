@@ -3,6 +3,7 @@ rule extract_times:
         "results/fipy~{rev}/suite~{suite}/{id}/solver.json"
     input:
         log="results/fipy~{rev}/suite~{suite}/{id}/solver.log",
+        config=config["simulations"]
     params:
         config=get_config_by_id,
     conda:
