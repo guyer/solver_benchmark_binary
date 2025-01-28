@@ -30,7 +30,7 @@ try:
                             np.log10(max_size) / dimension,
                             size_steps,
                             dtype=int)**dimension
-        df = pd.DataFrame(data=sizes, columns=["size"])
+        df = pd.DataFrame(data=sizes, columns=["numberOfElements"])
         df["benchmark"] = name
         df["hostname"] = platform.node()
         benchmarks.append(df)

@@ -130,8 +130,7 @@ if __name__ == "__main__":
                    "preconditioner"] = "unpreconditioned"
 
         # Add configuration to each record, tidy-style
-        config = pd.read_json(snakemake.input.config, orient="index").T
-        config["uuid"] = snakemake.wildcards.id
+        config = pd.DataFrame([snakemake.params.config]).set_index("id", drop=False)
         df = config.join(df, lsuffix="_L", how="cross")
 
         df.to_json(snakemake.output[0], date_format="iso")
