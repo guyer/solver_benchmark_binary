@@ -8,7 +8,7 @@ rule all_permutations:
         benchmarks = pd.read_csv(input["benchmarks"], index_col=False)
         fipy_revs = pd.read_csv(input["fipy_revs"], index_col=False)
         df = benchmarks.join(fipy_revs, how="cross")
-        df.to_csv(output[0], index=False)
+        df.to_csv(output[0], index_label="id")
 
 rule benchmark_permutations:
     output:

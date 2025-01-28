@@ -1,3 +1,6 @@
+from pathlib import Path
+import pandas as pd
+
 configfile: "config/config.yml"
 
 include: "rules/common.smk"
@@ -8,6 +11,12 @@ include: "rules/logs.smk"
 include: "rules/solve.smk"
 
 report: "report/workflow.rst"
+
+simulation_file = Path(config["simulations"])
+if simulation_file.exists():
+    SIMULATIONS = pd.read_csv(simulation_file).set_index("id", drop=False)
+else:
+    SIMULATIONS = pd.DataFrame(columns=["id"])
 
 rule all:
     localrule: True

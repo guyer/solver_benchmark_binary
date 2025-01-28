@@ -33,26 +33,7 @@ def get_permutation_ids(wildcards):
     df = pd.read_csv(path)
     return df.index.map("{:07d}".format)
 
-def extract_config_by_id(wildcards, input, output, log):
-    import logging
-
-    # https://stackoverflow.com/a/55849527/2019542
-    logger = logging.getLogger('make_config')
-    fh = logging.FileHandler(str(log))
-    fh.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
-
-    try:
-        permutations = pd.read_csv(input)
-        permutations.loc[int(wildcards.id)].to_json(output)
-    except Exception as e:
-        logger.error(e, exc_info=True)
-        raise e
-
-def read_config(path):
-    import json
-
-    with open(path, 'r') as f:
-        return json.load(f)
+# https://bioinformatics.stackexchange.com/questions/18248/pick-matching-entry-from-snakemake-config-table
+# https://github.com/snakemake/snakemake/issues/1171#issuecomment-927242813
+def get_config_by_id(wildcards):
+    return SIMULATIONS.loc[int(wildcards.id)].to_dict()
