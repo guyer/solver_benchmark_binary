@@ -8,13 +8,13 @@ def get_list_from_file(listf):
         items = f.read().split()
     return items
 
-# https://stackoverflow.com/a/55849527/2019542
-logger = logging.getLogger('benchmark_permutations')
-fh = logging.FileHandler(str(snakemake.log[0]))
-fh.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
-logger.addHandler(fh)
+# https://stackoverflow.com/a/55849527
+# https://stackoverflow.com/a/65732832
+logging.basicConfig(
+    filename=snakemake.log[0],
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+)
 
 try:
     min_size = snakemake.config["size"].get("min", 10)
@@ -38,5 +38,5 @@ try:
     df = pd.concat(benchmarks)
     df.to_csv(snakemake.output[0], index=False)
 except Exception as e:
-    logger.error(e, exc_info=True)
+    logging.error(e, exc_info=True)
     raise e

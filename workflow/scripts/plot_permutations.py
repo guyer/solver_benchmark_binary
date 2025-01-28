@@ -188,13 +188,13 @@ def plot_sweep_times(df):
         plt.show()
 
 if __name__ == "__main__":
-    # https://stackoverflow.com/a/55849527/2019542
-    logger = logging.getLogger('plot_permutations')
-    fh = logging.FileHandler(str(snakemake.log[0]))
-    fh.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
+    # https://stackoverflow.com/a/55849527
+    # https://stackoverflow.com/a/65732832
+    logging.basicConfig(
+        filename=snakemake.log[0],
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+    )
 
     try:
         df = pd.read_json(snakemake.input[0])
@@ -204,5 +204,5 @@ if __name__ == "__main__":
         plot_all(df, snakemake.output.prepare, data_set="prepare_seconds", ylabel="prepare time", ymin=1e-4, ymax=1e2)
         plot_all(df, snakemake.output.solve, data_set="solve_seconds", ylabel="solve time", ymin=1e-4, ymax=1e2)
     except Exception as e:
-        logger.error(e, exc_info=True)
+        logging.error(e, exc_info=True)
         raise e
