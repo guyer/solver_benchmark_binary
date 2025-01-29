@@ -38,6 +38,7 @@ rule aggregate_all_results:
         "results/all.json"
     input:
         logs=expand("results/fipy~{rev}/suite~{suite}/{id}/solver.json",
+                    zip,
                     rev=SIMULATIONS["fipy_rev"],
                     suite=SIMULATIONS["suite"],
                     id=SIMULATIONS["id"])
