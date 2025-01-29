@@ -8,8 +8,6 @@ def get_list_from_file(listf):
         items = f.read().split()
     return items
 
-# https://stackoverflow.com/a/55849527
-# https://stackoverflow.com/a/65732832
 logging.basicConfig(
     filename=snakemake.log[0],
     level=logging.INFO,

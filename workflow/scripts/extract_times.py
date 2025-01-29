@@ -111,8 +111,6 @@ def read_events(fname):
     return events
 
 if __name__ == "__main__":
-    # https://stackoverflow.com/a/55849527
-    # https://stackoverflow.com/a/65732832
     logging.basicConfig(
         filename=snakemake.log[0],
         level=logging.INFO,
