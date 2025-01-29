@@ -16,7 +16,7 @@ simulation_file = Path(config["simulations"])
 if simulation_file.exists():
     SIMULATIONS = pd.read_csv(simulation_file).set_index("id", drop=False)
 else:
-    SIMULATIONS = pd.DataFrame(columns=["id"])
+    SIMULATIONS = pd.DataFrame(columns=["fipy_rev", "suite", "id"])
 
 rule all:
     localrule: True
@@ -39,7 +39,7 @@ rule aggregate_all_results:
     input:
         logs=expand("results/fipy~{rev}/suite~{suite}/{id}/solver.json",
                     rev=SIMULATIONS["fipy_rev"],
-                    suite=SIMULATIONS["fipy_rev"],
+                    suite=SIMULATIONS["suite"],
                     id=SIMULATIONS["id"])
     log:
         "logs/aggregate_all_results.log"
