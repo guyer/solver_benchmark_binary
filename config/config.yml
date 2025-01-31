@@ -17,8 +17,8 @@ size:
 
 suites:
 - "petsc"
-# - "pysparse"
-# - "no-pysparse"
+- "pysparse"
+- "no-pysparse"
 - "scipy"
 
 restart: "resources/t=300.0.npz"
