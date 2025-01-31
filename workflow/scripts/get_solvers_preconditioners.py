@@ -41,7 +41,7 @@ if __name__ == "__main__":
         preconditioners = get_classes(cls=fp.preconditioner.Preconditioner)
         preconditioners.append("none")
 
-        preconditioners = ["JacobiPreconditioner", "LUPreconditioner"]
+        preconditioners = ["JacobiPreconditioner", "none"]
 
         with open(snakemake.output["preconditioners"], 'w') as f:
             json.dump({"preconditioner": preconditioners}, f)
