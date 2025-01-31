@@ -72,7 +72,7 @@ rule get_solvers_preconditioners:
     log:
         "logs/fipy~{rev}/suite~{suite}/get_solvers_preconditioners.log"
     shell:
-        "FIPY_SOLVERS={suite}"
+        "FIPY_SOLVERS={wildcards.suite}"
         " python workflow/scripts/get_solvers_preconditioners.py"
         " {output.solvers} {output.preconditioners}"
-        " > {log}"
+        " 2> {log}"
