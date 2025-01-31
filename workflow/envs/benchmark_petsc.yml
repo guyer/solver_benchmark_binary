@@ -19,8 +19,6 @@ dependencies:
   - scotch <7
   # petsc 3.21 has parallel failure when running tests
   - petsc4py < 3.21
-  - jupyter
-  - jupyterlab_code_formatter
   - pip:
     - git+https://github.com/usnistgov/steppyngstounes.git#egg=steppyngstounes
     - ?"git+" + config["fipy_url"] + "@" + wildcards["rev"] + "#egg=fipy"
