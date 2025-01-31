@@ -71,5 +71,8 @@ rule get_solvers_preconditioners:
         "../../results/fipy~{rev}/suite~{suite}/environment.yml"
     log:
         "logs/fipy~{rev}/suite~{suite}/get_solvers_preconditioners.log"
-    script:
-        "../scripts/get_solvers_preconditioners.py"
+    shell:
+        "FIPY_SOLVERS={suite}"
+        " python workflow/scripts/get_solvers_preconditioners.py"
+        " {output.solvers} {output.preconditioners}"
+        " > {log}"
