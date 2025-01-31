@@ -21,13 +21,11 @@ def get_classes(cls):
     return classes
 
 if __name__ == "__main__":
-    # https://stackoverflow.com/a/55849527/2019542
-    logger = logging.getLogger('get_solvers_preconditioners')
-    fh = logging.FileHandler(str(snakemake.log[0]))
-    fh.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
+    logging.basicConfig(
+        filename=snakemake.log[0],
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+    )
 
     try:
         solvers = get_classes(cls=fp.solver.Solver)
@@ -48,5 +46,5 @@ if __name__ == "__main__":
         with open(snakemake.output["preconditioners"], 'w') as f:
             json.dump({"preconditioner": preconditioners}, f)
     except Exception as e:
-        logger.error(e, exc_info=True)
+        logging.error(e, exc_info=True)
         raise e
