@@ -13,6 +13,7 @@ dependencies:
   - pip ==9.0.3
   - pysparse
   - jupyter
+  - pathlib2
   - pip:
     - git+https://github.com/usnistgov/steppyngstounes.git#egg=steppyngstounes
     - ?"git+" + config["fipy_url"] + "@" + wildcards["rev"] + "#egg=fipy"
