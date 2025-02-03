@@ -15,7 +15,7 @@ rule solve:
         "benchmarks/fipy~{rev}/suite~{suite}/benchmark-{id}.tsv"
     shell:
         r"""
-        FIPY_SOLVERS={suite} \
+        FIPY_SOLVERS={wildcards.suite} \
             python {input.benchmark:q} \
             --solver={params.config[solver]} \
             --preconditioner={params.config[preconditioner]} \
