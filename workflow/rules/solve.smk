@@ -19,7 +19,7 @@ rule solve:
             python {input.benchmark:q} \
             --solver={params.config[solver]} \
             --preconditioner={params.config[preconditioner]} \
-            --numberOfElements={params.config[size]} \
+            --numberOfElements={params.config[numberOfElements]} \
             --restart={params.config[restart]} \
             --totaltime={params.config[totaltime]} \
             --checkpoint_interval={params.config[checkpoint_interval]} \
