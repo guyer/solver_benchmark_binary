@@ -40,6 +40,9 @@ def get_benchmark(wildcards):
 # https://bioinformatics.stackexchange.com/questions/18248/pick-matching-entry-from-snakemake-config-table
 # https://github.com/snakemake/snakemake/issues/1171#issuecomment-927242813
 def get_config_by_id(wildcards):
-    config = snakemake.config
-    config.update(SIMULATIONS.loc[int(wildcards.id)].to_dict())
-    return config
+    global config
+
+    id_config = {}
+    id_config.update(config)
+    id_config.update(SIMULATIONS.loc[int(wildcards.id)].to_dict())
+    return id_config
