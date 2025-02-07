@@ -5,10 +5,10 @@ fipy_url: "https://github.com/usnistgov/fipy.git"
 fipy_revs:
 # - "62cbf2211"
 # - "d8a569e79"
-- "7539436cb" # patched "b873c7e3f"
-- "53298da97" # patched "2054173bf"
-- "8f54cea79" # patched "36bff3800"
-- "daef9eff4" # patched "2c7ac213b"
+- "fc047b817" # patched "b873c7e3f"
+- "21c82d4c3" # patched "2054173bf"
+- "cc1eb816c" # patched "36bff3800"
+- "62d38a3c6" # patched "2c7ac213b"
 
 size:
   min: 10
