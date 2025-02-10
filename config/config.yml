@@ -8,7 +8,7 @@ fipy_revs:
 - "fc047b817" # patched "b873c7e3f"
 - "21c82d4c3" # patched "2054173bf"
 - "cc1eb816c" # patched "36bff3800"
-- "62d38a3c6" # patched "2c7ac213b"
+- "6bf1eae87" # patched "2c7ac213b"
 
 size:
   min: 10
