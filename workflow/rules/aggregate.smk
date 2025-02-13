@@ -25,16 +25,15 @@ rule plot_permutations:
 rule plot_permutations_skibbidy:
     output:
         total="results/plots/skibbidy/total.png",
-        prepare="results/plots/skibbidy/prepare.png",
-        solve="results/plots/skibbidy/solve.png",
     input:
         "results/total_times_skibbidy.json"
     log:
         "logs/{benchmark}/skibbidy/plot_permutations_skibbidy.log"
-    conda:
-        "../envs/snakemake.yml"
-    script:
-        "../scripts/plot_permutations.py"
+    run:
+        from plot_permutations import plot_all
+
+        df = pd.read_json(input[0])
+        plot_all(df, output.total, ymin=1e-4, ymax=1e2)
 
 rule skibbidy:
     output:
