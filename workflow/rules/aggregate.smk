@@ -28,7 +28,7 @@ rule plot_permutations_skibbidy:
     input:
         "results/total_times_skibbidy.json"
     log:
-        "logs/{benchmark}/skibbidy/plot_permutations_skibbidy.log"
+        "logs/skibbidy/plot_permutations_skibbidy.log"
     run:
         from plot_permutations import plot_all
 
