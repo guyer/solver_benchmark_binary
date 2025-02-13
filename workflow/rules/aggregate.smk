@@ -33,7 +33,7 @@ rule plot_permutations_skibbidy:
         from workflow.scripts.plot_permutations import plot_all
 
         df = pd.read_json(input[0])
-        plot_all(df, output.total, ymin=1e-4, ymax=1e2)
+        plot_all(df, output.total, ymin=1e0, ymax=1e4)
 
 rule skibbidy:
     output:
