@@ -29,15 +29,11 @@ if __name__ == "__main__":
                "DummySolver", "GeneralSolver"]
     solvers = [solver for solver in solvers if solver not in exclude]
 
-    solvers = ["LinearGMRESSolver"]
-
     with open(args.solver_fname, 'w') as f:
         json.dump({"solver": solvers}, f)
 
     preconditioners = get_classes(cls=fp.preconditioner.Preconditioner)
     preconditioners.append("none")
-
-    preconditioners = ["JacobiPreconditioner", "none"]
 
     with open(args.preconditioner_fname, 'w') as f:
         json.dump({"preconditioner": preconditioners}, f)
