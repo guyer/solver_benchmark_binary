@@ -26,7 +26,7 @@ def get_classes(cls):
 if __name__ == "__main__":
     solvers = get_classes(cls=fp.solver.Solver)
     exclude = ["Solver", "DefaultSolver", "DefaultAsymmetricSolver",
-               "DummySolver", "GeneralSolver"]
+               "DummySolver", "GeneralSolver", "TrilinosMLTest"]
     solvers = [solver for solver in solvers if solver not in exclude]
 
     with open(args.solver_fname, 'w') as f:
