@@ -39,6 +39,7 @@ rule all_permutations:
         df = benchmarks.join(fipy_revs, how="cross")
         df = df[~((df["solver"].isin(["LinearLUSolver", "LinearJORSolver"])
                   & (df["preconditioner"] != "none")))]
+        df = df[~(df["preconditioner"] == "MultilevelSolverSmootherPreconditioner")]
         df.to_csv(output[0], index_label="id")
 
 rule bootstrap:
