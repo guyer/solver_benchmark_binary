@@ -22,29 +22,15 @@ rule plot_permutations:
     script:
         "../scripts/plot_permutations.py"
 
-rule plot_permutations_skibbidy:
+rule append_time_to_permutations:
     output:
-        total="results/plots/skibbidy/total.png",
-    input:
-        "results/total_times_skibbidy.json"
-    log:
-        "logs/skibbidy/plot_permutations_skibbidy.log"
-    run:
-        from workflow.scripts.plot_permutations import plot_all
-
-        df = pd.read_json(input[0])
-        plot_all(df, output.total, ymin=1e0, ymax=1e4)
-
-rule skibbidy:
-    output:
-        json="results/total_times_skibbidy.json"
+        json="results/all_permutations_timed.json"
     input:
         csv="config/all_permutations.csv"
     run:
         import numpy as np
-        from pathlib import Path
 
-        p = pd.read_csv(input["csv"])
+        df = pd.read_csv(input["csv"])
 
         def get_elapsed(row):
             benchmark = f"benchmarks/fipy~{row['fipy_rev']}/suite~{row['suite']}/benchmark-{row['id']}.tsv"
@@ -55,16 +41,16 @@ rule skibbidy:
                 return np.nan
 
         # merge elapsed time with permutations
-        p["elapsed_seconds"] = p.apply(get_elapsed, axis=1)
+        df["elapsed_seconds"] = df.apply(get_elapsed, axis=1)
 
         # make digestible by plot_all()
-        p["converged"] = True
-        p = p.rename(columns={
+        df["converged"] = True
+        df = df.rename(columns={
                 "suite": "package.solver",
                 "solver": "solver_class"
             })
 
-        p.to_json(output["json"])
+        df.to_json(output["json"])
 
 rule total_times:
     localrule: True
