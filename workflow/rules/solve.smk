@@ -23,7 +23,7 @@ rule solve:
             --restart={params.config[restart]} \
             --totaltime={params.config[totaltime]} \
             --checkpoint_interval={params.config[checkpoint_interval]} \
-            --solve_log={output:q}
+            --solve_log={output:q} \
             2> {log:q} \
             || touch {output:q}
         """
