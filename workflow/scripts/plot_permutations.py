@@ -89,7 +89,8 @@ def plot_all(df, output, color_by_suite=True,
     return ax
 
 def plot_solve_fraction(df, color_by_suite=True,
-             by=["package.solver", "solver_class", "preconditioner"]):
+             by=["package.solver", "solver_class", "preconditioner"]
+             minmax=False):
     color_map = {
         'no-pysparse': 'red',
         'trilinos': 'red',
@@ -112,6 +113,8 @@ def plot_solve_fraction(df, color_by_suite=True,
                         solve_std=("solve_seconds", "std"),
                         solve_fraction_count=("solve_fraction", "count"),
                         solve_fraction_mean=("solve_fraction", "mean"),
+                        solve_fraction_max=("solve_fraction", "max"),
+                        solve_fraction_min=("solve_fraction", "min"),
                         solve_fraction_std=("solve_fraction", "std")).reset_index()
 
     groups = groups.groupby(by)
@@ -129,13 +132,20 @@ def plot_solve_fraction(df, color_by_suite=True,
             group.mask(group["converged"].astype(bool)).plot("numberOfElements", "solve_fraction_mean", logx=True,
                        ax=ax, label=None, color=color, marker="x", linestyle="")
 
-        # plot uncertainty
-        err = group["solve_fraction_std"] / np.sqrt(group["solve_fraction_count"])
-        ax.fill_between(group["numberOfElements"],
-                        group["solve_fraction_mean"] - err,
-                        group["solve_fraction_mean"] + err,
-                        color=color,
-                        alpha=0.1)
+        if minmax:
+            ax.fill_between(group["numberOfElements"],
+                            group["solve_fraction_min"],
+                            group["solve_fraction_max"],
+                            color=color,
+                            alpha=0.1)
+        else:
+            # plot uncertainty
+            err = group["solve_fraction_std"] / np.sqrt(group["solve_fraction_count"])
+            ax.fill_between(group["numberOfElements"],
+                            group["solve_fraction_mean"] - err,
+                            group["solve_fraction_mean"] + err,
+                            color=color,
+                            alpha=0.1)
 
     if color_by_suite:
         legend_elements = [Line2D([0], [0], color=c, label=s)
@@ -198,9 +208,9 @@ if __name__ == "__main__":
         df = pd.read_json(snakemake.input[0])
         df = df.query(f"fipy_rev == '{snakemake.wildcards.rev}'"
                       f"and benchmark == '{snakemake.wildcards.benchmark}'")
-        plot_all(df, snakemake.output.total, ymin=1e-4, ymax=1e4, by=["package.solver"])
-        plot_all(df, snakemake.output.prepare, data_set="prepare_seconds", ylabel="prepare time", ymin=1e-4, ymax=1e4, by=["package.solver"])
-        plot_all(df, snakemake.output.solve, data_set="solve_seconds", ylabel="solve time", ymin=1e-4, ymax=1e4, by=["package.solver"])
+        plot_all(df, snakemake.output.total, ymin=1e-4, ymax=1e4, by=["package.solver"], minmax=True)
+        plot_all(df, snakemake.output.prepare, data_set="prepare_seconds", ylabel="prepare time", ymin=1e-4, ymax=1e4, by=["package.solver"], minmax=True)
+        plot_all(df, snakemake.output.solve, data_set="solve_seconds", ylabel="solve time", ymin=1e-4, ymax=1e4, by=["package.solver"], minmax=True)
     except Exception as e:
         logging.error(e, exc_info=True)
         raise e
