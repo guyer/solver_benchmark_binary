@@ -10,7 +10,8 @@ from matplotlib.legend import Legend
 def plot_all(df, output, color_by_suite=True,
              by=["package.solver", "solver_class", "preconditioner"],
              data_set="elapsed_seconds", ylabel="elapsed time", title=None,
-             xmin=None, xmax=None, ymin=None, ymax=None, ax=None):
+             xmin=None, xmax=None, ymin=None, ymax=None, ax=None,
+             minmax=False):
     color_map = {
         'no-pysparse': 'red',
         'trilinos': 'red',
@@ -31,6 +32,8 @@ def plot_all(df, output, color_by_suite=True,
     groups = groups.agg(converged=("converged", "all"),
                         data_count=(data_set, "count"),
                         data_mean=(data_set, "mean"),
+                        data_min=(data_set, "min"),
+                        data_max=(data_set, "max"),
                         data_std=(data_set, "std")).reset_index()
     groups = groups.groupby(by)
     for key, group in groups:
@@ -47,13 +50,21 @@ def plot_all(df, output, color_by_suite=True,
             group.mask(group["converged"].astype(bool)).plot("numberOfElements", "data_mean", loglog=True,
                        ax=ax, label=None, color=color, marker="x", linestyle="")
 
-        # plot uncertainty
-        err = group["data_std"] / np.sqrt(group["data_count"])
-        ax.fill_between(group["numberOfElements"],
-                        group["data_mean"] - err,
-                        group["data_mean"] + err,
-                        color=color,
-                        alpha=0.1)
+        if minmax:
+            # plot range
+            ax.fill_between(group["numberOfElements"],
+                            group["data_min"],
+                            group["data_max"],
+                            color=color,
+                            alpha=0.1)
+        else:
+            # plot uncertainty
+            err = group["data_std"] / np.sqrt(group["data_count"])
+            ax.fill_between(group["numberOfElements"],
+                            group["data_mean"] - err,
+                            group["data_mean"] + err,
+                            color=color,
+                            alpha=0.1)
 
     if color_by_suite:
         legend_elements = [Line2D([0], [0], color=c, label=s)
@@ -89,7 +100,7 @@ def plot_all(df, output, color_by_suite=True,
     return ax
 
 def plot_solve_fraction(df, color_by_suite=True,
-             by=["package.solver", "solver_class", "preconditioner"]
+             by=["package.solver", "solver_class", "preconditioner"],
              minmax=False):
     color_map = {
         'no-pysparse': 'red',
@@ -133,6 +144,7 @@ def plot_solve_fraction(df, color_by_suite=True,
                        ax=ax, label=None, color=color, marker="x", linestyle="")
 
         if minmax:
+            # plot range
             ax.fill_between(group["numberOfElements"],
                             group["solve_fraction_min"],
                             group["solve_fraction_max"],
