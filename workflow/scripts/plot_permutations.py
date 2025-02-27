@@ -198,9 +198,9 @@ if __name__ == "__main__":
         df = pd.read_json(snakemake.input[0])
         df = df.query(f"fipy_rev == '{snakemake.wildcards.rev}'"
                       f"and benchmark == '{snakemake.wildcards.benchmark}'")
-        plot_all(df, snakemake.output.total, ymin=1e-4, ymax=1e4)
-        plot_all(df, snakemake.output.prepare, data_set="prepare_seconds", ylabel="prepare time", ymin=1e-4, ymax=1e4)
-        plot_all(df, snakemake.output.solve, data_set="solve_seconds", ylabel="solve time", ymin=1e-4, ymax=1e4)
+        plot_all(df, by=["package.solver"], snakemake.output.total, ymin=1e-4, ymax=1e4)
+        plot_all(df, by=["package.solver"], snakemake.output.prepare, data_set="prepare_seconds", ylabel="prepare time", ymin=1e-4, ymax=1e4)
+        plot_all(df, by=["package.solver"], snakemake.output.solve, data_set="solve_seconds", ylabel="solve time", ymin=1e-4, ymax=1e4)
     except Exception as e:
         logging.error(e, exc_info=True)
         raise e
