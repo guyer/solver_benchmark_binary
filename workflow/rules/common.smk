@@ -27,41 +27,22 @@ def concat_json(input, output, log):
             f.write(repr(e))
         raise e
 
-def get_conda_environment(wildcards):
-    path = checkpoints.render_conda_template.get(**wildcards).output[0]
-    # https://snakemake.readthedocs.io/en/stable/project_info/faq.html#how-does-snakemake-interpret-relative-paths
-    # "... output ... files are considered to be relative
-    # to the working directory ...
-    # Any other directives (e.g. conda:, ...) consider paths to be
-    # relative to the Snakefile they are defined in."
-    return os.path.join("..",
-                        os.path.relpath(path, start="workflow/"))
-
 def get_permutation_ids(wildcards):
-    path = checkpoints.rev_and_suite_permutations.get(**wildcards).output[0]
-    df = pd.read_csv(path, index_col="index")
+#     path = checkpoints.all_permutations.get(**wildcards).output[0]
+    path = "config/all_permutations.csv"
+    df = pd.read_csv(path)
     return df.index.map("{:07d}".format)
 
-def extract_config_by_id(wildcards, input, output, log):
-    import logging
+def get_benchmark(wildcards):
+    benchmark = SIMULATIONS.loc[int(wildcards.id), 'benchmark']
+    return f"workflow/scripts/{benchmark}.py"
 
-    # https://stackoverflow.com/a/55849527/2019542
-    logger = logging.getLogger('make_config')
-    fh = logging.FileHandler(str(log))
-    fh.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
+# https://bioinformatics.stackexchange.com/questions/18248/pick-matching-entry-from-snakemake-config-table
+# https://github.com/snakemake/snakemake/issues/1171#issuecomment-927242813
+def get_config_by_id(wildcards):
+    global config
 
-    try:
-        permutations = pd.read_csv(input, index_col="index")
-        permutations.loc[int(wildcards.id)].to_json(output)
-    except Exception as e:
-        logger.error(e, exc_info=True)
-        raise e
-
-def read_config(path):
-    import json
-
-    with open(path, 'r') as f:
-        return json.load(f)
+    id_config = {}
+    id_config.update(config)
+    id_config.update(SIMULATIONS.loc[int(wildcards.id)].to_dict())
+    return id_config

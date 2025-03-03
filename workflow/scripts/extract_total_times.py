@@ -2,13 +2,11 @@ import logging
 import pandas as pd
 
 if __name__ == "__main__":
-    # https://stackoverflow.com/a/55849527/2019542
-    logger = logging.getLogger('extract_total_times')
-    fh = logging.FileHandler(str(snakemake.log[0]))
-    fh.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
+    logging.basicConfig(
+        filename=snakemake.log[0],
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+    )
 
     try:
         df = pd.read_json(snakemake.input.all, convert_dates=["time_stamp"])
@@ -33,5 +31,5 @@ if __name__ == "__main__":
         df2.sort_values("numberOfElements").to_json(snakemake.output[0],
                                                     date_format="iso")
     except Exception as e:
-        logger.error(e, exc_info=True)
+        logging.error(e, exc_info=True)
         raise e

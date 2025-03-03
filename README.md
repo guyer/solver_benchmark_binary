@@ -33,14 +33,20 @@ snakemake --use-conda bootstrap
 
 #### Simulation and Analysis
 
-Once the FiPy revision environments have been established by the 
-`all_envs` rule, all permutations can be run an plotted with:
+Once the simultation variants have been established by the 
+`bootstrap` rule, all permutations can be run and plotted with:
 
 ```bash
 snakemake --use-conda all
 ```
 
-Progress can be tracked by launching
+Progress can be tracked with
+
+```bash
+snakemake --summary
+```
+
+or by launching
 [panoptes](https://github.com/panoptes-organization/panoptes) and invoking
 `snakemake` with the `--wms-monitor` option.
 

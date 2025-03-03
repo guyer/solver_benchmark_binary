@@ -1,25 +1,66 @@
-rule aggregate_permutations:
-    localrule: True
+rule benchmark_permutations:
     output:
-        "results/all_permutations.csv"
-    input:
-        expand("results/fipy~{rev}/suite~{suite}/permutations.csv",
-               rev=config["fipy_revs"],
-               suite=config["suites"])
-    log:
-        "logs/aggregate_permutations.log"
-    run:
-        concat_csv(input, output[0], log[0])
-
-checkpoint rev_and_suite_permutations:
-    output:
-        "results/fipy~{rev}/suite~{suite}/permutations.csv"
-    input:
-        preconditioners="results/fipy~{rev}/suite~{suite}/preconditioners.txt",
-        solvers="results/fipy~{rev}/suite~{suite}/solvers.txt"
+        "config/benchmark_permutations.csv"
     conda:
         "../envs/snakemake.yml"
     log:
-        "logs/fipy~{rev}/suite~{suite}/rev_and_suite_permutations.log"
+        "logs/benchmark_permutations.log"
     script:
-        "../scripts/rev_and_suite_permutations.py"
+        "../scripts/benchmark_permutations.py"
+
+rule fipy_permutations:
+    output:
+        "config/fipy_permutations.csv"
+    input:
+        expand("config/fipy~{rev}/suite_permutations.csv",
+               rev=config["fipy_revs"])
+    log:
+        "logs/all_permutations.log"
+    run:
+        concat_csv(input, output[0], log[0])
+
+rule suite_permutations:
+    output:
+        "config/fipy~{rev}/suite_permutations.csv"
+    input:
+        expand("config/fipy~{{rev}}/suite~{suite}/permutations.csv",
+               suite=config["suites"])
+    log:
+        "logs/fipy~{rev}/suite_permutations.csv"
+    run:
+        concat_csv(input, output[0], log[0])
+
+rule solver_preconditioner_permutations:
+    output:
+        "config/fipy~{rev}/suite~{suite}/permutations.csv"
+    input:
+        solvers="results/fipy~{rev}/suite~{suite}/solvers.json",
+        preconditioners="results/fipy~{rev}/suite~{suite}/preconditioners.json"
+    log:
+        "logs/fipy~{rev}/suite~{suite}/solver_preconditioner_permutations.log"
+    run:
+        solvers = pd.read_json(input["solvers"])
+        preconditioners = pd.read_json(input["preconditioners"])
+
+        permutations = solvers.join(preconditioners, how="cross")
+        # it makes no sense to precondition LU
+        permutations = permutations.query("(solver != 'LinearLUSolver')"
+                                          "| (preconditioner == 'none')")
+
+        permutations["suite"] = wildcards["suite"]
+        permutations["fipy_rev"] = wildcards["rev"]
+        permutations.to_csv(output[0], index=False)
+
+rule get_solvers_preconditioners:
+    output:
+        solvers="results/fipy~{rev}/suite~{suite}/solvers.json",
+        preconditioners="results/fipy~{rev}/suite~{suite}/preconditioners.json"
+    conda:
+        "../../results/fipy~{rev}/suite~{suite}/environment.yml"
+    log:
+        "logs/fipy~{rev}/suite~{suite}/get_solvers_preconditioners.log"
+    shell:
+        "FIPY_SOLVERS={wildcards.suite}"
+        " python workflow/scripts/get_solvers_preconditioners.py"
+        " {output.solvers} {output.preconditioners}"
+        " 2> {log}"

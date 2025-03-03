@@ -111,13 +111,11 @@ def read_events(fname):
     return events
 
 if __name__ == "__main__":
-    # https://stackoverflow.com/a/55849527/2019542
-    logger = logging.getLogger('rev_and_suite_permutations')
-    fh = logging.FileHandler(str(snakemake.log[0]))
-    fh.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
+    logging.basicConfig(
+        filename=snakemake.log[0],
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+    )
 
     try:
         events = read_events(snakemake.input.log)
@@ -130,11 +128,10 @@ if __name__ == "__main__":
                    "preconditioner"] = "unpreconditioned"
 
         # Add configuration to each record, tidy-style
-        config = pd.read_json(snakemake.input.config, orient="index").T
-        config["uuid"] = snakemake.wildcards.id
+        config = pd.DataFrame([snakemake.params.config]).set_index("id", drop=False)
         df = config.join(df, lsuffix="_L", how="cross")
 
         df.to_json(snakemake.output[0], date_format="iso")
     except Exception as e:
-        logger.error(e, exc_info=True)
+        logging.error(e, exc_info=True)
         raise e

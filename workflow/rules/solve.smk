@@ -2,22 +2,46 @@ rule solve:
     output:
         "results/fipy~{rev}/suite~{suite}/{id}/solver.log"
     input:
-        config="results/fipy~{rev}/suite~{suite}/{id}/config.json",
+        env="results/fipy~{rev}/suite~{suite}/environment.yml",
+        config=config["simulations"],
+        benchmark=get_benchmark,
     params:
-        config=lambda w, input: read_config(input.config),
+        config=get_config_by_id,
     conda:
         "../../results/fipy~{rev}/suite~{suite}/environment.yml"
     log:
-        notebook="logs/fipy~{rev}/suite~{suite}/{id}/notebooks/benchmark.ipynb"
-    notebook:
-        "../notebooks/binary_phase_field.py.ipynb"
+        "logs/fipy~{rev}/suite~{suite}/{id}/notebooks/benchmark.log"
+    benchmark:
+        "benchmarks/fipy~{rev}/suite~{suite}/benchmark-{id}.tsv"
+    shell:
+        r"""
+        FIPY_SOLVERS={wildcards.suite} \
+            python {input.benchmark:q} \
+            --solver={params.config[solver]} \
+            --preconditioner={params.config[preconditioner]} \
+            --numberOfElements={params.config[numberOfElements]} \
+            --restart={params.config[restart]} \
+            --totaltime={params.config[totaltime]} \
+            --checkpoint_interval={params.config[checkpoint_interval]} \
+            --solve_log={output:q} \
+            2> {log:q} \
+            || touch {output:q}
+        """
 
-rule make_config:
+rule ipynb2py:
     output:
-        "results/fipy~{rev}/suite~{suite}/{id}/config.json"
+        "workflow/scripts/{notebook}.py"
     input:
-        "results/fipy~{rev}/suite~{suite}/permutations.csv"
+        "workflow/notebooks/{notebook}.py.ipynb"
+    conda:
+        "../envs/snakemake.yml"
     log:
-        "logs/fipy~{rev}/suite~{suite}/{id}/make_config.log"
-    run:
-        extract_config_by_id(wildcards, input[0], output[0], log[0])
+        stdout="workflow/scripts/{notebook}.stdout",
+        stderr="workflow/scripts/{notebook}.stderr"
+    shell:
+        r"""
+        jupyter nbconvert {input:q} --to python \
+            --output-dir=workflow/scripts/ \
+            --output {wildcards.notebook:q}.py \
+            > {log.stdout:q} 2> {log.stderr:q}
+        """

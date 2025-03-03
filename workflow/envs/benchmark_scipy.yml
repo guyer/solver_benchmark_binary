@@ -1,9 +1,10 @@
+# This environment is redundant to environment.yml.
+# Present for symmetry with other solvers.
 channels:
   - conda-forge
-  - nodefaults
 dependencies:
   - python==3.11
-  - numpy
+  - numpy < 2.0
   - scipy
   - matplotlib-base
   - future
@@ -11,14 +12,8 @@ dependencies:
   - mayavi
   - gmsh <4.0|>=4.5.2
   - pip
-  - mpich
-  - mpi4py
-  # petsc 3.20.2_*_102 is broken on macOS,
-  # as a result of linking scotch 7.0.2
-  # https://github.com/conda-forge/petsc-feedstock/issues/180
-  - scotch <7
-  # petsc 3.21 has parallel failure when running tests
-  - petsc4py < 3.21
+  - jupyter
+  - jupyterlab_code_formatter
   - pip:
     - git+https://github.com/usnistgov/steppyngstounes.git#egg=steppyngstounes
     - ?"git+" + config["fipy_url"] + "@" + wildcards["rev"] + "#egg=fipy"
