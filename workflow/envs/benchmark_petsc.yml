@@ -17,8 +17,8 @@ dependencies:
   # as a result of linking scotch 7.0.2
   # https://github.com/conda-forge/petsc-feedstock/issues/180
   - scotch <7
-  # petsc 3.21 has parallel failure when running tests
-  - petsc4py < 3.21
+  # petsc 3.19 changed nonzero preallocation
+  - petsc4py < 3.19
   - pip:
     - git+https://github.com/usnistgov/steppyngstounes.git#egg=steppyngstounes
     - ?"git+" + config["fipy_url"] + "@" + wildcards["rev"] + "#egg=fipy"

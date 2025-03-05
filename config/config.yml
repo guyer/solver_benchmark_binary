@@ -16,7 +16,7 @@ size:
   steps: 6
 
 suites:
-- "petsc318"
+- "petsc"
 - "pysparse"
 
 restart: "resources/t=300.0.npz"
