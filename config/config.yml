@@ -20,11 +20,8 @@ suites:
 - "pysparse"
 
 restart: "resources/t=300.0.npz"
-checkpoint_interval: 10.
-totaltime: 310.
-tolerance: 1e-9
-segregation2transformation: 6.
-gradient2thermal: 10.
+checkpoint_interval: 1.
+totaltime: 301.
 view: False
 
 benchmarks:
