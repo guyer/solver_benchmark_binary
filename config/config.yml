@@ -5,9 +5,9 @@ fipy_url: "https://github.com/usnistgov/fipy.git"
 fipy_revs:
 # - "d8a569e79"
 - "371d28468" # patched "62cbf2211"
-- "ef3db887e" # patched "b873c7e3f"
-- "f715725b4" # patched "2054173bf"
-- "742c901e9" # patched "36bff3800"
+# - "ef3db887e" # patched "b873c7e3f"
+# - "f715725b4" # patched "2054173bf"
+# - "742c901e9" # patched "36bff3800"
 - "a5f233aa7" # patched "2c7ac213b"
 
 size:
@@ -16,10 +16,8 @@ size:
   steps: 6
 
 suites:
-- "petsc"
+- "petsc318"
 - "pysparse"
-- "no-pysparse"
-- "scipy"
 
 restart: "resources/t=300.0.npz"
 checkpoint_interval: 10.
