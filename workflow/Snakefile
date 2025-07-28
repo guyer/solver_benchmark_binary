@@ -18,6 +18,8 @@ if simulation_file.exists():
 else:
     SIMULATIONS = pd.DataFrame(columns=["fipy_rev", "suite", "id"])
 
+(GLOB_REV, GLOB_SUITE, GLOB_ID) = glob_wildcards("results/fipy~{rev}/suite~{suite}/{id}/solver.json")
+
 rule all:
     localrule: True
     input:
@@ -66,7 +68,11 @@ rule glob_all_results:
     output:
         "results/glob_all.json"
     input:
-        logs=glob_wildcards("results/fipy~{rev}/suite~{suite}/{id}/solver.json").fname
+        logs=expand("results/fipy~{rev}/suite~{suite}/{id}/solver.json",
+                    zip,
+                    rev=GLOB_REV,
+                    suite=GLOB_SUITE,
+                    id=GLOB_ID)
     log:
         "logs/glob_all_results.log"
     run:
