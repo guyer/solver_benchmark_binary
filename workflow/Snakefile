@@ -66,9 +66,7 @@ rule glob_all_results:
     output:
         "results/glob_all.json"
     input:
-        logs=expand("results/fipy~{rev}/suite~{suite}/{id}/solver.json",
-                    zip,
-                    **glob_wildcards("results/fipy~{rev}/suite~{suite}/{id}/solver.json"))
+        logs=glob_wildcards("results/fipy~{rev}/suite~{suite}/{id}/solver.json").fname
     log:
         "logs/glob_all_results.log"
     run:
