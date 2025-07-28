@@ -62,6 +62,18 @@ rule aggregate_all_results:
     run:
         concat_json(input.logs, output[0], log[0])
 
+rule glob_all_results:
+    output:
+        "results/glob_all.json"
+    input:
+        logs=expand("results/fipy~{rev}/suite~{suite}/{id}/solver.json",
+                    zip,
+                    **glob_wildcards("results/fipy~{rev}/suite~{suite}/{id}/solver.json"))
+    log:
+        "logs/glob_all_results.log"
+    run:
+        concat_json(input.logs, output[0], log[0])
+
 rule plot_permutations_timed:
     output:
         total="results/plots/all_permutations_timed.png",
