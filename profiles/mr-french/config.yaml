@@ -6,3 +6,8 @@ latency-wait: 90
 default-resources:
   - mem=1mb
   - slurm_partition="faster"
+  - runtime=120
+set-resources:
+  solve:
+    tasks: 128
+    nodes: 1
