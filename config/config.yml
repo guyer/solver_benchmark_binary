@@ -17,9 +17,6 @@ size:
 
 suites:
 - "petsc"
-- "pysparse"
-- "trilinos"
-- "scipy"
 
 restart: "resources/t=300.0.npz"
 checkpoint_interval: 1.
